@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>FutureYou – Meet the version of you 5 years from now</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0f0c1a;
+    --bg2: #1a1030;
+    --bg3: #0d1f3c;
+    --violet: #7c3aed;
+    --violet-mid: #4f46e5;
+    --violet-light: #a78bfa;
+    --violet-soft: #818cf8;
+    --green: #34d399;
+    --pink: #f472b6;
+    --blue: #60a5fa;
+    --amber: #fbbf24;
+    --orange: #fb923c;
+    --text: #ffffff;
+    --text-muted: rgba(255,255,255,0.45);
+    --text-dim: rgba(255,255,255,0.25);
+    --border: rgba(255,255,255,0.06);
+    --border-violet: rgba(167,139,250,0.2);
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: linear-gradient(160deg, var(--bg) 0%, var(--bg2) 35%, var(--bg3) 100%);
+    background-attachment: fixed;
+    color: var(--text);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a { text-decoration: none; color: inherit; }
+  button { cursor: pointer; font-family: inherit; border: none; outline: none; }
+  input, textarea { font-family: inherit; outline: none; }
+
+  /* ── UTILITIES ────────────────────────────── */
+  .container { max-width: 1120px; margin: 0 auto; padding: 0 32px; }
+  .text-center { text-align: center; }
+  .grad-text {
+    background: linear-gradient(135deg, var(--violet-light) 0%, var(--violet-soft) 50%, var(--blue) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .section-label {
+    display: inline-block;
+    color: var(--violet-light);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .section-title {
+    font-size: 36px;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    line-height: 1.15;
+    margin-bottom: 16px;
+  }
+  .section-sub {
+    color: var(--text-muted);
+    font-size: 15px;
+    line-height: 1.65;
+  }
+
+  /* ── NAV ──────────────────────────────────── */
+  nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 32px;
+    background: rgba(15,12,26,0.88);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(167,139,250,0.08);
+  }
+  .nav-logo { display: flex; align-items: center; gap: 10px; }
+  .nav-logo-icon {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px;
+    background: linear-gradient(135deg, rgba(124,58,237,0.5), rgba(79,70,229,0.3));
+    border: 1px solid rgba(167,139,250,0.3);
+    box-shadow: 0 0 16px rgba(124,58,237,0.3);
+  }
+  .nav-logo-name { font-weight: 800; font-size: 17px; letter-spacing: -0.01em; }
+  .nav-links { display: flex; align-items: center; gap: 32px; }
+  .nav-links a { color: rgba(255,255,255,0.45); font-size: 14px; font-weight: 500; transition: color 0.15s; }
+  .nav-links a:hover { color: rgba(255,255,255,0.85); }
+  .nav-actions { display: flex; align-items: center; gap: 12px; }
+  .btn-ghost { background: none; color: rgba(255,255,255,0.5); font-size: 14px; font-weight: 500; transition: color 0.15s; padding: 6px 0; }
+  .btn-ghost:hover { color: #fff; }
+  .btn-primary {
+    padding: 10px 22px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #fff;
+    background: linear-gradient(135deg, var(--violet), var(--violet-mid));
+    box-shadow: 0 0 20px rgba(124,58,237,0.35);
+    transition: transform 0.12s, box-shadow 0.12s;
+  }
+  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 28px rgba(124,58,237,0.5); }
+
+  /* ── HERO ─────────────────────────────────── */
+  .hero {
+    position: relative;
+    text-align: center;
+    padding: 96px 32px 112px;
+    overflow: hidden;
+  }
+  .hero-orb {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+  }
+  .hero-orb-1 {
+    width: 700px; height: 500px;
+    top: -100px; left: 50%; transform: translateX(-50%);
+    background: radial-gradient(ellipse, rgba(124,58,237,0.18) 0%, transparent 65%);
+    filter: blur(60px);
+  }
+  .hero-orb-2 {
+    width: 300px; height: 300px;
+    top: 60px; left: 8%;
+    background: radial-gradient(circle, rgba(79,70,229,0.1) 0%, transparent 70%);
+    filter: blur(50px);
+  }
+  .hero-orb-3 {
+    width: 260px; height: 260px;
+    top: 80px; right: 8%;
+    background: radial-gradient(circle, rgba(244,114,182,0.08) 0%, transparent 70%);
+    filter: blur(50px);
+  }
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--violet-light);
+    background: rgba(124,58,237,0.12);
+    border: 1px solid rgba(167,139,250,0.25);
+    margin-bottom: 32px;
+  }
+  .hero-badge-dot { color: var(--green); }
+  .hero-h1 {
+    font-size: 58px;
+    font-weight: 900;
+    letter-spacing: -0.035em;
+    line-height: 1.08;
+    max-width: 720px;
+    margin: 0 auto 24px;
+  }
+  .hero-sub {
+    color: var(--text-muted);
+    font-size: 18px;
+    line-height: 1.65;
+    max-width: 480px;
+    margin: 0 auto 40px;
+  }
+  .hero-form {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    max-width: 440px;
+    margin: 0 auto 16px;
+  }
+  .hero-input {
+    flex: 1;
+    padding: 14px 20px;
+    border-radius: 12px;
+    font-size: 14px;
+    color: #fff;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(167,139,250,0.2);
+  }
+  .hero-input::placeholder { color: rgba(255,255,255,0.25); }
+  .btn-hero {
+    padding: 14px 28px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #fff;
+    background: linear-gradient(135deg, var(--violet), var(--violet-mid));
+    box-shadow: 0 6px 28px rgba(124,58,237,0.45);
+    white-space: nowrap;
+    transition: transform 0.12s;
+  }
+  .btn-hero:hover { transform: translateY(-1px); }
+  .hero-disclaimer { color: rgba(255,255,255,0.2); font-size: 11px; margin-bottom: 56px; }
+
+  /* Chat preview */
+  .chat-preview {
+    max-width: 520px;
+    margin: 0 auto;
+    border-radius: 24px;
+    padding: 24px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(167,139,250,0.14);
+    box-shadow: 0 32px 80px rgba(0,0,0,0.4);
+    text-align: left;
+  }
+  .chat-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding-bottom: 16px;
+    margin-bottom: 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+  .chat-avatar {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px;
+    background: linear-gradient(135deg, var(--violet), var(--violet-mid));
+    box-shadow: 0 0 16px rgba(124,58,237,0.5);
+    flex-shrink: 0;
+  }
+  .chat-name { font-size: 14px; font-weight: 600; }
+  .chat-status { display: flex; align-items: center; gap: 6px; margin-top: 2px; }
+  .chat-status-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 6px var(--green);
+  }
+  .chat-status-text { font-size: 11px; color: rgba(255,255,255,0.3); }
+  .chat-messages { display: flex; flex-direction: column; gap: 12px; }
+  .chat-msg-user { display: flex; justify-content: flex-end; }
+  .chat-msg-user .bubble {
+    padding: 10px 16px;
+    border-radius: 16px;
+    border-top-right-radius: 4px;
+    font-size: 13px;
+    max-width: 72%;
+    background: linear-gradient(135deg, var(--violet), var(--violet-mid));
+  }
+  .chat-msg-ai { display: flex; align-items: flex-start; gap: 10px; }
+  .chat-msg-ai .avatar-sm {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px;
+    flex-shrink: 0;
+    background: linear-gradient(135deg, var(--violet), var(--violet-mid));
+    box-shadow: 0 0 10px rgba(124,58,237,0.4);
+  }
+  .chat-msg-ai .bubble {
+    padding: 12px 16px;
+    border-radius: 16px;
+    border-top-left-radius: 4px;
+    font-size: 13px;
+    line-height: 1.6;
+    max-width: 80%;
+    background: rgba(124,58,237,0.1);
+    border: 1px solid rgba(167,139,250,0.18);
+    box-shadow: 0 0 24px rgba(124,58,237,0.06);
+    color: rgba(255,255,255,0.88);
+  }
+  .bubble-accent { color: var(--violet-light); }
+  .chat-prompts { display: flex; gap: 8px; margin-top: 4px; flex-wrap: wrap; }
+  .chat-prompt {
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: 11px;
+    color: rgba(255,255,255,0.55);
+    background: rgba(124,58,237,0.1);
+    border: 1px solid rgba(167,139,250,0.18);
+  }
+
+  /* ── STATS BAR ────────────────────────────── */
+  .stats-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 60px;
+    padding: 24px 32px;
+    border-top: 1px solid rgba(255,255,255,0.04);
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+  .stat-item { text-align: center; }
+  .stat-val { font-size: 22px; font-weight: 800; }
+  .stat-label { font-size: 11px; color: rgba(255,255,255,0.3); margin-top: 2px; }
+
+  /* ── FEATURES ─────────────────────────────── */
+  .features { padding: 96px 0; }
+  .features-header { text-align: center; margin-bottom: 56px; }
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+  .feature-card {
+    border-radius: 20px;
+    padding: 24px;
+  }
+  .feature-icon {
+    width: 44px; height: 44px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+    margin-bottom: 16px;
+  }
+  .feature-title { font-size: 15px; font-weight: 600; margin-bottom: 8px; }
+  .feature-desc { font-size: 13px; line-height: 1.65; color: rgba(255,255,255,0.4); }
+
+  /* ── HOW IT WORKS ─────────────────────────── */
+  .how-section {
+    padding: 80px 0;
+    background: rgba(255,255,255,0.015);
+  }
+  .how-header { text-align: center; margin-bottom: 56px; }
+  .how-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+    position: relative;
+  }
+  .how-connector {
+    position: absolute;
+    top: 28px;
+    left: 12.5%;
+    right: 12.5%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(167,139,250,0.25), rgba(167,139,250,0.25), transparent);
+  }
+  .how-step { display: flex; flex-direction: column; align-items: center; text-align: center; }
+  .how-num {
+    width: 56px; height: 56px;
+    border-radius: 16px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 17px;
+    font-weight: 900;
+    margin-bottom: 20px;
+    position: relative;
+    z-index: 1;
+  }
+  .how-title { font-size: 14px; font-weight: 600; margin-bottom: 8px; }
+  .how-desc { font-size: 12px; color: rgba(255,255,255,0.35); line-height: 1.65; }
+
+  /* ── TESTIMONIALS ─────────────────────────── */
+  .testimonials { padding: 96px 0; }
+  .testi-header { text-align: center; margin-bottom: 56px; }
+  .testi-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+  .testi-card {
+    border-radius: 20px;
+    padding: 24px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+  .testi-stars { color: var(--amber); font-size: 12px; letter-spacing: 2px; margin-bottom: 12px; }
+  .testi-text { font-size: 13px; color: rgba(255,255,255,0.65); line-height: 1.7; margin-bottom: 20px; }
+  .testi-author { display: flex; align-items: center; gap: 12px; }
+  .testi-avatar {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .testi-name { font-size: 13px; font-weight: 600; }
+  .testi-role { font-size: 11px; color: rgba(255,255,255,0.3); margin-top: 1px; }
+
+  /* ── PRICING ──────────────────────────────── */
+  .pricing-section {
+    padding: 80px 0;
+    background: rgba(255,255,255,0.015);
+  }
+  .pricing-header { text-align: center; margin-bottom: 56px; }
+  .pricing-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    align-items: stretch;
+  }
+  .pricing-card {
+    border-radius: 20px;
+    padding: 28px;
+    display: flex;
+    flex-direction: column;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    transition: transform 0.2s;
+  }
+  .pricing-card.highlight {
+    background: linear-gradient(135deg, rgba(124,58,237,0.25), rgba(79,70,229,0.15));
+    border-color: rgba(167,139,250,0.45);
+    box-shadow: 0 0 40px rgba(124,58,237,0.2);
+    transform: scale(1.02);
+  }
+  .pricing-badge {
+    display: inline-flex;
+    align-self: flex-start;
+    padding: 4px 12px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--violet-light);
+    background: rgba(167,139,250,0.18);
+    border: 1px solid rgba(167,139,250,0.3);
+    margin-bottom: 12px;
+  }
+  .pricing-name { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+  .pricing-price { display: flex; align-items: flex-end; gap: 2px; margin-bottom: 4px; }
+  .pricing-amount { font-size: 32px; font-weight: 900; }
+  .pricing-period { font-size: 13px; color: rgba(255,255,255,0.35); margin-bottom: 4px; }
+  .pricing-tagline { font-size: 12px; color: rgba(255,255,255,0.35); margin-bottom: 20px; }
+  .pricing-features { flex: 1; display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; }
+  .pricing-feature { display: flex; align-items: center; gap: 8px; }
+  .pricing-check {
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 9px;
+    flex-shrink: 0;
+  }
+  .pricing-feature span { font-size: 12px; color: rgba(255,255,255,0.55); }
+  .btn-plan {
+    padding: 13px 20px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 600;
+    width: 100%;
+    transition: transform 0.12s;
+  }
+  .btn-plan.primary {
+    color: #fff;
+    background: linear-gradient(135deg, var(--violet), var(--violet-mid));
+    box-shadow: 0 6px 24px rgba(124,58,237,0.4);
+  }
+  .btn-plan.secondary {
+    color: rgba(255,255,255,0.6);
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+  .btn-plan:hover { transform: translateY(-1px); }
+
+  /* ── CTA SECTION ──────────────────────────── */
+  .cta-section {
+    padding: 96px 32px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  .cta-icon {
+    width: 64px; height: 64px;
+    border-radius: 18px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px;
+    margin-bottom: 32px;
+    background: linear-gradient(135deg, rgba(124,58,237,0.35), rgba(79,70,229,0.2));
+    border: 1px solid rgba(167,139,250,0.3);
+    box-shadow: 0 0 48px rgba(124,58,237,0.3);
+  }
+  .cta-h2 {
+    font-size: 44px;
+    font-weight: 900;
+    letter-spacing: -0.03em;
+    max-width: 520px;
+    margin-bottom: 20px;
+    line-height: 1.1;
+  }
+  .cta-sub {
+    color: rgba(255,255,255,0.35);
+    font-size: 15px;
+    line-height: 1.65;
+    max-width: 400px;
+    margin-bottom: 40px;
+  }
+  .btn-cta {
+    padding: 16px 40px;
+    border-radius: 16px;
+    font-size: 15px;
+    font-weight: 800;
+    color: #fff;
+    background: linear-gradient(135deg, var(--violet), var(--violet-mid));
+    box-shadow: 0 10px 40px rgba(124,58,237,0.5);
+    transition: transform 0.12s;
+    margin-bottom: 16px;
+  }
+  .btn-cta:hover { transform: translateY(-2px); }
+  .cta-note { color: rgba(255,255,255,0.2); font-size: 11px; }
+
+  /* ── FOOTER ───────────────────────────────── */
+  footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 32px;
+    border-top: 1px solid rgba(255,255,255,0.05);
+  }
+  .footer-logo { display: flex; align-items: center; gap: 8px; }
+  .footer-logo-icon {
+    width: 24px; height: 24px;
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px;
+    background: linear-gradient(135deg, rgba(124,58,237,0.4), rgba(79,70,229,0.3));
+  }
+  .footer-logo-name { font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.4); }
+  .footer-links { display: flex; gap: 24px; }
+  .footer-links a { font-size: 11px; color: rgba(255,255,255,0.25); transition: color 0.15s; }
+  .footer-links a:hover { color: rgba(255,255,255,0.5); }
+  .footer-copy { font-size: 11px; color: rgba(255,255,255,0.2); }
+</style>
+</head>
+<body>
+
+<!-- ── NAV ─────────────────────────────────── -->
+<nav>
+  <div class="nav-logo">
+    <div class="nav-logo-icon">✨</div>
+    <span class="nav-logo-name">FutureYou</span>
+  </div>
+  <div class="nav-links">
+    <a href="#features">Features</a>
+    <a href="#how">How It Works</a>
+    <a href="#testimonials">Testimonials</a>
+    <a href="#pricing">Pricing</a>
+  </div>
+  <div class="nav-actions">
+    <button class="btn-ghost">Log in</button>
+    <button class="btn-primary">Start Free</button>
+  </div>
+</nav>
+
+<!-- ── HERO ───────────────────────────────── -->
+<section class="hero">
+  <div class="hero-orb hero-orb-1"></div>
+  <div class="hero-orb hero-orb-2"></div>
+  <div class="hero-orb hero-orb-3"></div>
+
+  <div class="hero-badge">
+    <span class="hero-badge-dot">●</span>
+    Now in Early Access — Join 12,000+ users
+  </div>
+
+  <h1 class="hero-h1">
+    Meet the version of you<br>
+    <span class="grad-text">5 years from now.</span>
+  </h1>
+
+  <p class="hero-sub">
+    An AI that knows your goals, fears, and dreams — and talks to you like the future version of yourself who already made it.
+  </p>
+
+  <div class="hero-form">
+    <input class="hero-input" type="email" placeholder="Enter your email" />
+    <button class="btn-hero">Start Free →</button>
+  </div>
+  <p class="hero-disclaimer">No credit card required · Free plan available · Cancel anytime</p>
+
+  <!-- Chat preview -->
+  <div class="chat-preview">
+    <div class="chat-header">
+      <div class="chat-avatar">✨</div>
+      <div>
+        <div class="chat-name">Future You</div>
+        <div class="chat-status">
+          <div class="chat-status-dot"></div>
+          <span class="chat-status-text">5 years ahead of you</span>
+        </div>
+      </div>
+    </div>
+    <div class="chat-messages">
+      <div class="chat-msg-user">
+        <div class="bubble">I feel like I'm not making progress.</div>
+      </div>
+      <div class="chat-msg-ai">
+        <div class="avatar-sm">✨</div>
+        <div class="bubble">
+          I felt exactly the same at your stage. Here's what you're missing — progress isn't always visible. You've been building the foundation.
+          <span class="bubble-accent"> What's one thing you've improved at this month?</span>
+        </div>
+      </div>
+      <div class="chat-prompts">
+        <span class="chat-prompt">I feel lost</span>
+        <span class="chat-prompt">Motivate me</span>
+        <span class="chat-prompt">Calm my anxiety</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── STATS BAR ───────────────────────────── -->
+<div class="stats-bar">
+  <div class="stat-item"><div class="stat-val">12,000+</div><div class="stat-label">Users</div></div>
+  <div class="stat-item"><div class="stat-val">4.9★</div><div class="stat-label">App Rating</div></div>
+  <div class="stat-item"><div class="stat-val">2.4M+</div><div class="stat-label">Messages Sent</div></div>
+  <div class="stat-item"><div class="stat-val">94%</div><div class="stat-label">Feel More Clarity</div></div>
+</div>
+
+<!-- ── FEATURES ────────────────────────────── -->
+<section class="features" id="features">
+  <div class="container">
+    <div class="features-header">
+      <span class="section-label">What You Get</span>
+      <h2 class="section-title">Everything your future self needs<br>to guide you forward</h2>
+      <p class="section-sub">Built for people serious about becoming who they're meant to be.</p>
+    </div>
+    <div class="features-grid">
+
+      <div class="feature-card" style="background:linear-gradient(135deg,rgba(167,139,250,0.1),rgba(255,255,255,0.02));border:1px solid rgba(167,139,250,0.18)">
+        <div class="feature-icon" style="background:rgba(167,139,250,0.15);border:1px solid rgba(167,139,250,0.25)">✨</div>
+        <div class="feature-title">Talk to Your Future Self</div>
+        <div class="feature-desc">An AI version of you — 5 years ahead — trained on your goals, fears, and personality. Real conversations that feel personal.</div>
+      </div>
+
+      <div class="feature-card" style="background:linear-gradient(135deg,rgba(52,211,153,0.08),rgba(255,255,255,0.02));border:1px solid rgba(52,211,153,0.15)">
+        <div class="feature-icon" style="background:rgba(52,211,153,0.12);border:1px solid rgba(52,211,153,0.2)">🎯</div>
+        <div class="feature-title">Goal Architecture</div>
+        <div class="feature-desc">Break down your biggest ambitions into clear, structured milestones with priority scoring and timeframes.</div>
+      </div>
+
+      <div class="feature-card" style="background:linear-gradient(135deg,rgba(244,114,182,0.08),rgba(255,255,255,0.02));border:1px solid rgba(244,114,182,0.15)">
+        <div class="feature-icon" style="background:rgba(244,114,182,0.12);border:1px solid rgba(244,114,182,0.2)">🧠</div>
+        <div class="feature-title">Fear Mapping</div>
+        <div class="feature-desc">Identify and categorize what's holding you back. Your Future Self has already overcome every one of them.</div>
+      </div>
+
+      <div class="feature-card" style="background:linear-gradient(135deg,rgba(251,146,60,0.08),rgba(255,255,255,0.02));border:1px solid rgba(251,146,60,0.15)">
+        <div class="feature-icon" style="background:rgba(251,146,60,0.12);border:1px solid rgba(251,146,60,0.2)">🔥</div>
+        <div class="feature-title">Identity Building</div>
+        <div class="feature-desc">Define the traits you want to embody. Confidence, discipline, focus — your AI reinforces them daily.</div>
+      </div>
+
+      <div class="feature-card" style="background:linear-gradient(135deg,rgba(96,165,250,0.08),rgba(255,255,255,0.02));border:1px solid rgba(96,165,250,0.15)">
+        <div class="feature-icon" style="background:rgba(96,165,250,0.12);border:1px solid rgba(96,165,250,0.2)">🏆</div>
+        <div class="feature-title">Role Model Wisdom</div>
+        <div class="feature-desc">Your Future Self channels the mindset of the people you admire most — Kobe, Goggins, Aurelius.</div>
+      </div>
+
+      <div class="feature-card" style="background:linear-gradient(135deg,rgba(251,191,36,0.08),rgba(255,255,255,0.02));border:1px solid rgba(251,191,36,0.15)">
+        <div class="feature-icon" style="background:rgba(251,191,36,0.12);border:1px solid rgba(251,191,36,0.2)">🎙️</div>
+        <div class="feature-title">Voice &amp; Tone</div>
+        <div class="feature-desc">Choose how your Future Self speaks to you — supportive, strict, motivational, or friendly.</div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ── HOW IT WORKS ────────────────────────── -->
+<section class="how-section" id="how">
+  <div class="container">
+    <div class="how-header">
+      <span class="section-label">How It Works</span>
+      <h2 class="section-title">Four steps to meet your future self</h2>
+    </div>
+    <div class="how-grid">
+      <div class="how-connector"></div>
+
+      <div class="how-step">
+        <div class="how-num" style="background:linear-gradient(135deg,rgba(167,139,250,0.25),rgba(167,139,250,0.12));border:1px solid rgba(167,139,250,0.35);color:#a78bfa;box-shadow:0 0 24px rgba(167,139,250,0.15)">01</div>
+        <div class="how-title">Build Your Profile</div>
+        <div class="how-desc">Define your goals, fears, desired traits, and role models in a guided onboarding flow.</div>
+      </div>
+
+      <div class="how-step">
+        <div class="how-num" style="background:linear-gradient(135deg,rgba(52,211,153,0.25),rgba(52,211,153,0.12));border:1px solid rgba(52,211,153,0.35);color:#34d399;box-shadow:0 0 24px rgba(52,211,153,0.15)">02</div>
+        <div class="how-title">Choose Your Tone</div>
+        <div class="how-desc">Pick how your Future Self communicates — from a firm coach to a warm confidant.</div>
+      </div>
+
+      <div class="how-step">
+        <div class="how-num" style="background:linear-gradient(135deg,rgba(244,114,182,0.25),rgba(244,114,182,0.12));border:1px solid rgba(244,114,182,0.35);color:#f472b6;box-shadow:0 0 24px rgba(244,114,182,0.15)">03</div>
+        <div class="how-title">Start the Conversation</div>
+        <div class="how-desc">Chat anytime. Ask for motivation, clarity, or just to be heard by a version of you who figured it all out.</div>
+      </div>
+
+      <div class="how-step">
+        <div class="how-num" style="background:linear-gradient(135deg,rgba(96,165,250,0.25),rgba(96,165,250,0.12));border:1px solid rgba(96,165,250,0.35);color:#60a5fa;box-shadow:0 0 24px rgba(96,165,250,0.15)">04</div>
+        <div class="how-title">Grow Every Day</div>
+        <div class="how-desc">Weekly reflections, habit tracking, and progress reviews keep you accountable to the future you're building.</div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ── TESTIMONIALS ────────────────────────── -->
+<section class="testimonials" id="testimonials">
+  <div class="container">
+    <div class="testi-header">
+      <span class="section-label">Real Stories</span>
+      <h2 class="section-title">People who've met their future self</h2>
+    </div>
+    <div class="testi-grid">
+
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <p class="testi-text">"I was completely lost about my direction. Talking to my Future Self for the first time felt like someone finally understood me — because it was me."</p>
+        <div class="testi-author">
+          <div class="testi-avatar" style="background:rgba(124,58,237,0.25);color:#a78bfa;border:1px solid rgba(124,58,237,0.35)">A</div>
+          <div><div class="testi-name">Alex R.</div><div class="testi-role">Entrepreneur, 28</div></div>
+        </div>
+      </div>
+
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <p class="testi-text">"The fear mapping step alone was worth it. Seeing my anxieties laid out and then having my Future Self talk me through them was incredibly cathartic."</p>
+        <div class="testi-author">
+          <div class="testi-avatar" style="background:rgba(190,24,93,0.25);color:#f472b6;border:1px solid rgba(190,24,93,0.35)">P</div>
+          <div><div class="testi-name">Priya M.</div><div class="testi-role">Software Engineer, 24</div></div>
+        </div>
+      </div>
+
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <p class="testi-text">"I set my AI to Strict mode. It holds me accountable like no one else has. No fluff, no excuses. Exactly what I needed."</p>
+        <div class="testi-author">
+          <div class="testi-avatar" style="background:rgba(5,150,105,0.25);color:#34d399;border:1px solid rgba(5,150,105,0.35)">J</div>
+          <div><div class="testi-name">James T.</div><div class="testi-role">Fitness Coach, 31</div></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ── PRICING ─────────────────────────────── -->
+<section class="pricing-section" id="pricing">
+  <div class="container">
+    <div class="pricing-header">
+      <span class="section-label">Pricing</span>
+      <h2 class="section-title">Invest in who you're becoming</h2>
+      <p class="section-sub">Less than a coffee a week to talk to the best version of yourself.</p>
+    </div>
+    <div class="pricing-grid">
+
+      <div class="pricing-card">
+        <div class="pricing-name">Explorer</div>
+        <div class="pricing-price"><span class="pricing-amount">Free</span></div>
+        <div class="pricing-tagline">Start your journey.</div>
+        <div class="pricing-features">
+          <div class="pricing-feature">
+            <div class="pricing-check" style="background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.4)">✓</div>
+            <span>5 chats / month</span>
+          </div>
+          <div class="pricing-feature">
+            <div class="pricing-check" style="background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.4)">✓</div>
+            <span>Goal &amp; fear profiling</span>
+          </div>
+          <div class="pricing-feature">
+            <div class="pricing-check" style="background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.4)">✓</div>
+            <span>Basic tone selection</span>
+          </div>
+          <div class="pricing-feature">
+            <div class="pricing-check" style="background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.4)">✓</div>
+            <span>Web access</span>
+          </div>
+        </div>
+        <button class="btn-plan secondary">Get Started Free</button>
+      </div>
+
+      <div class="pricing-card highlight">
+        <span class="pricing-badge">Most Popular</span>
+        <div class="pricing-name">Pathfinder</div>
+        <div class="pricing-price"><span class="pricing-amount">$12</span><span class="pricing-period">/mo</span></div>
+        <div class="pricing-tagline">For serious growth.</div>
+        <div class="pricing-features">
+          <div class="pricing-feature">
+            <div class="pricing-check" style="background:rgba(167,139,250,0.2);color:#a78bfa">✓</div>
+            <span>Unlimited chats</span>
+          </div>
+          <div class="pricing-feature">
+            <div class="pricing-check" style="background:rgba(167,139,250,0.2);color:#a78bfa">✓</div>
+            <span>Full onboarding profile</span>
+          </div>
+          <div class="pricing-feature">
+            <div class="pricing-check" style="background:rgba(167,139,250,0.2);color:#a78bfa">✓</div>
+            <span>All 4 tone modes</span>
+          </div>
+          <div class="pricing-feature">
+            <div class="pricing-check" style="background:rgba(167,139,250,0.2);color:#a78bfa">✓</div>
+            <span>Voice input</span>
+          </div>
+          <div class="pricing-feature">
+            <div class="pricing-check" style="background:rgba(167,139,250,0.2);color:#a78bfa">✓</div>
+            <span>Weekly reflections</span>
+          </div>
+          <div class="pricing-feature">
+            <div class="pricing-check" style="background:rgba(167,139,250,0.2);color:#a78bfa">✓</div>
+            <span>Role model wisdom</span>
+          </div>
+        </div>
+        <button class="btn-plan primary">Start 7-Day Free Trial</button>
+      </div>
+
+      <div class="pricing-card">
+        <div class="pricing-name">Visionary</div>
+        <div class="pricing-price"><span class="pricing-amount">$29</span><span class="pricing-period">/mo</span></div>
+        <div class="pricing-tagline">The complete transformation.</div>
+        <div class="pricing-features">
+          <div class="pricing-feature">
+            <div class="pricing-check" style="background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.4)">✓</div>
+            <span>Everything in Pathfinder</span>
+          </div>
+          <div class="pricing-feature">
+            <div class="pricing-check" style="background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.4)">✓</div>
+            <span>Multiple Future Self profiles</span>
+          </div>
+          <div class="pricing-feature">
+            <div class="pricing-check" style="background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.4)">✓</div>
+            <span>Goal milestone tracking</span>
+          </div>
+          <div class="pricing-feature">
+            <div class="pricing-check" style="background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.4)">✓</div>
+            <span>Priority support</span>
+          </div>
+          <div class="pricing-feature">
+            <div class="pricing-check" style="background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.4)">✓</div>
+            <span>Early feature access</span>
+          </div>
+        </div>
+        <button class="btn-plan secondary">Go Visionary</button>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ── CTA ─────────────────────────────────── -->
+<section class="cta-section">
+  <div class="cta-icon">✨</div>
+  <h2 class="cta-h2">
+    Your future self is already<br>
+    <span class="grad-text">waiting.</span>
+  </h2>
+  <p class="cta-sub">The only question is — are you ready to listen?</p>
+  <button class="btn-cta">Start Your Journey Free →</button>
+  <p class="cta-note">No credit card · Free forever plan available</p>
+</section>
+
+<!-- ── FOOTER ──────────────────────────────── -->
+<footer>
+  <div class="footer-logo">
+    <div class="footer-logo-icon">✨</div>
+    <span class="footer-logo-name">FutureYou</span>
+  </div>
+  <div class="footer-links">
+    <a href="#">Privacy</a>
+    <a href="#">Terms</a>
+    <a href="#">Contact</a>
+    <a href="#">Blog</a>
+  </div>
+  <div class="footer-copy">© 2026 FutureYou. All rights reserved.</div>
+</footer>
+
+</body>
+</html>
