@@ -59,7 +59,11 @@ const handleLogin = async () => {
       <div class="auth-brand">
         <div class="auth-brand__icon">✦</div>
         <div class="auth-brand__text">
-          <div class="auth-brand__name">FutureYou</div>
+          <div class="auth-brand__name">
+            <router-link to="/">
+              FutureYou
+            </router-link>
+          </div>
           <div class="auth-brand__tagline">Your future self is waiting</div>
         </div>
       </div>

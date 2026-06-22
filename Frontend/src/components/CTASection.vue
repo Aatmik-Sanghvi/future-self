@@ -8,7 +8,11 @@
             <span class="grad-text">waiting.</span>
         </h2>
         <p class="cta-sub">The only question is — are you ready to listen?</p>
-        <button class="btn-cta">Start Your Journey Free →</button>
+        <button class="btn-cta">
+            <router-link to="/register" class="btn-cta-link">
+                Start Your Journey Free →
+            </router-link>
+        </button>
         <p class="cta-note">No credit card · Free forever plan available</p>
     </section>
 </template>

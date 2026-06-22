@@ -80,16 +80,15 @@ const handleRegister = async () => {
 <template>
   <div class="auth-page">
     <div class="auth-card">
-      <!-- Progress bar -->
-      <div class="auth-progress">
-        <div class="auth-progress__bar" :style="{ width: progress + '%' }"></div>
-      </div>
-
       <!-- Brand (inline layout) -->
-      <div class="auth-brand auth-brand--inline">
+      <div class="auth-brand">
         <div class="auth-brand__icon">✦</div>
         <div class="auth-brand__text">
-          <div class="auth-brand__name">FutureYou</div>
+          <div class="auth-brand__name">
+            <router-link to="/">
+              FutureYou
+            </router-link>
+          </div>
           <div class="auth-brand__tagline">Begin your transformation</div>
         </div>
       </div>

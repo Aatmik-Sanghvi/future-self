@@ -22,6 +22,7 @@ return new class extends Migration
             $table->string('profile_image')->nullable();
             $table->text('current_state_summary')->nullable();
             $table->text('future_self_summary')->nullable();
+            $table->boolean('is_onboarded')->default(false);
             $table->rememberToken();
             $table->timestamps();
             $table->softDeletes();

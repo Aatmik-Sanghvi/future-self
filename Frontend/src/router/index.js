@@ -3,7 +3,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 const routes = [
   {
     path: '/',
-    redirect: '/login'
+    redirect: ''
   },
   {
     path: '/login',
@@ -24,10 +24,10 @@ const routes = [
     meta: { title: 'Forgot Password - FutureYou' }
   },
   {
-    path: '/dashboard',
-    name: 'Dashboard',
+    path: '/',
+    name: '',
     component: () => import('@/views/DashboardView.vue'),
-    meta: { title: 'Future You - Dashboard' }
+    meta: { title: 'Future You - Home' }
   }
 ]
 
