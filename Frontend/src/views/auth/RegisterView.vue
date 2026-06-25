@@ -1,10 +1,18 @@
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
+import { register } from '@/api/auth'
+import CountryFlag from 'vue-country-flag-next'
+import countryTelephoneData from 'country-telephone-data'
 
 const router = useRouter()
 
+const name = ref('')
 const email = ref('')
+const mobile = ref('')
+const selectedCountryIso2 = ref('in')
+const countryMenuOpen = ref(false)
+const countryMenuRef = ref(null)
 const password = ref('')
 const confirmPassword = ref('')
 const showPassword = ref(false)
@@ -12,8 +20,60 @@ const showConfirmPassword = ref(false)
 const agreedToTerms = ref(false)
 const isLoading = ref(false)
 const errorMessage = ref('')
+const validationErrors = ref({})
 
-// Password strength
+const handleOutsideClick = (event) => {
+  if (countryMenuOpen.value && countryMenuRef.value && !countryMenuRef.value.contains(event.target)) {
+    countryMenuOpen.value = false
+  }
+}
+
+onMounted(() => {
+  document.addEventListener('click', handleOutsideClick)
+})
+
+onBeforeUnmount(() => {
+  document.removeEventListener('click', handleOutsideClick)
+})
+
+const toggleCountryMenu = () => {
+  countryMenuOpen.value = !countryMenuOpen.value
+}
+
+const selectCountry = (iso2) => {
+  selectedCountryIso2.value = iso2
+  countryMenuOpen.value = false
+}
+
+const countryOptions = (() => {
+  const entries = new Map()
+  ;(countryTelephoneData.allCountries || [])
+    .filter((country) => country.dialCode)
+    .forEach((country) => {
+      const dialCode = `+${country.dialCode}`
+      if (!entries.has(dialCode)) {
+        entries.set(dialCode, {
+          iso2: country.iso2,
+          dialCode,
+          label: dialCode,
+        })
+      }
+    })
+  return Array.from(entries.values()).sort((a, b) => {
+    const aCode = parseInt(a.dialCode.replace('+', ''), 10)
+    const bCode = parseInt(b.dialCode.replace('+', ''), 10)
+    return aCode - bCode
+  })
+})()
+
+const selectedCountry = computed(() =>
+  countryOptions.find((option) => option.iso2 === selectedCountryIso2.value) || countryOptions[0]
+)
+
+const countryCode = computed(() => selectedCountry.value?.dialCode || '+1')
+const mobileNumber = computed(() => mobile.value.trim())
+const fullMobile = computed(() => `${countryCode.value}${mobileNumber.value.replace(/^\+/, '')}`)
+
 const passwordStrength = computed(() => {
   const val = password.value
   if (!val) return { level: 0, label: '', class: '' }
@@ -49,9 +109,14 @@ const passwordsMatch = computed(() => {
   return password.value === confirmPassword.value
 })
 
+const isPhoneValid = computed(() => /^\d{7,15}$/.test(mobileNumber.value))
+
 const isFormValid = computed(() => {
   return (
+    name.value.trim() !== '' &&
     email.value.trim() !== '' &&
+    mobile.value !== '' &&
+    isPhoneValid.value &&
     password.value.length >= 8 &&
     confirmPassword.value === password.value &&
     agreedToTerms.value
@@ -62,14 +127,28 @@ const handleRegister = async () => {
   if (!isFormValid.value) return
 
   isLoading.value = true
+  validationErrors.value = {}
   errorMessage.value = ''
 
   try {
     // TODO: Wire up to your auth API
-    // await authApi.register({ email: email.value, password: password.value, password_confirmation: confirmPassword.value })
-    await new Promise(resolve => setTimeout(resolve, 1500))
-    // router.push('/onboarding')
+    const response = await register({
+      name: name.value,
+      email: email.value,
+      country_code: countryCode.value,
+      mobile: mobileNumber.value,
+      password: password.value,
+    })
+    
+    router.push({ path: '/onboarding', query: { source: 'register' } })
   } catch (err) {
+    if(err.response?.status === 422) {
+      // Handle validation errors if needed
+      validationErrors.value = err.response.data.errors
+    } else {
+      errorMessage.value =
+        err.response?.data?.message || 'Registration failed. Please try again.'
+    }
     errorMessage.value = err?.response?.data?.message || 'Registration failed. Please try again.'
   } finally {
     isLoading.value = false
@@ -110,6 +189,27 @@ const handleRegister = async () => {
 
       <!-- Form -->
       <form @submit.prevent="handleRegister" id="register-form">
+        
+        <!-- Name -->
+        <div class="auth-field">
+          <label class="auth-field__label" for="register-name">Name</label>
+          <div class="auth-field__wrapper">
+            <svg class="auth-field__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+              <circle cx="12" cy="7" r="4"/>
+            </svg>
+            <input
+              id="register-name"
+              v-model="name"
+              type="text"
+              class="auth-field__input"
+              placeholder="John Doe"
+              autocomplete="name"
+              required
+            />
+          </div>
+        </div>
+
         <!-- Email -->
         <div class="auth-field">
           <label class="auth-field__label" for="register-email">Email</label>
@@ -125,6 +225,42 @@ const handleRegister = async () => {
               class="auth-field__input"
               placeholder="you@example.com"
               autocomplete="email"
+              required
+            />
+          </div>
+        </div>
+        
+        <!-- Mobile -->
+        <div class="auth-field">
+          <label class="auth-field__label" for="register-mobile">Mobile</label>
+          <div class="auth-field__wrapper auth-field__phone-row">
+            <div class="auth-field__country-wrapper" ref="countryMenuRef">
+              <button type="button" class="auth-field__country-button" @click="toggleCountryMenu" aria-label="Select country code">
+                <CountryFlag :country="selectedCountryIso2" size="small" rounded class="auth-field__country-flag" />
+                <span class="auth-field__country-code">
+                  {{ selectedCountry.dialCode }}
+                </span>
+              </button>
+              <div v-if="countryMenuOpen" class="auth-field__country-dropdown">
+                <button
+                  v-for="country in countryOptions"
+                  :key="country.iso2"
+                  type="button"
+                  class="auth-field__country-item"
+                  @click="selectCountry(country.iso2)"
+                >
+                  <CountryFlag :country="country.iso2" size="small" rounded class="auth-field__country-flag" />
+                  <span>{{ country.dialCode }}</span>
+                </button>
+              </div>
+            </div>
+            <input
+              id="register-mobile"
+              v-model="mobile"
+              type="tel"
+              class="auth-field__input auth-field__input--mobile"
+              placeholder="9876543210"
+              autocomplete="tel-national"
               required
             />
           </div>

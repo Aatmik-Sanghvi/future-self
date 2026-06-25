@@ -34,9 +34,9 @@ const handleLogin = async () => {
       password: password.value 
     })
 
-    // console.log(response.data)
+    console.log(response.data)
     // await new Promise(resolve => setTimeout(resolve, 1500))
-    router.push({ path: '/dashboard', query: { source: 'login' } })
+    router.push({ path: response.data.is_onboarded ? '/dashboard' : '/onboarding', query: { source: 'login' } })
   } catch (err) {
     if (err.response?.status === 422) {
         validationErrors.value = err.response.data.errors

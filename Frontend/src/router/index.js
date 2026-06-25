@@ -24,6 +24,12 @@ const routes = [
     meta: { title: 'Forgot Password - FutureYou' }
   },
   {
+    path: '/onboarding',
+    name: 'Onboarding',
+    component: () => import('@/views/OnboardingView.vue'),
+    meta: { title: 'Onboarding - FutureYou' }
+  },
+  {
     path: '/',
     name: '',
     component: () => import('@/views/DashboardView.vue'),

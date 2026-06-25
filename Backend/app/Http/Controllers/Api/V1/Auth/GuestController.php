@@ -31,7 +31,7 @@ class GuestController extends ResponseController
 
         $user = $this->user->create($request->all());
 
-        return ResponseHelper::send(200, 'User registered successfully', $this->get_user_data($user));
+        return ResponseHelper::send(200, 'User registered successfully', $this->get_user_data());
     }
 
     public function login(Request $request){
