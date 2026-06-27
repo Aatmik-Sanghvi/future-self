@@ -1,14 +1,15 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { login } from '@/api/auth'
+import { useAuthStore } from '@/stores/auth'
 
 const router = useRouter()
+
+const auth = useAuthStore()
 
 const email = ref('')
 const password = ref('')
 const showPassword = ref(false)
-const isLoading = ref(false)
 const errorMessage = ref('')
 const validationErrors = ref({})
 
@@ -23,31 +24,18 @@ const togglePassword = () => {
 const handleLogin = async () => {
   if (!isFormValid.value) return
 
-  isLoading.value = true
-  validationErrors.value = {}
-  errorMessage.value = ''
-
+  // TODO: Wire up to your auth API
   try {
-    // TODO: Wire up to your auth API
-    const response = await login({ 
-      email: email.value, 
-      password: password.value 
+    const response = await auth.login({
+      email: email.value,
+      password: password.value,
     })
 
-    console.log(response.data)
-    // await new Promise(resolve => setTimeout(resolve, 1500))
-    router.push({ path: response.data.is_onboarded ? '/dashboard' : '/onboarding', query: { source: 'login' } })
+    router.push({
+      name: response.is_onboarded ? 'Dashboard' : 'Onboarding',
+    })
   } catch (err) {
-    if (err.response?.status === 422) {
-        validationErrors.value = err.response.data.errors
-    } else {
-        errorMessage.value =
-            err.response?.data?.message ||
-            'Something went wrong.'
-    }
-
-  } finally {
-    isLoading.value = false
+    console.error(err)
   }
 }
 </script>
@@ -147,11 +135,11 @@ const handleLogin = async () => {
           id="login-submit"
           type="submit"
           class="auth-submit"
-          :class="{ 'auth-submit--loading': isLoading }"
-          :disabled="!isFormValid || isLoading"
+          :class="{ 'auth-submit--loading': auth.loading }"
+          :disabled="!isFormValid || auth.loading"
         >
-          <span v-if="isLoading" class="auth-submit__spinner"></span>
-          {{ isLoading ? 'Signing in...' : 'Sign in' }}
+          <span v-if="auth.loading" class="auth-submit__spinner"></span>
+          {{ auth.loading ? 'Signing in...' : 'Sign in' }}
         </button>
       </form>
 

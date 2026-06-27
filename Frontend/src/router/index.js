@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
 
 const routes = [
   {
@@ -9,13 +10,19 @@ const routes = [
     path: '/login',
     name: 'Login',
     component: () => import('@/views/auth/LoginView.vue'),
-    meta: { title: 'Sign In - FutureYou' }
+    meta: {
+      title: 'Sign In - FutureYou',
+      guestOnly: true, 
+    }
   },
   {
     path: '/register',
     name: 'Register',
     component: () => import('@/views/auth/RegisterView.vue'),
-    meta: { title: 'Create Account - FutureYou' }
+    meta: { 
+      title: 'Create Account - FutureYou',
+      guestOnly: true,
+    }
   },
   {
     path: '/forgot-password',
@@ -27,13 +34,18 @@ const routes = [
     path: '/onboarding',
     name: 'Onboarding',
     component: () => import('@/views/OnboardingView.vue'),
-    meta: { title: 'Onboarding - FutureYou' }
+    meta: { 
+      title: 'Onboarding - FutureYou',
+      requiresAuth: true,
+    }
   },
   {
     path: '/',
-    name: '',
+    name: 'Dashboard',
     component: () => import('@/views/DashboardView.vue'),
-    meta: { title: 'Future You - Home' }
+    meta: { 
+      title: 'Future You - Home' ,
+    }
   }
 ]
 
@@ -42,8 +54,31 @@ const router = createRouter({
   routes
 })
 
-router.beforeEach((to) => {
+router.beforeEach(async (to) => {
   document.title = to.meta.title || 'FutureYou'
+
+  const auth = useAuthStore()
+
+  // Restore the session after refresh
+  // if(auth.token && !auth.user) {
+  //   await auth.checkAuth()
+  // }
+
+  // protected pages
+  if (to.meta.requiresAuth && !auth.isAuthenticated) {
+    return { 
+      name: 'Login' 
+    }
+  }
+
+  // Guest pages
+  if (to.meta.guestOnly && auth.isAuthenticated) {
+    return { 
+      name: 'Onboarding' 
+    }
+  }
+
+  return true
 })
 
 export default router
