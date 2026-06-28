@@ -1,5 +1,6 @@
 <script setup>
   import { onMounted } from 'vue'
+  import ToastContainer from 'vue3-toastify'
   import { useAuthStore } from '@/stores/auth'
 
   const auth = useAuthStore()
@@ -15,6 +16,7 @@
       <component :is="Component" />
     </transition>
   </router-view>
+  <ToastContainer />
 </template>
 
 <style scoped>

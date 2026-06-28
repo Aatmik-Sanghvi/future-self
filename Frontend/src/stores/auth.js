@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import AuthService from '@/services/authService'
+import { toast } from 'vue3-toastify'
 
 export const useAuthStore = defineStore('auth', () => {
 
@@ -23,9 +24,28 @@ export const useAuthStore = defineStore('auth', () => {
             console.log('Login response:', response.data);
             token.value = response.data.data.token
             localStorage.setItem('token', token.value)
-            // await fetchUser()
+            await fetchUser()
             return response.data
         } catch (err) {
+            error.value = err.response?.data?.message ?? 'Something went wrong.'
+            throw err
+        } finally {
+            loading.value = false
+        }
+    }
+
+    async function register(userData) {
+        loading.value = true
+        error.value = null
+
+        try {
+            const response = await AuthService.register(userData)
+            console.log('Register response:', response.data);
+            token.value = response.data.data.token
+            localStorage.setItem('token', token.value)
+            await fetchUser()
+            return response.data            
+        } catch(err) {
             error.value = err.response?.data?.message ?? 'Something went wrong.'
             throw err
         } finally {
@@ -42,9 +62,9 @@ export const useAuthStore = defineStore('auth', () => {
             clearAuth()
             throw error
         }
-     }
+    }
 
-     async function checkAuth() {
+    async function checkAuth() {
         if(!token.value) {
             return false
         }
@@ -56,13 +76,27 @@ export const useAuthStore = defineStore('auth', () => {
             clearAuth()
             return false
         }
-     }
+    }
 
-     function clearAuth() {
+    async function logout() {
+        const response = await AuthService.logout()
+        clearAuth()
+        return response.data
+    }
+
+    function clearAuth() {
         user.value = null
         token.value = null
         localStorage.removeItem('token')
-     }
+    }
+
+    function toastMessage(message, type = 'success') {
+        toast(message, {
+            "theme": "dark",
+            "type": type,
+            "autoClose": 3000,
+        });
+    }
 
     return {
         user,
@@ -71,8 +105,11 @@ export const useAuthStore = defineStore('auth', () => {
         error,
         isAuthenticated,
         login,
+        register,
         fetchUser,
         checkAuth,
         clearAuth,
+        logout,
+        toastMessage
     }
 })

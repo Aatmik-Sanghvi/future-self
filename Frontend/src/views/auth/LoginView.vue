@@ -10,7 +10,6 @@ const auth = useAuthStore()
 const email = ref('')
 const password = ref('')
 const showPassword = ref(false)
-const errorMessage = ref('')
 const validationErrors = ref({})
 
 const isFormValid = computed(() => {
@@ -31,11 +30,17 @@ const handleLogin = async () => {
       password: password.value,
     })
 
-    router.push({
-      name: response.is_onboarded ? 'Dashboard' : 'Onboarding',
+    await router.push({
+      name: auth.user?.is_onboarded ? 'Dashboard' : 'Onboarding',
     })
+
+    // window.setTimeout(() => {
+      auth.toastMessage(response?.message || 'Signed in successfully', { type: 'success' })
+    // }, 120)
   } catch (err) {
     console.error(err)
+    const message = err?.response?.data?.message || err?.response?.message || 'Something went wrong.'
+    auth.toastMessage(message, { type: 'error' })
   }
 }
 </script>

@@ -52,6 +52,23 @@ nav {
   display: flex; align-items: center; gap: 8px;
 }
 .step-pill strong { color: var(--violet-light); }
+.nav-actions { display: flex; align-items: center; }
+.logout-btn {
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.04);
+  color: rgba(255,255,255,0.78);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.logout-btn:hover {
+  background: rgba(255,255,255,0.08);
+  color: #fff;
+  border-color: rgba(244,114,182,0.35);
+}
 
 /* ── PROGRESS BAR ─────────────────────────────── */
 .progress-wrap {
@@ -241,6 +258,14 @@ input::placeholder, textarea::placeholder { color: rgba(255,255,255,0.18); }
 }
 .btn-skip:hover { color:rgba(255,255,255,.4); }
 .btn-continue:hover:not(:disabled) { transform:translateY(-1px); }
+.back-btn {
+  margin-bottom: 16px;
+  padding: 8px 14px;
+  width: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
 
 /* ── TRAIT CHIPS ─────────────────────────────── */
 .trait-chip {

@@ -1,11 +1,12 @@
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
-import { register } from '@/api/auth'
 import CountryFlag from 'vue-country-flag-next'
 import countryTelephoneData from 'country-telephone-data'
+import { useAuthStore } from '@/stores/auth'
 
 const router = useRouter()
+const auth = useAuthStore()
 
 const name = ref('')
 const email = ref('')
@@ -126,13 +127,11 @@ const isFormValid = computed(() => {
 const handleRegister = async () => {
   if (!isFormValid.value) return
 
-  isLoading.value = true
   validationErrors.value = {}
-  errorMessage.value = ''
 
   try {
     // TODO: Wire up to your auth API
-    const response = await register({
+    const response = await auth.register({
       name: name.value,
       email: email.value,
       country_code: countryCode.value,
@@ -140,7 +139,9 @@ const handleRegister = async () => {
       password: password.value,
     })
     
-    router.push({ path: '/onboarding', query: { source: 'register' } })
+    await router.push({ name: auth.user?.is_onboarded ? 'Dashboard' : 'Onboarding' })
+
+    auth.toastMessage(response?.message || 'Register successful', { type: 'success' })
   } catch (err) {
     if(err.response?.status === 422) {
       // Handle validation errors if needed

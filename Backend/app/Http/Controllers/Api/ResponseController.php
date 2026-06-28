@@ -11,7 +11,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Validator;
-// use Stripe\Stripe;
 use Stripe\StripeClient;
 use Illuminate\Http\Request;
 use Stripe\Webhook;
@@ -60,27 +59,20 @@ class ResponseController extends Controller
 
     public function get_user_data($token = null)
     {
-        // Retrieve only the required fields (signup fields) from the user
-        $user_data = User::where('id', Auth::id())->Details()->first();
+        $userId = Auth::id();
+
+        $user_data = User::where('id', $userId)->Details()->first();
 
         return [
             'id' => $user_data->id,
             'name' => $user_data->name ?? '',
             'username' => $user_data->username ?? '',
-            'email'=>$user_data->email ??'',
+            'email' => $user_data->email ?? '',
             'country_code' => $user_data->country_code ?? '',
             'mobile' => $user_data->mobile ?? '',
             'profile_image' => $user_data->profile_image ?? '',
+            'is_onboarded' => $user_data->is_onboarded ?? false,
             'token' => $token ?? request()->bearerToken() ?? '',
         ];
     }
-
-
-    // public function plans(){
-    //     $response = $this->planService->getPlan();
-    //     $response['kyc_status'] = auth()->user()->kyc_status;
-    //     $response['is_premium'] = auth()->user()->is_premium;
-    //     $response['current_period_end'] = auth()->user()->latestSubscription->current_period_end ?? null;
-    //     return $this->sendResponse(200, __('api.success'), $response);
-    // }
 }

@@ -9,7 +9,9 @@
       <div class="step-pill" v-if="currentStepNumber < 6">
         Setting up your profile &nbsp;·&nbsp; Step <strong>{{ Math.min(currentStepNumber + 1, 5) }}</strong> of 5
       </div>
-      <div style="width: 120px"></div>
+      <div class="nav-actions">
+        <button class="logout-btn" type="button" @click="handleLogout">Log out</button>
+      </div>
     </nav>
 
     <!-- PROGRESS -->
@@ -155,6 +157,7 @@
 
         <!-- STEP 2: FEARS -->
         <div v-show="currentStep === 1" :class="['step', { active: currentStep === 1 }]">
+          <button class="btn btn-ghost back-btn" type="button" @click="goBack()">← Back</button>
           <p class="step-label" style="color: var(--pink)">Step 2 of 5</p>
           <h1 class="step-title">Your Fears</h1>
           <p class="step-sub">Naming them is the first step to overcoming them.</p>
@@ -236,6 +239,7 @@
 
         <!-- STEP 3: TRAITS -->
         <div v-show="currentStep === 2" :class="['step', { active: currentStep === 2 }]">
+          <button class="btn btn-ghost back-btn" type="button" @click="goBack()">← Back</button>
           <p class="step-label" style="color: var(--amber)">Step 3 of 5</p>
           <h1 class="step-title">Desired Traits</h1>
           <p class="step-sub">Who do you want to become? Pick from the presets or add your own.</p>
@@ -291,6 +295,7 @@
 
         <!-- STEP 4: ROLE MODELS -->
         <div v-show="currentStep === 3" :class="['step', { active: currentStep === 3 }]">
+          <button class="btn btn-ghost back-btn" type="button" @click="goBack()">← Back</button>
           <p class="step-label" style="color: var(--blue)">Step 4 of 5</p>
           <h1 class="step-title">Role Models</h1>
           <p class="step-sub">Who inspires you? Your Future Self will channel their mindset.</p>
@@ -345,6 +350,7 @@
 
         <!-- STEP 5: TONE -->
         <div v-show="currentStep === 4" :class="['step', { active: currentStep === 4 }]">
+          <button class="btn btn-ghost back-btn" type="button" @click="goBack()">← Back</button>
           <p class="step-label" style="color: var(--violet-light)">Step 5 of 5</p>
           <h1 class="step-title">How should Future You <span style="color: var(--violet-light)">talk to you?</span></h1>
           <p class="step-sub">Choose the voice that moves you most. You can change this anytime.</p>
@@ -403,6 +409,11 @@
 
 <script setup>
 import { ref, reactive, computed } from 'vue'
+import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
+
+const router = useRouter()
+const auth = useAuthStore()
 
 // State
 const currentStep = ref(0)
@@ -575,6 +586,24 @@ const selectTone = (toneKey) => {
 const goNext = () => {
   if (currentStep.value < 5) {
     currentStep.value++
+  }
+}
+
+const goBack = () => {
+  if (currentStep.value > 0) {
+    currentStep.value--
+  }
+}
+
+const handleLogout = async () => {
+  try {
+    const response = await auth.logout()
+    await router.push({ name: 'Login' })
+
+    auth.toastMessage(response?.message || 'You have been logged out.', { type: 'success' })
+  } catch (err) {
+    console.error(err)
+    auth.toastMessage('Unable to log out right now.', { type: 'error' })
   }
 }
 

@@ -31,6 +31,14 @@ const routes = [
     meta: { title: 'Forgot Password - FutureYou' }
   },
   {
+    path: '/logout',
+    name: 'Logout',
+    meta: { 
+      title: 'Logout - FutureYou',
+      guestOnly: true,
+    }
+  },
+  {
     path: '/onboarding',
     name: 'Onboarding',
     component: () => import('@/views/OnboardingView.vue'),

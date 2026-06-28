@@ -30,8 +30,11 @@ class GuestController extends ResponseController
         ]);
 
         $user = $this->user->create($request->all());
+        Auth::login($user);
 
-        return ResponseHelper::send(200, 'User registered successfully', $this->get_user_data());
+        $token = $user->createToken('api-token')->plainTextToken;
+
+        return ResponseHelper::send(200, 'User registered successfully', $this->get_user_data($token));
     }
 
     public function login(Request $request){
