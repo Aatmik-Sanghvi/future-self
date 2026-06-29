@@ -10,6 +10,18 @@ class AuthService {
         return api.post('/register', userData)
     }
 
+    forgotPassword(email) {
+        return api.post('/forgot-password', email)
+    }
+
+    verifyOtp(data) {
+        return api.post('/verify-otp', data)
+    }
+
+    resetPassword(data) {
+        return api.post('/reset-password', data)
+    }
+
     profile() {
         return api.get('/profile')
     }

@@ -13,6 +13,9 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('V1')->group(function () {
     Route::post('register', [GuestController::class, 'register']);
     Route::post('login',[GuestController::class, 'login']);
+    Route::post('forgot-password', [GuestController::class, 'forgotPassword']);
+    Route::post('verify-otp', [GuestController::class, 'verifyOtp']);
+    Route::post('reset-password', [GuestController::class, 'resetPassword']);
     
     Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('profile', [GeneralController::class, 'profile']);

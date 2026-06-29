@@ -53,6 +53,54 @@ export const useAuthStore = defineStore('auth', () => {
         }
     }
 
+    async function forgotPassword(email) {
+        loading.value = true
+        error.value = null
+
+        try {
+            const response = await AuthService.forgotPassword(email)
+            console.log('Forgot password response:', response.data);
+            return response.data
+        } catch (err) {
+            error.value = err.response?.data?.message ?? 'Something went wrong.'
+            throw err
+        } finally {
+            loading.value = false
+        }
+    }
+
+    async function verifyOtp(data) {
+        loading.value = true
+        error.value = null
+
+        try {
+            const response = await AuthService.verifyOtp(data)
+            console.log('Verify OTP response:', response.data);
+            return response.data
+        } catch (err) {
+            error.value = err.response?.data?.message ?? 'Something went wrong.'
+            throw err
+        } finally {
+            loading.value = false
+        }
+    }
+
+    async function resetPassword(data) {
+        loading.value = true
+        error.value = null
+
+        try {
+            const response = await AuthService.resetPassword(data)
+            console.log('Reset password response:', response.data);
+            return response.data
+        } catch (err) {
+            error.value = err.response?.data?.message ?? 'Something went wrong.'
+            throw err
+        } finally {
+            loading.value = false
+        }
+    }
+
     async function fetchUser() {
         try {
             const response = await AuthService.profile()
@@ -106,6 +154,9 @@ export const useAuthStore = defineStore('auth', () => {
         isAuthenticated,
         login,
         register,
+        forgotPassword,
+        verifyOtp,
+        resetPassword,
         fetchUser,
         checkAuth,
         clearAuth,

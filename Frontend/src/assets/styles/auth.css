@@ -782,3 +782,124 @@ body {
   opacity: 0;
   transform: translateY(-12px);
 }
+
+/* ---------- OTP Verification ---------- */
+.otp-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.otp-group {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  width: 100%;
+}
+
+.otp-input {
+  width: 56px;
+  height: 64px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-input);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-size: 1.5rem;
+  font-weight: 700;
+  text-align: center;
+  outline: none;
+  transition: all var(--transition-fast);
+}
+
+.otp-input:hover {
+  border-color: rgba(139, 92, 246, 0.28);
+  background: var(--bg-input-focus);
+}
+
+.otp-input:focus {
+  border-color: var(--border-input-focus);
+  background: var(--bg-input-focus);
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+  transform: translateY(-2px);
+}
+
+.otp-input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.otp-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  font-size: 0.85rem;
+}
+
+.otp-timer {
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.otp-timer--warning {
+  color: #f59e0b;
+}
+
+.otp-resend {
+  background: none;
+  border: none;
+  color: var(--accent-mid);
+  font-weight: 600;
+  cursor: pointer;
+  transition: color var(--transition-fast);
+  padding: 0;
+}
+
+.otp-resend:hover:not(:disabled) {
+  color: var(--accent-end);
+  text-decoration: underline;
+}
+
+.otp-resend:disabled {
+  color: var(--text-muted);
+  cursor: not-allowed;
+}
+
+.otp-email-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  background: rgba(139, 92, 246, 0.1);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  border-radius: 12px;
+  color: var(--accent-end);
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-top: 8px;
+}
+
+/* ---------- Step Transitions ---------- */
+.step-wrapper {
+  position: relative;
+  overflow: hidden;
+}
+
+.step-enter-active,
+.step-leave-active {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.step-enter-from {
+  opacity: 0;
+  transform: translateX(30px);
+}
+
+.step-leave-to {
+  opacity: 0;
+  transform: translateX(-30px);
+  position: absolute;
+  top: 0;
+  width: 100%;
+}
