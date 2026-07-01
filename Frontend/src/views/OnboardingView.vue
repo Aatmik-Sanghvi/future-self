@@ -96,10 +96,10 @@
               <div>
                 <label class="lbl">Timeframe</label>
                 <div class="tf-row">
-                  <button class="tf-btn" :class="{ short: newGoal.tf === 'short' }" @click="newGoal.tf = 'short'">
+                  <button class="tf-btn" :class="{ short: newGoal.tf === 'short-term' }" @click="newGoal.tf = 'short-term'">
                     ⚡ Short-term
                   </button>
-                  <button class="tf-btn" :class="{ long: newGoal.tf === 'long' }" @click="newGoal.tf = 'long'">
+                  <button class="tf-btn" :class="{ long: newGoal.tf === 'long-term' }" @click="newGoal.tf = 'long-term'">
                     🌠 Long-term
                   </button>
                 </div>
@@ -411,6 +411,7 @@
 import { ref, reactive, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import OnboardingService from '@/services/onboardingService'
 
 const router = useRouter()
 const auth = useAuthStore()
@@ -423,12 +424,13 @@ const customTraitInput = ref('')
 const roleModelInput = ref('')
 const loadingDots = ref('...')
 const completedLoadingSteps = ref(0)
+const saving = ref(false)
 
 const newGoal = reactive({
   title: '',
   desc: '',
   cat: '',
-  tf: 'short',
+  tf: 'short-term',
   prio: 3,
 })
 
@@ -476,28 +478,119 @@ const isStep3 = computed(() => currentStep.value == 3)
 const isStep4 = computed(() => currentStep.value == 4)
 const isStep5 = computed(() => currentStep.value == 5)
 
+// ── Validation helpers ──
+const validateGoal = () => {
+  if (!newGoal.title.trim()) {
+    auth.toastMessage('Goal title is required.', 'error')
+    return false
+  }
+  if (newGoal.title.trim().length > 255) {
+    auth.toastMessage('Goal title must be under 255 characters.', 'error')
+    return false
+  }
+  return true
+}
+
+const validateFear = () => {
+  if (!newFear.text.trim()) {
+    auth.toastMessage('Please describe your fear.', 'error')
+    return false
+  }
+  return true
+}
+
+const validateTraits = () => {
+  if (selectedTraits.value.size === 0) {
+    auth.toastMessage('Select at least one trait.', 'error')
+    return false
+  }
+  return true
+}
+
+const validateRoleModels = () => {
+  if (roleModels.value.length === 0) {
+    auth.toastMessage('Add at least one role model.', 'error')
+    return false
+  }
+  return true
+}
+
+const validateTone = () => {
+  if (!selectedTone.value) {
+    auth.toastMessage('Please choose a tone.', 'error')
+    return false
+  }
+  return true
+}
+
+// ── Extract validation errors from API 422 response ──
+const handleApiError = (err, fallbackMsg) => {
+  if (err.response?.status === 422 && err.response?.data?.errors) {
+    const firstField = Object.keys(err.response.data.errors)[0]
+    auth.toastMessage(err.response.data.errors[firstField][0], 'error')
+  } else {
+    auth.toastMessage(err.response?.data?.message || fallbackMsg, 'error')
+  }
+}
+
 // Methods - Goals
-const addGoal = () => {
-  if (!newGoal.title.trim()) return
-  goals.value.push({
-    id: Date.now(),
-    title: newGoal.title,
-    desc: newGoal.desc,
-    cat: newGoal.cat,
-    tf: newGoal.tf,
-    prio: newGoal.prio,
-  })
-  console.log(goals.value)
-  newGoal.title = ''
-  newGoal.desc = ''
-  newGoal.cat = ''
-  newGoal.tf = 'short'
-  newGoal.prio = 3
-  if (goals.value.length === 1) {
-    showGoalPanel.value = false
+const addGoal = async () => {
+  if (!validateGoal()) return
+  if (saving.value) return
+  saving.value = true
+
+  const goalData = {
+    title: newGoal.title.trim(),
+    description: newGoal.desc.trim(),
+    category: newGoal.cat || goalCategories[0],
+    timeframe: newGoal.tf,
+    priority: String(newGoal.prio),
   }
 
-  
+  try {
+    const response = await OnboardingService.saveGoals(goalData)
+    const savedGoal = response.data?.data
+
+    goals.value.push({
+      id: savedGoal?.id || Date.now(),
+      title: newGoal.title,
+      desc: newGoal.desc,
+      cat: newGoal.cat,
+      tf: newGoal.tf,
+      prio: newGoal.prio,
+    })
+    console.log(goals.value)
+
+    newGoal.title = ''
+    newGoal.desc = ''
+    newGoal.cat = ''
+    newGoal.tf = 'short'
+    newGoal.prio = 3
+
+    if (goals.value.length === 1) {
+      showGoalPanel.value = false
+    }
+
+    auth.toastMessage('Goal saved!', {type:'success'})
+  } catch (err) {
+    console.error(err)
+    handleApiError(err, 'Failed to save goal. Please try again.')
+  } finally {
+    saving.value = false
+  }
+}
+
+const getDetail = async (type) => {
+  try{
+    const data = {
+      type: type,
+    }
+    if(type != 'goals') data.goal_id = goals.value[0]?.id
+    const response = await OnboardingService.getDetail(data)
+    return response.data?.data
+  } catch(err) {
+    console.error(err)
+  }
 }
 
 const removeGoal = (id) => {
@@ -507,19 +600,43 @@ const removeGoal = (id) => {
 }
 
 // Methods - Fears
-const addFear = () => {
-  if (!newFear.text.trim()) return
-  fears.value.push({
-    id: Date.now(),
-    text: newFear.text,
-    cat: newFear.cat,
-    int: newFear.int,
-  })
-  newFear.text = ''
-  newFear.cat = ''
-  newFear.int = 3
-  if (fears.value.length === 1) {
-    showFearPanel.value = false
+const addFear = async () => {
+  if (!validateFear()) return
+  if (saving.value) return
+  saving.value = true
+
+  const fearData = {
+    goal_id: goals.value[0]?.id,
+    fear: newFear.text.trim(),
+    category: newFear.cat || fearCategories[0],
+    priority: String(newFear.int)  
+  }
+
+  try {
+    const response = await OnboardingService.saveFears(fearData)
+    const savedFear = response.data?.data
+
+    fears.value.push({
+      id: savedFear?.id || Date.now(),
+      text: newFear.text,
+      cat: newFear.cat,
+      int: newFear.int,
+    })
+
+    newFear.text = ''
+    newFear.cat = ''
+    newFear.int = 3
+
+    if (fears.value.length === 1) {
+      showFearPanel.value = false
+    }
+
+    auth.toastMessage('Fear saved!', {type:'success'})
+  } catch (err) {
+    console.error(err)
+    handleApiError(err, 'Failed to save fear. Please try again.')
+  } finally {
+    saving.value = false
   }
 }
 
@@ -556,6 +673,28 @@ const removeCustomTrait = (trait) => {
   if (idx > -1) customTraits.value.splice(idx, 1)
 }
 
+// ── Save traits via API ──
+const saveTraits = async () => {
+  if (!validateTraits()) return false
+  if (saving.value) return false
+  saving.value = true
+
+  try {
+    await OnboardingService.saveDesiredTraits({
+      goal_id: goals.value[0]?.id,
+      traits: Array.from(selectedTraits.value),
+    })
+    auth.toastMessage('Traits saved!', {type:'success'})
+    return true
+  } catch (err) {
+    console.error(err)
+    handleApiError(err, 'Failed to save traits. Please try again.')
+    return false
+  } finally {
+    saving.value = false
+  }
+}
+
 // Methods - Role Models
 const addRoleModel = () => {
   const v = roleModelInput.value.trim()
@@ -578,12 +717,66 @@ const removeRoleModel = (role) => {
   if (idx > -1) roleModels.value.splice(idx, 1)
 }
 
+// ── Save role models via API ──
+const saveRoleModels = async () => {
+  if (!validateRoleModels()) return false
+  if (saving.value) return false
+  saving.value = true
+
+  try {
+    await OnboardingService.saveRoleModels({
+      names: [...roleModels.value],
+    })
+    auth.toastMessage('Role models saved!', 'success')
+    return true
+  } catch (err) {
+    console.error(err)
+    handleApiError(err, 'Failed to save role models. Please try again.')
+    return false
+  } finally {
+    saving.value = false
+  }
+}
+
 // Methods - Tone & Navigation
 const selectTone = (toneKey) => {
   selectedTone.value = toneKey
 }
 
-const goNext = () => {
+const goNext = async () => {
+  if (saving.value) return
+
+  // Step 0 → 1 : Goals (already saved individually, just validate at least one exists)
+  if (currentStep.value === 0) {
+    if (!goals.value.length) {
+      auth.toastMessage('Add at least one goal to continue.', 'error')
+      return
+    }
+  }
+
+  // Step 1 → 2 : Fears (already saved individually, just validate at least one exists)
+  if (currentStep.value === 1) {
+    if (!fears.value.length) {
+      auth.toastMessage('Add at least one fear to continue.', 'error')
+      return
+    }
+  }
+
+  // Step 2 → 3 : Traits (save in bulk on Continue)
+  if (currentStep.value === 2) {
+    const ok = await saveTraits()
+    if (!ok) return
+  }
+
+  // Step 3 → 4 : Role Models (save in bulk on Continue)
+  if (currentStep.value === 3) {
+    if (roleModels.value.length) {
+      const ok = await saveRoleModels()
+      if (!ok) return
+    }
+    // If no role models, we allow skip (there's a Skip button)
+  }
+
   if (currentStep.value < 5) {
     currentStep.value++
   }
@@ -608,6 +801,8 @@ const handleLogout = async () => {
 }
 
 const startLoading = () => {
+  if (!validateTone()) return
+
   currentStep.value = 5
   let tick = 0
   const dotsCyc = ['', '.', '..', '...']

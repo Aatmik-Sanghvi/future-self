@@ -11,6 +11,10 @@ class DesiredTraits extends Model
         'trait',
     ];
 
+    public function scopeDetails($query){
+        return $query->select(['id', 'goal_id', 'trait']);
+    }
+
     public function goal()
     {
         return $this->belongsTo(Goal::class);
@@ -25,5 +29,9 @@ class DesiredTraits extends Model
             ]);
         }
         return $traits;
+    }
+
+    public function getDesiredTraits($goal_id){
+        return $this->where('goal_id', $goal_id)->Details()->get();
     }
 }

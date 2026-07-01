@@ -102,4 +102,36 @@ class OnboardingController extends Controller
 
         return ResponseHelper::send(412, 'Failed to save your role models. Please try again later.');
     }
+    
+    public function getDetail(Request $request){
+        $request->validate([
+            'type' => 'required',
+            'goal_id' => 'required_if:type,fears,struggles,desired-traits,role-models'
+        ]);
+    
+        $data = null;
+        switch($request->type) {
+            case 'goals':
+                $data = $this->goals->getGoals();
+                break;
+            case 'fears':
+                $data = $this->fears->getFears($request->goal_id);
+                break;
+            case 'struggles':
+                $data = $this->struggles->getStruggles($request->goal_id);
+                break;
+            case 'desired-traits':
+                $data = $this->desiredTraits->getDesiredTraits($request->goal_id);
+                break;
+            case 'role-models':
+                $data = $this->roleModels->getRoleModels($request->goal_id);
+                break;
+        }
+        
+        if($data){
+            return ResponseHelper::send(200, 'Your details had been retrieved successfully.', $data);
+        }
+        
+        return ResponseHelper::send(412, 'Failed to retrieve your details. Please try again later.');
+    }
 }

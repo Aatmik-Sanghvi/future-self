@@ -11,6 +11,10 @@ class RoleModel extends Model
         'names',
     ];
 
+    public function scopeDetails($query){
+        return $query->select(['id', 'goal_id', 'names']);
+    }
+
     public function goal()
     {
         return $this->belongsTo(Goal::class);
@@ -25,5 +29,9 @@ class RoleModel extends Model
             ]);
         }
         return $roleModels;
+    }
+
+    public function getRoleModels($goal_id){
+        return $this->where('goal_id', $goal_id)->Details()->get();
     }
 }

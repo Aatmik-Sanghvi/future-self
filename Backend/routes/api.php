@@ -29,6 +29,8 @@ Route::prefix('V1')->group(function () {
             Route::post('desired-traits', [OnboardingController::class, 'desiredTraits']);
             Route::post('role-models', [OnboardingController::class, 'roleModels']);
 
+            Route::post('get-detail', [OnboardingController::class, 'getDetail']);
+
             Route::post('chat', [AIController::class, 'test']);
 
             Route::post('/coach', function (Request $request) {
