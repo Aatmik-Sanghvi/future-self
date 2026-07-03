@@ -34,4 +34,8 @@ class RoleModel extends Model
     public function getRoleModels($goal_id){
         return $this->where('goal_id', $goal_id)->Details()->get();
     }
+
+    public function removeDetail($id){
+        return $this->find($id)->delete();
+    }
 }

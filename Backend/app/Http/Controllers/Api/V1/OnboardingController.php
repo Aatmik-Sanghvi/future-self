@@ -45,6 +45,32 @@ class OnboardingController extends Controller
         return ResponseHelper::send(412, 'Failed to save your goals. Please try again later.');
     }
 
+    public function removeDetail(Request $request){
+        $removeDetail = '';
+        switch($request->type) {
+            case 'goals':
+                $removeDetail = $this->goals->removeDetail($request->id);
+                break;
+            case 'fears':
+                $removeDetail = $this->fears->removeDetail($request->id);
+                break;
+            case 'struggles':
+                $removeDetail = $this->struggles->removeDetail($request->id);
+                break;
+            case 'desired-traits':
+                $removeDetail = $this->desiredTraits->removeDetail($request->id);
+                break;
+            case 'role-models':
+                $removeDetail = $this->roleModels->removeDetail($request->id);
+                break;
+        }
+        if($removeDetail){
+            return ResponseHelper::send(200, ucfirst($request->type).' had been removed successfully.');
+        }
+
+        return ResponseHelper::send(412, 'Failed to remove your '.ucfirst($request->type).'. Please try again later.');
+    }
+
     public function fears(Request $request){
         $request->validate([
             'fear' => 'required|string',
@@ -128,7 +154,7 @@ class OnboardingController extends Controller
                 break;
         }
         
-        if($data){
+        if($data && (is_countable($data) ? count($data) > 0 : true)){
             return ResponseHelper::send(200, 'Your details had been retrieved successfully.', $data);
         }
         

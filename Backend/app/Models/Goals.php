@@ -33,4 +33,8 @@ class Goals extends Model
     public function getGoals(){
         return $this->where('user_id', auth()->id())->Details()->first();
     }
+
+    public function removeDetail($id){
+        return $this->find($id)->delete();
+    }
 }

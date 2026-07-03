@@ -34,4 +34,8 @@ class DesiredTraits extends Model
     public function getDesiredTraits($goal_id){
         return $this->where('goal_id', $goal_id)->Details()->get();
     }
+
+    public function removeDetail($id){
+        return $this->find($id)->delete();
+    }
 }

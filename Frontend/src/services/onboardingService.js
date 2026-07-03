@@ -10,6 +10,10 @@ class OnboardingService {
         return api.post('/onboarding/goals', goals)
     }
 
+    removeDetail(data) {
+        return api.post('/onboarding/remove-detail', data)
+    }
+
     saveFears(fear) {
         return api.post('/onboarding/fears', fear)
     }

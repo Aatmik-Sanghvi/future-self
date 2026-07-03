@@ -45,15 +45,17 @@
         <div v-show="currentStep === 0" :class="['step', { active: currentStep === 0 }]">
           <p class="step-label" style="color: var(--violet-light)">Step 1 of 5</p>
           <h1 class="step-title">Your Goals</h1>
-          <p class="step-sub">What are you working towards? Add as many as you like — big or small.</p>
+          <p class="step-sub">What are you working towards?
+             <!-- Add as many as you like — big or small. -->
+            </p>
 
           <div class="saved-list">
             <div v-for="goal in goals" :key="goal.id" class="saved-goal">
               <div class="saved-body">
                 <div class="saved-row">
                   <span class="saved-ttl">{{ goal.title }}</span>
-                  <span class="badge" :class="goal.tf === 'short' ? 'badge-short' : 'badge-long'">
-                    {{ goal.tf === 'short' ? 'short-term' : 'long-term' }}
+                  <span class="badge" :class="goal.tf === 'short-term' ? 'badge-short' : 'badge-long'">
+                    {{ goal.tf === 'short-term' ? 'short-term' : 'long-term' }}
                   </span>
                   <span v-if="goal.cat" class="badge" style="background: rgba(167, 139, 250, 0.12); color: #a78bfa">
                     {{ goal.cat }}
@@ -68,7 +70,7 @@
                   </div>
                 </div>
               </div>
-              <button class="btn-rm" @click="removeGoal(goal.id)">×</button>
+              <button class="btn-rm" @click="removeDetail(goal.id, 'goals')">×</button>
             </div>
           </div>
 
@@ -78,7 +80,7 @@
             <div class="field">
               <!-- <div> -->
                 <label class="lbl">Title <span>*</span></label>
-                <input v-model="newGoal.title" type="text" placeholder="e.g. Build my own company" />
+                <input v-model="newGoal.title" type="text" placeholder="e.g. Build my own company"/>
               <!-- </div> -->
               <!-- <div>
                 <label class="lbl">Category</label>
@@ -177,7 +179,7 @@
                   <span style="font-size: 12px; color: #f472b6">{{ fear.int }}/5</span>
                 </div>
               </div>
-              <button class="btn-rm" @click="removeFear(fear.id)">×</button>
+              <button class="btn-rm" @click="removeDetail(fear.id, 'fears')">×</button>
             </div>
           </div>
 
@@ -276,7 +278,7 @@
                 class="custom-tag"
               >
                 {{ trait }}
-                <button @click="removeCustomTrait(trait)">×</button>
+                <button @click="removeDetail(trait.id, 'customTraits')">×</button>
               </span>
             </div>
           </div>
@@ -331,7 +333,7 @@
               <div v-for="(role, i) in roleModels" :key="i" class="role-row">
                 <div class="role-num">{{ i + 1 }}</div>
                 <span class="role-name">{{ role }}</span>
-                <button class="btn-rm" @click="removeRoleModel(role)">×</button>
+                <button class="btn-rm" @click="removeDetail(role.id, 'roleModels')">×</button>
               </div>
             </div>
           </div>
@@ -408,7 +410,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import OnboardingService from '@/services/onboardingService'
@@ -533,6 +535,21 @@ const handleApiError = (err, fallbackMsg) => {
   }
 }
 
+const getDetail = async (type) => {
+  try{
+    const data = {
+      type: type,
+    }
+    
+    if(type != 'goals') data.goal_id = goals.value[0]?.id
+    
+    const response = await OnboardingService.getDetail(data)
+    return response.data?.data
+  } catch(err) {
+    console.error(err)
+  }
+}
+
 // Methods - Goals
 const addGoal = async () => {
   if (!validateGoal()) return
@@ -580,23 +597,31 @@ const addGoal = async () => {
   }
 }
 
-const getDetail = async (type) => {
-  try{
-    const data = {
-      type: type,
-    }
-    if(type != 'goals') data.goal_id = goals.value[0]?.id
-    const response = await OnboardingService.getDetail(data)
-    return response.data?.data
-  } catch(err) {
-    console.error(err)
-  }
-}
+const removeDetail = async (id, type) => {
+  try {
+    await OnboardingService.removeDetail({ id, type })
 
-const removeGoal = (id) => {
-  const idx = goals.value.findIndex(g => g.id === id)
-  if (idx > -1) goals.value.splice(idx, 1)
-  if (!goals.value.length) showGoalPanel.value = true
+    auth.toastMessage('Removed successfully!', { type: 'success' })
+
+    const list = type === 'goals' ? goals : fears
+
+    const idx = list.value.findIndex(item => item.id === id)
+
+    if (idx > -1) {
+      list.value.splice(idx, 1)
+    }
+
+    if (type === 'goals' && !list.value.length) {
+      showGoalPanel.value = true
+    }
+
+    if (type === 'fears' && !list.value.length) {
+      showFearPanel.value = true
+    }
+  } catch (err) {
+    console.error(err)
+    handleApiError(err, 'Failed to remove. Please try again.')
+  }
 }
 
 // Methods - Fears
@@ -640,11 +665,11 @@ const addFear = async () => {
   }
 }
 
-const removeFear = (id) => {
-  const idx = fears.value.findIndex(f => f.id === id)
-  if (idx > -1) fears.value.splice(idx, 1)
-  if (!fears.value.length) showFearPanel.value = true
-}
+// const removeFear = (id) => {
+//   const idx = fears.value.findIndex(f => f.id === id)
+//   if (idx > -1) fears.value.splice(idx, 1)
+//   if (!fears.value.length) showFearPanel.value = true
+// }
 
 const updateIntensityLabel = () => {
   // This function is called when intensity is updated
@@ -667,11 +692,11 @@ const addCustomTrait = () => {
   customTraitInput.value = ''
 }
 
-const removeCustomTrait = (trait) => {
-  selectedTraits.value.delete(trait)
-  const idx = customTraits.value.indexOf(trait)
-  if (idx > -1) customTraits.value.splice(idx, 1)
-}
+// const removeCustomTrait = (trait) => {
+//   selectedTraits.value.delete(trait)
+//   const idx = customTraits.value.indexOf(trait)
+//   if (idx > -1) customTraits.value.splice(idx, 1)
+// }
 
 // ── Save traits via API ──
 const saveTraits = async () => {
@@ -712,10 +737,10 @@ const addRoleModelFromSugg = (sugg) => {
   }
 }
 
-const removeRoleModel = (role) => {
-  const idx = roleModels.value.indexOf(role)
-  if (idx > -1) roleModels.value.splice(idx, 1)
-}
+// const removeRoleModel = (role) => {
+//   const idx = roleModels.value.indexOf(role)
+//   if (idx > -1) roleModels.value.splice(idx, 1)
+// }
 
 // ── Save role models via API ──
 const saveRoleModels = async () => {
@@ -814,9 +839,74 @@ const startLoading = () => {
   setTimeout(() => clearInterval(interval), 5000)
 }
 
+// ── Load existing data on mount ──
+const loadExistingData = async () => {
+  try {
+    // 1. Fetch goals
+    const goalsData = await getDetail('goals')
+    
+    if (goalsData) {
+      console.log(goalsData);
+      
+      goals.value.push({
+        id: goalsData.id,
+        title: goalsData.title,
+        desc: goalsData.description || '',
+        cat: goalsData.category || '',
+        tf: goalsData.timeframe || 'short-term',
+        prio: Number(goalsData.priority) || 3,
+      })
+      showGoalPanel.value = false
+    }else{
+      showGoalPanel.value = true
+    }
+
+      // 2. Fetch fears (needs goal_id)
+      const fearsData = await getDetail('fears')
+      
+      if (fearsData) {
+        fears.value.push({
+          id: fearsData.id,
+          text: fearsData.fear,
+          cat: fearsData.category || '',
+          int: Number(fearsData.priority) || 3,
+        })
+        showFearPanel.value = false
+      } else {
+        showFearPanel.value = true
+      }
+
+      // 3. Fetch desired traits
+      const traitsData = await getDetail('desired-traits')
+      if (traitsData && traitsData.length) {
+        traitsData.forEach(t => {
+          const traitName = t.trait
+          selectedTraits.value.add(traitName)
+          // If it's not a preset trait, add it as custom
+          if (!traitOptions.includes(traitName)) {
+            customTraits.value.push(traitName)
+          }
+        })
+      }else{
+        showTraitPanel.value = true
+      }
+
+      // 4. Fetch role models
+      const roleModelsData = await getDetail('role-models')
+      if (roleModelsData && roleModelsData.length) {
+        roleModels.value = roleModelsData.map(r => r.names)
+      }else{
+        showRolePanel.value = true
+      }
+  } catch (err) {
+    console.error('Failed to load existing onboarding data:', err)
+  }
+}
+
 // Initialize
-showGoalPanel.value = true
-showFearPanel.value = true
+onMounted(() => {
+  loadExistingData()
+})
 </script>
 
 <style scoped>

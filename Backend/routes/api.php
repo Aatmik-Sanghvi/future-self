@@ -24,12 +24,14 @@ Route::prefix('V1')->group(function () {
         // Onboarding
         Route::prefix('onboarding')->group(function () {
             Route::post('goals', [OnboardingController::class, 'goals']);
+            
             Route::post('fears', [OnboardingController::class, 'fears']);
             Route::post('struggle', [OnboardingController::class, 'struggles']);
             Route::post('desired-traits', [OnboardingController::class, 'desiredTraits']);
             Route::post('role-models', [OnboardingController::class, 'roleModels']);
 
             Route::post('get-detail', [OnboardingController::class, 'getDetail']);
+            Route::post('remove-detail', [OnboardingController::class, 'removeDetail']);
 
             Route::post('chat', [AIController::class, 'test']);
 

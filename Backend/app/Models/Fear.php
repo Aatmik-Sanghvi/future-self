@@ -27,6 +27,11 @@ class Fear extends Model
     }
 
     public function getFears($goal_id){
-        return $this->where('goal_id', $goal_id)->Details()->first();
+        $response = $this->where('goal_id', $goal_id)->Details()->first();
+        return $response;
+    }
+
+    public function removeDetail($id){
+        return $this->find($id)->delete();
     }
 }
