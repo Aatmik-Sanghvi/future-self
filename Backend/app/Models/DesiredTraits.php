@@ -22,6 +22,7 @@ class DesiredTraits extends Model
 
     public function store($data){
         $traits = [];
+        self::where('goal_id', $data['goal_id'])->delete();
         foreach($data['traits'] as $trait){
             $traits[] = self::create([
                 'goal_id' => $data['goal_id'],

@@ -9,6 +9,8 @@ use App\Models\Fear;
 use App\Models\Struggles;
 use App\Models\DesiredTraits;
 use App\Models\RoleModel;
+use App\Models\CommunicationTone;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class OnboardingController extends Controller
@@ -18,6 +20,8 @@ class OnboardingController extends Controller
     protected $struggles;
     protected $desiredTraits;
     protected $roleModels;
+    protected $communicationTone;
+    protected $user;
 
     public function __construct()
     {
@@ -26,6 +30,8 @@ class OnboardingController extends Controller
         $this->struggles = new Struggles();
         $this->desiredTraits = new DesiredTraits();
         $this->roleModels = new RoleModel();
+        $this->communicationTone = new CommunicationTone();
+        $this->user = new User();
     }
 
     public function goals(Request $request){
@@ -62,6 +68,9 @@ class OnboardingController extends Controller
                 break;
             case 'role-models':
                 $removeDetail = $this->roleModels->removeDetail($request->id);
+                break;
+            case 'tone':
+                $removeDetail = $this->communicationTone->removeDetail($request->id);
                 break;
         }
         if($removeDetail){
@@ -128,11 +137,35 @@ class OnboardingController extends Controller
 
         return ResponseHelper::send(412, 'Failed to save your role models. Please try again later.');
     }
+
+    public function saveTone(Request $request){
+        $request->validate([
+            'tone' => 'required|string|in:supportive,strict,motivational,friendly',
+        ]);
+
+        $tone = $this->communicationTone->store($request->except('_token'));
+        if($tone){
+            return ResponseHelper::send(200, 'Your communication tone has been saved successfully.', $tone);
+        }
+
+        return ResponseHelper::send(412, 'Failed to save your communication tone. Please try again later.');
+    }
+
+    public function updateOnboarded(Request $request){
+        $updateStatus = $this->user->where('id',auth()->id())->update([
+            'is_onboarded' => 1
+        ]);
+        if($updateStatus){
+            return ResponseHelper::send(200, 'You had been onboarded successfully.');
+        }
+
+        return ResponseHelper::send(412, 'Failed to onboard you. Please try again later.');
+    }
     
     public function getDetail(Request $request){
         $request->validate([
             'type' => 'required',
-            'goal_id' => 'required_if:type,fears,struggles,desired-traits,role-models'
+            'goal_id' => 'required_if:type,fears,struggles,desired-traits,role-models,tone'
         ]);
     
         $data = null;
@@ -151,6 +184,9 @@ class OnboardingController extends Controller
                 break;
             case 'role-models':
                 $data = $this->roleModels->getRoleModels($request->goal_id);
+                break;
+            case 'tone':
+                $data = $this->communicationTone->getTone($request->goal_id);
                 break;
         }
         

@@ -21,14 +21,28 @@ class RoleModel extends Model
     }
 
     public function store($data){
-        $roleModels = [];
-        foreach($data['names'] as $name){
-            $roleModels[] = self::create([
+        $existingNames = self::where('goal_id', $data['goal_id'])
+            ->pluck('names')
+            ->toArray();
+
+        $newNames = array_diff($data['names'], $existingNames);
+
+        $records = [];
+
+        foreach ($newNames as $name) {
+            $records[] = [
                 'goal_id' => $data['goal_id'],
-                'names' => $name
-            ]);
+                'names' => $name,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
         }
-        return $roleModels;
+
+        if (!empty($records)) {
+            self::insert($records);
+        }
+
+        return $records;
     }
 
     public function getRoleModels($goal_id){

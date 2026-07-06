@@ -29,9 +29,9 @@ const handleLogin = async () => {
       email: email.value,
       password: password.value,
     })
-
+    
     await router.push({
-      name: auth.user?.is_onboarded ? 'Dashboard' : 'Onboarding',
+      name: response.data?.is_onboarded ? 'Dashboard' : 'Onboarding',
     })
 
     // window.setTimeout(() => {

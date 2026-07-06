@@ -15,6 +15,8 @@ export const useAuthStore = defineStore('auth', () => {
 
     const isAuthenticated = computed(() => !!token.value)
 
+    const isOnboarded = computed(() => user.is_onboarded)
+
     async function login(credentials) {
         loading.value = true
         error.value = null
@@ -152,6 +154,7 @@ export const useAuthStore = defineStore('auth', () => {
         loading,
         error,
         isAuthenticated,
+        isOnboarded,
         login,
         register,
         forgotPassword,

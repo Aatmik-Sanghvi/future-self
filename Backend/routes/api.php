@@ -29,6 +29,8 @@ Route::prefix('V1')->group(function () {
             Route::post('struggle', [OnboardingController::class, 'struggles']);
             Route::post('desired-traits', [OnboardingController::class, 'desiredTraits']);
             Route::post('role-models', [OnboardingController::class, 'roleModels']);
+            Route::post('tone', [OnboardingController::class, 'saveTone']);
+            Route::get('onboarded', [OnboardingController::class, 'updateOnboarded']);
 
             Route::post('get-detail', [OnboardingController::class, 'getDetail']);
             Route::post('remove-detail', [OnboardingController::class, 'removeDetail']);

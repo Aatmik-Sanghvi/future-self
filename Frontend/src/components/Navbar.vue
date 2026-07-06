@@ -1,4 +1,7 @@
 <script setup>
+import { useAuthStore } from '@/stores/auth';
+
+const auth = useAuthStore()
 </script>
 
 <template>
@@ -13,9 +16,12 @@
       <a href="#testimonials">Testimonials</a>
       <a href="#pricing">Pricing</a>
     </div>
-    <div class="nav-actions">
+    <div class="nav-actions" v-if="!auth.isAuthenticated">
       <router-link to="/login" class="btn-secondary">Login</router-link>
       <router-link to="/register" class="btn-primary">Start Free</router-link>
+    </div>
+    <div class="nav-actions" v-else>
+      <button @click="auth.logout()" class="logout-btn" type="button">Logout</button>
     </div>
   </nav>
 </template>

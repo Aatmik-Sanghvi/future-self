@@ -317,7 +317,7 @@
             <p class="sugg-label">Suggestions — click to add</p>
             <div class="chip-group">
               <button
-                v-for="sugg in roleModelSuggestions.filter(s => !roleModels.includes(s))"
+                v-for="sugg in roleModelSuggestions.filter(s => !roleModels.some(r => r.name === s))"
                 :key="sugg"
                 class="sugg-chip chip"
                 @click="addRoleModelFromSugg(sugg)"
@@ -330,10 +330,11 @@
           <div v-if="roleModels.length" style="margin-bottom: 24px">
             <p class="sugg-label">Your inspirations</p>
             <div class="saved-list">
-              <div v-for="(role, i) in roleModels" :key="i" class="role-row">
+              <div v-for="(role, i) in roleModels" :key="role.id" class="role-row">
                 <div class="role-num">{{ i + 1 }}</div>
-                <span class="role-name">{{ role }}</span>
-                <button class="btn-rm" @click="removeDetail(role.id, 'roleModels')">×</button>
+                <span class="role-name">{{ role.name }}</span>
+                <button class="btn-rm" v-if="id" @click="removeDetail(role.id, 'role-models')">×</button>
+                <button class="btn-rm" v-else @click="removeRole(role.name)">×</button>
               </div>
             </div>
           </div>
@@ -597,26 +598,34 @@ const addGoal = async () => {
   }
 }
 
+const removeRole = (name) => {
+  const idx = roleModels.value.findIndex(item => item.name === name)
+  if (idx > -1) roleModels.value.splice(idx, 1)
+}
+
 const removeDetail = async (id, type) => {
   try {
     await OnboardingService.removeDetail({ id, type })
 
     auth.toastMessage('Removed successfully!', { type: 'success' })
 
-    const list = type === 'goals' ? goals : fears
-
-    const idx = list.value.findIndex(item => item.id === id)
-
-    if (idx > -1) {
-      list.value.splice(idx, 1)
-    }
-
-    if (type === 'goals' && !list.value.length) {
-      showGoalPanel.value = true
-    }
-
-    if (type === 'fears' && !list.value.length) {
-      showFearPanel.value = true
+    if (type === 'goals') {
+      const idx = goals.value.findIndex(item => item.id === id)
+      if (idx > -1) goals.value.splice(idx, 1)
+      if (!goals.value.length) showGoalPanel.value = true
+    } else if (type === 'fears') {
+      const idx = fears.value.findIndex(item => item.id === id)
+      if (idx > -1) fears.value.splice(idx, 1)
+      if (!fears.value.length) showFearPanel.value = true
+    } else if (type === 'role-models') {
+      const idx = roleModels.value.findIndex(item => item.id === id)
+      if (idx > -1) roleModels.value.splice(idx, 1)
+    } else if (type === 'desired-traits') {
+      const idx = customTraits.value.findIndex(item => item.id === id)
+      if (idx > -1) {
+        selectedTraits.value.delete(customTraits.value[idx].name)
+        customTraits.value.splice(idx, 1)
+      }
     }
   } catch (err) {
     console.error(err)
@@ -723,17 +732,17 @@ const saveTraits = async () => {
 // Methods - Role Models
 const addRoleModel = () => {
   const v = roleModelInput.value.trim()
-  if (!v || roleModels.value.includes(v)) {
+  if (!v || roleModels.value.some(r => r.name === v)) {
     roleModelInput.value = ''
     return
   }
-  roleModels.value.push(v)
+  roleModels.value.push({ id: null, name: v })
   roleModelInput.value = ''
 }
 
 const addRoleModelFromSugg = (sugg) => {
-  if (!roleModels.value.includes(sugg)) {
-    roleModels.value.push(sugg)
+  if (!roleModels.value.some(r => r.name === sugg)) {
+    roleModels.value.push({ id: null, name: sugg })
   }
 }
 
@@ -750,9 +759,17 @@ const saveRoleModels = async () => {
 
   try {
     await OnboardingService.saveRoleModels({
-      names: [...roleModels.value],
+      goal_id: goals.value[0]?.id,
+      names: roleModels.value.map(r => r.name),
     })
-    auth.toastMessage('Role models saved!', 'success')
+
+    // Re-fetch to get real database IDs for newly added items
+    const refreshed = await getDetail('role-models')
+    if (refreshed && refreshed.length) {
+      roleModels.value = refreshed.map(r => ({ id: r.id, name: r.names }))
+    }
+
+    auth.toastMessage('Role models saved!', {type:'success'})
     return true
   } catch (err) {
     console.error(err)
@@ -766,6 +783,20 @@ const saveRoleModels = async () => {
 // Methods - Tone & Navigation
 const selectTone = (toneKey) => {
   selectedTone.value = toneKey
+}
+
+const updateOnboarded = async () => {
+  try {
+    await OnboardingService.updateOnboarded()
+    await router.push({
+      name: auth.user?.is_onboarded ? 'Dashboard' : 'Onboarding',
+    })
+    auth.toastMessage('Onboarded successfully!', {type:'success'})
+  } catch (err) {
+    console.error(err)
+    handleApiError(err, 'Failed to onboard. Please try again.')
+    return false
+  }
 }
 
 const goNext = async () => {
@@ -795,11 +826,12 @@ const goNext = async () => {
 
   // Step 3 → 4 : Role Models (save in bulk on Continue)
   if (currentStep.value === 3) {
-    if (roleModels.value.length) {
+    const hasNewRoleModels = roleModels.value.some(r => r.id === null)
+    if (hasNewRoleModels) {
       const ok = await saveRoleModels()
       if (!ok) return
     }
-    // If no role models, we allow skip (there's a Skip button)
+    // If no role models or no new ones, just move forward
   }
 
   if (currentStep.value < 5) {
@@ -825,8 +857,25 @@ const handleLogout = async () => {
   }
 }
 
-const startLoading = () => {
+const startLoading = async () => {
   if (!validateTone()) return
+  if (saving.value) return
+  saving.value = true
+
+  try {
+    await OnboardingService.saveTone({
+      goal_id: goals.value[0]?.id,
+      tone: selectedTone.value,
+    })
+    auth.toastMessage('Tone saved!', { type: 'success' })
+  } catch (err) {
+    console.error(err)
+    handleApiError(err, 'Failed to save tone. Please try again.')
+    saving.value = false
+    return
+  } finally {
+    saving.value = false
+  }
 
   currentStep.value = 5
   let tick = 0
@@ -836,7 +885,10 @@ const startLoading = () => {
     loadingDots.value = dotsCyc[tick % 4]
     completedLoadingSteps.value = Math.min(tick, 6)
   }, 500)
-  setTimeout(() => clearInterval(interval), 5000)
+  setTimeout(() => {
+    clearInterval(interval)
+    updateOnboarded()
+  }, 5000)
 }
 
 // ── Load existing data on mount ──
@@ -894,9 +946,15 @@ const loadExistingData = async () => {
       // 4. Fetch role models
       const roleModelsData = await getDetail('role-models')
       if (roleModelsData && roleModelsData.length) {
-        roleModels.value = roleModelsData.map(r => r.names)
+        roleModels.value = roleModelsData.map(r => ({ id: r.id, name: r.names }))
       }else{
         showRolePanel.value = true
+      }
+
+      // 5. Fetch communication tone
+      const toneData = await getDetail('tone')
+      if (toneData) {
+        selectedTone.value = toneData.tone
       }
   } catch (err) {
     console.error('Failed to load existing onboarding data:', err)

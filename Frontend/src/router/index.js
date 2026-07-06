@@ -53,6 +53,7 @@ const routes = [
     component: () => import('@/views/DashboardView.vue'),
     meta: { 
       title: 'Future You - Home' ,
+      redirectTo: true,
     }
   }
 ]
@@ -83,6 +84,13 @@ router.beforeEach(async (to) => {
   if (to.meta.guestOnly && auth.isAuthenticated) {
     return { 
       name: 'Onboarding' 
+    }
+  }
+
+  // Redirect to dashboard
+  if(to.meta.redirectTo && auth.isOnboarded) {
+    return {
+      name:'Dashboard'
     }
   }
 

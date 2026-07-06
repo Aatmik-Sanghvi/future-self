@@ -25,6 +25,14 @@ class OnboardingService {
     saveRoleModels(data) {
         return api.post('/onboarding/role-models', data)
     }
+
+    saveTone(data) {
+        return api.post('/onboarding/tone', data)
+    }
+
+    updateOnboarded() {
+        return api.get('/onboarding/onboarded')
+    }
 }
 
 export default new OnboardingService()
