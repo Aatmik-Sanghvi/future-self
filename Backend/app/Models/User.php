@@ -28,6 +28,8 @@ class User extends Authenticatable
         'mobile',
         'profile_image',
         'is_onboarded',
+        'current_state_summary',
+        'future_self_summary',
     ];
 
     /**

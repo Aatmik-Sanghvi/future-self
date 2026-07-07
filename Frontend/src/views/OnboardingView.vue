@@ -788,9 +788,8 @@ const selectTone = (toneKey) => {
 const updateOnboarded = async () => {
   try {
     await OnboardingService.updateOnboarded()
-    await router.push({
-      name: auth.user?.is_onboarded ? 'Dashboard' : 'Onboarding',
-    })
+    await auth.fetchUser()
+    await router.push({ name: 'Dashboard' })
     auth.toastMessage('Onboarded successfully!', {type:'success'})
   } catch (err) {
     console.error(err)

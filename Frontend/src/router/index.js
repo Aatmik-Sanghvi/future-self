@@ -69,28 +69,33 @@ router.beforeEach(async (to) => {
   const auth = useAuthStore()
 
   // Restore the session after refresh
-  // if(auth.token && !auth.user) {
-  //   await auth.checkAuth()
-  // }
+  if(auth.token && !auth.user) {
+    await auth.checkAuth()
+  }
 
-  // protected pages
+  // protected pages - redirect to login if not authenticated
   if (to.meta.requiresAuth && !auth.isAuthenticated) {
     return { 
       name: 'Login' 
     }
   }
 
-  // Guest pages
+  // Guest pages - redirect authenticated users away from login/register
   if (to.meta.guestOnly && auth.isAuthenticated) {
     return { 
-      name: 'Onboarding' 
+      name: auth.isOnboarded ? 'Dashboard' : 'Onboarding' 
     }
   }
 
-  // Redirect to dashboard
-  if(to.meta.redirectTo && auth.isOnboarded) {
+  // Redirect already-onboarded users away from Onboarding to Dashboard
+  if (to.name === 'Onboarding' && auth.isAuthenticated && auth.isOnboarded) {
+    return { name: 'Dashboard' }
+  }
+
+  // Redirect authenticated but non-onboarded users to onboarding from Dashboard
+  if (to.meta.redirectTo && auth.isAuthenticated && !auth.isOnboarded) {
     return {
-      name:'Dashboard'
+      name: 'Onboarding'
     }
   }
 

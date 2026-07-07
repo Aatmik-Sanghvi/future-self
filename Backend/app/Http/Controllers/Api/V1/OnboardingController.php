@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Helpers\ResponseHelper;
+use App\Jobs\GenerateOnboardingSummary;
 use App\Http\Controllers\Controller;
 use App\Models\Goals;
 use App\Models\Fear;
@@ -12,6 +13,7 @@ use App\Models\RoleModel;
 use App\Models\CommunicationTone;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class OnboardingController extends Controller
 {
@@ -152,6 +154,8 @@ class OnboardingController extends Controller
     }
 
     public function updateOnboarded(Request $request){
+        
+        GenerateOnboardingSummary::dispatch(auth()->id());
         $updateStatus = $this->user->where('id',auth()->id())->update([
             'is_onboarded' => 1
         ]);

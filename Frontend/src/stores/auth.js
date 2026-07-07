@@ -15,7 +15,7 @@ export const useAuthStore = defineStore('auth', () => {
 
     const isAuthenticated = computed(() => !!token.value)
 
-    const isOnboarded = computed(() => user.is_onboarded)
+    const isOnboarded = computed(() => user.value?.is_onboarded)
 
     async function login(credentials) {
         loading.value = true
@@ -106,8 +106,8 @@ export const useAuthStore = defineStore('auth', () => {
     async function fetchUser() {
         try {
             const response = await AuthService.profile()
-            user.value = response.data
-            return response.data
+            user.value = response.data.data
+            return response.data.data
         } catch (error) {
             clearAuth()
             throw error

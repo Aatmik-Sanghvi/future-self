@@ -1,12 +1,10 @@
 <?php
 
-use App\Ai\Agents\FutureSelf;
 use App\Helpers\ResponseHelper;
 use App\Http\Controllers\Api\V1\AIController;
 use App\Http\Controllers\Api\V1\Auth\GuestController;
 use App\Http\Controllers\Api\V1\GeneralController;
 use App\Http\Controllers\Api\V1\OnboardingController;
-use App\Services\GitHubModelsProvider;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -34,20 +32,11 @@ Route::prefix('V1')->group(function () {
 
             Route::post('get-detail', [OnboardingController::class, 'getDetail']);
             Route::post('remove-detail', [OnboardingController::class, 'removeDetail']);
-
-            Route::post('chat', [AIController::class, 'test']);
-
-            Route::post('/coach', function (Request $request) {
-                $response = (new FutureSelf)
-                    ->prompt('Analyze this sales transcript...', attachments: [
-                        $request->file('transcript'),
-                    ]);
-
-                return [
-                    'analysis' => (string) $response,
-                ];
-            });
         });
+
+        // Chat with FutureSelf agent
+        Route::post('chat', [AIController::class, 'chat']);
+        Route::get('conversations', [AIController::class, 'conversations']);
+        Route::post('messages', [AIController::class, 'messages']);
     });
 });
-
