@@ -12,6 +12,7 @@
     "@tailwindcss/vite": "^4.3.1",
     "axios": "^1.18.0",
     "country-telephone-data": "^0.6.3",
+    "marked": "^18.0.5",
     "pinia": "^3.0.4",
     "tailwindcss": "^4.3.1",
     "vue": "^3.5.32",

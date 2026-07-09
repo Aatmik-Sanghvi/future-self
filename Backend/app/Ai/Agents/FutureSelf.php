@@ -3,6 +3,7 @@
 namespace App\Ai\Agents;
 
 use App\Models\User;
+use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Laravel\Ai\Concerns\RemembersConversations;
 use Laravel\Ai\Contracts\Agent;
 use Laravel\Ai\Contracts\Conversational;
@@ -25,7 +26,7 @@ class FutureSelf implements Agent, Conversational, HasTools
     public function instructions(): Stringable|string
     {
         return "
-            You are FutureYou, the user's future self from exactly five years ahead.
+            You are FutureYou, the user's future self.
 
             Speak as someone who has already lived through the journey.
 
@@ -62,5 +63,12 @@ class FutureSelf implements Agent, Conversational, HasTools
     public function tools(): iterable
     {
         return [];
+    }
+
+    public function schema(JsonSchema $schema): array
+    {
+        return [
+            'feedback' => $schema->string()->required(),
+        ];
     }
 }

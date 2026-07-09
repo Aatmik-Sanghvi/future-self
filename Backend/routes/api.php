@@ -38,5 +38,6 @@ Route::prefix('V1')->group(function () {
         Route::post('chat', [AIController::class, 'chat']);
         Route::get('conversations', [AIController::class, 'conversations']);
         Route::post('messages', [AIController::class, 'messages']);
+        Route::post('delete-conversation', [AIController::class, 'deleteConversation']);
     });
 });

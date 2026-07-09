@@ -7,6 +7,7 @@ use App\Helpers\ResponseHelper;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class AIController extends Controller
 {
@@ -31,6 +32,7 @@ class AIController extends Controller
         }
 
         $response = $agent->prompt($request->message);
+        Log::info($response);
 
         return ResponseHelper::send(200, 'Message sent successfully.', [
             'reply' => $response->text,
@@ -71,5 +73,28 @@ class AIController extends Controller
             ->get(['id', 'role', 'content', 'created_at']);
 
         return ResponseHelper::send(200, 'Messages fetched successfully.', $messages);
+    }
+
+    /**
+     * Delete a conversation.
+     */
+    public function deleteConversation(Request $request)
+    {
+        $request->validate([
+            'conversation_id' => 'required|string',
+        ]);
+
+        $table = config('ai.conversations.tables.conversations', 'agent_conversations');
+
+        $deleted = DB::table($table)
+            ->where('id', $request->conversation_id)
+            ->where('user_id', auth()->id())
+            ->delete();
+
+        if ($deleted) {
+            return ResponseHelper::send(200, 'Conversation deleted successfully.');
+        } else {
+            return ResponseHelper::send(404, 'Conversation not found.');
+        }
     }
 }

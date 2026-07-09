@@ -48,6 +48,15 @@ const routes = [
     }
   },
   {
+    path: '/chat',
+    name: 'Chat',
+    component: () => import('@/views/ChatView.vue'),
+    meta: {
+      title: 'Chat - FutureYou',
+      requiresAuth: true,
+    }
+  },
+  {
     path: '/',
     name: 'Dashboard',
     component: () => import('@/views/DashboardView.vue'),
@@ -87,10 +96,7 @@ router.beforeEach(async (to) => {
     }
   }
 
-  // Redirect already-onboarded users away from Onboarding to Dashboard
-  if (to.name === 'Onboarding' && auth.isAuthenticated && auth.isOnboarded) {
-    return { name: 'Dashboard' }
-  }
+  // Allow re-visiting onboarding for view/edit purposes
 
   // Redirect authenticated but non-onboarded users to onboarding from Dashboard
   if (to.meta.redirectTo && auth.isAuthenticated && !auth.isOnboarded) {
