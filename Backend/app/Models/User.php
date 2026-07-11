@@ -46,7 +46,7 @@ class User extends Authenticatable
     }
 
     public function scopeDetails($query){
-        return $query->select('id', 'name', 'email', 'country_code', 'mobile', 'profile_image', 'is_onboarded');
+        return $query->select('id', 'name', 'email', 'country_code', 'mobile', 'profile_image', 'is_onboarded', 'created_at');
     }
 
     public function setPasswordAttribute($password)

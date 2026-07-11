@@ -6,6 +6,7 @@ import router from './router'
 import './assets/styles/auth.css'
 import './assets/styles/main.css'
 import './assets/styles/chat.css'
+import './assets/styles/profile.css'
 import 'vue3-toastify/dist/index.css'
 
 const app = createApp(App)

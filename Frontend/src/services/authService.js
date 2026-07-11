@@ -29,6 +29,10 @@ class AuthService {
     logout() {
         return api.post('/logout')
     }
+
+    updateProfile(data) {
+        return api.post('/update-profile', data)
+    }
 }
 
 export default new AuthService()

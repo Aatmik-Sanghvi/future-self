@@ -73,6 +73,7 @@ class ResponseController extends Controller
             'profile_image' => $user_data->profile_image ?? '',
             'is_onboarded' => $user_data->is_onboarded ?? false,
             'token' => $token ?? request()->bearerToken() ?? '',
+            'created_at' => $user_data->created_at ?? now(),
         ];
     }
 }

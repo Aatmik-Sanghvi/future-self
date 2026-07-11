@@ -28,7 +28,9 @@ const routes = [
     path: '/forgot-password',
     name: 'ForgotPassword',
     component: () => import('@/views/auth/ForgotPasswordView.vue'),
-    meta: { title: 'Forgot Password - FutureYou' }
+    meta: { 
+      title: 'Forgot Password - FutureYou' 
+    }
   },
   {
     path: '/logout',
@@ -57,11 +59,20 @@ const routes = [
     }
   },
   {
+    path: '/edit-profile',
+    name: 'EditProfile',
+    component: () => import('@/views/EditProfileView.vue'),
+    meta: {
+      title: 'Edit Profile - FutureYou',
+      requiresAuth: true,
+    }
+  },
+  {
     path: '/',
     name: 'Dashboard',
     component: () => import('@/views/DashboardView.vue'),
     meta: { 
-      title: 'Future You - Home' ,
+      title: 'Home - Future You' ,
       redirectTo: true,
     }
   }

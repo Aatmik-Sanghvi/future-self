@@ -29,6 +29,16 @@ class ValidationService
         ];
     }
 
+    // Common email validation rule
+    public function emailValidationRules()
+    {
+        return [
+            'required',
+            'email:rfc,dns',
+            'max:100'
+        ];
+    }
+
     // Common email exists validation rule
     public function emailLogsExistsRules()
     {

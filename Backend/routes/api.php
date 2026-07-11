@@ -17,6 +17,7 @@ Route::prefix('V1')->group(function () {
     
     Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('profile', [GeneralController::class, 'profile']);
+        Route::post('update-profile',[GeneralController::class, 'updateProfile']);
         Route::post('logout',[GeneralController::class, 'logout']);
 
         // Onboarding
