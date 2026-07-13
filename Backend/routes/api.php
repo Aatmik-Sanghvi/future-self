@@ -18,7 +18,10 @@ Route::prefix('V1')->group(function () {
     Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('profile', [GeneralController::class, 'profile']);
         Route::post('update-profile',[GeneralController::class, 'updateProfile']);
+        Route::post('update-password',[GeneralController::class, 'updatePassword']);
         Route::post('logout',[GeneralController::class, 'logout']);
+
+        Route::post('delete-account', [GeneralController::class, 'deleteAccount']);
 
         // Onboarding
         Route::prefix('onboarding')->group(function () {

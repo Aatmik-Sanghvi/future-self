@@ -33,6 +33,14 @@ class AuthService {
     updateProfile(data) {
         return api.post('/update-profile', data)
     }
+
+    updatePassword(data) {
+        return api.post('/update-password', data)
+    }
+
+    deleteAccount() {
+        return api.post('/delete-account')
+    }
 }
 
 export default new AuthService()

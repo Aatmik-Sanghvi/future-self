@@ -841,3 +841,251 @@
 .profile-danger-section {
   animation: profileFadeUp 0.4s ease-out 0.24s both;
 }
+
+/* ============================================
+   DELETE ACCOUNT CONFIRMATION MODAL
+   ============================================ */
+
+/* ── OVERLAY ───────────────────────────────── */
+.delete-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(5, 3, 12, 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  padding: 24px;
+}
+
+/* ── MODAL CARD ────────────────────────────── */
+.delete-modal {
+  position: relative;
+  width: 100%;
+  max-width: 440px;
+  background: linear-gradient(170deg, #1a1028 0%, #150e22 50%, #1a0e1e 100%);
+  border: 1px solid rgba(239, 68, 68, 0.15);
+  border-radius: 24px;
+  padding: 40px 36px 32px;
+  text-align: center;
+  overflow: hidden;
+  box-shadow:
+    0 0 60px rgba(239, 68, 68, 0.08),
+    0 24px 80px rgba(0, 0, 0, 0.5);
+}
+
+/* Danger ambient glow */
+.delete-modal-glow {
+  position: absolute;
+  top: -60px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 260px;
+  height: 180px;
+  background: radial-gradient(ellipse, rgba(239, 68, 68, 0.15) 0%, transparent 70%);
+  pointer-events: none;
+  animation: danger-pulse 3s ease-in-out infinite;
+}
+
+@keyframes danger-pulse {
+  0%, 100% { opacity: 0.7; transform: translateX(-50%) scale(1); }
+  50% { opacity: 1; transform: translateX(-50%) scale(1.08); }
+}
+
+/* ── WARNING ICON ──────────────────────────── */
+.delete-modal-icon-wrapper {
+  position: relative;
+  display: inline-block;
+  margin-bottom: 20px;
+}
+
+.delete-modal-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  position: relative;
+  z-index: 1;
+}
+
+.delete-modal-icon svg {
+  width: 28px;
+  height: 28px;
+  color: #f87171;
+}
+
+.delete-modal-icon-ring {
+  position: absolute;
+  inset: -5px;
+  border-radius: 50%;
+  border: 2px solid rgba(239, 68, 68, 0.2);
+  animation: delete-ring-pulse 2s ease-in-out infinite;
+}
+
+@keyframes delete-ring-pulse {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(1.06); }
+}
+
+/* ── MODAL CONTENT ─────────────────────────── */
+.delete-modal-title {
+  font-size: 20px;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -0.02em;
+  margin-bottom: 10px;
+}
+
+.delete-modal-desc {
+  font-size: 14px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.4);
+  margin-bottom: 28px;
+}
+
+.delete-modal-desc strong {
+  color: #f87171;
+  font-weight: 600;
+}
+
+/* ── CONFIRMATION INPUT ────────────────────── */
+.delete-modal-confirm-field {
+  text-align: left;
+  margin-bottom: 28px;
+}
+
+.delete-modal-confirm-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.35);
+  letter-spacing: 0.03em;
+  margin-bottom: 8px;
+}
+
+.delete-modal-keyword {
+  color: #f87171;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  background: rgba(239, 68, 68, 0.1);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.delete-modal-confirm-input {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(239, 68, 68, 0.15);
+  border-radius: 12px;
+  padding: 13px 16px;
+  font-size: 14px;
+  font-family: 'JetBrains Mono', 'Fira Code', 'Inter', monospace;
+  color: #f87171;
+  outline: none;
+  letter-spacing: 0.08em;
+  font-weight: 600;
+  transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.delete-modal-confirm-input::placeholder {
+  color: rgba(239, 68, 68, 0.15);
+  font-weight: 400;
+  letter-spacing: 0.08em;
+}
+
+.delete-modal-confirm-input:focus {
+  border-color: rgba(239, 68, 68, 0.4);
+  background: rgba(239, 68, 68, 0.04);
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.06);
+}
+
+/* ── MODAL ACTIONS ─────────────────────────── */
+.delete-modal-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.delete-modal-actions .profile-btn {
+  flex: 1;
+}
+
+.delete-modal-btn-confirm {
+  color: #fff;
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  box-shadow: 0 4px 24px rgba(239, 68, 68, 0.3);
+}
+
+.delete-modal-btn-confirm:hover:not(:disabled) {
+  box-shadow: 0 6px 32px rgba(239, 68, 68, 0.45);
+  transform: translateY(-1px);
+}
+
+.delete-modal-btn-confirm:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.delete-modal-btn-confirm:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* ── MODAL TRANSITIONS ─────────────────────── */
+.modal-enter-active {
+  transition: opacity 0.25s ease;
+}
+
+.modal-enter-active .delete-modal {
+  transition: opacity 0.25s ease, transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.modal-leave-active {
+  transition: opacity 0.2s ease;
+}
+
+.modal-leave-active .delete-modal {
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.modal-enter-from {
+  opacity: 0;
+}
+
+.modal-enter-from .delete-modal {
+  opacity: 0;
+  transform: scale(0.92) translateY(12px);
+}
+
+.modal-leave-to {
+  opacity: 0;
+}
+
+.modal-leave-to .delete-modal {
+  opacity: 0;
+  transform: scale(0.95) translateY(6px);
+}
+
+/* ── MODAL RESPONSIVE ──────────────────────── */
+@media (max-width: 480px) {
+  .delete-modal {
+    padding: 32px 20px 24px;
+    border-radius: 20px;
+  }
+
+  .delete-modal-actions {
+    flex-direction: column-reverse;
+  }
+
+  .delete-modal-title {
+    font-size: 18px;
+  }
+}

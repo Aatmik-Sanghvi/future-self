@@ -83,9 +83,9 @@ const form = ref({
 const joiningDate = ref(auth.user.created_at)
 
 const passwords = ref({
-  current: '',
-  new: '',
-  confirm: '',
+  old_password: '',
+  new_password: '',
+  confirm_password: '',
 })
 
 const showCurrentPw = ref(false)
@@ -93,6 +93,9 @@ const showNewPw = ref(false)
 const showConfirmPw = ref(false)
 const isSaving = ref(false)
 const showSaved = ref(false)
+const showDeleteModal = ref(false)
+const isDeleting = ref(false)
+const deleteConfirmText = ref('')
 
 // Computed
 const userInitials = computed(() => {
@@ -114,8 +117,8 @@ const joinedDate = computed(() => {
 })
 
 const passwordsMatch = computed(() => {
-  if (!passwords.value.new || !passwords.value.confirm) return true
-  return passwords.value.new === passwords.value.confirm
+  if (!passwords.value.new_password || !passwords.value.confirm_password) return true
+  return passwords.value.new_password === passwords.value.confirm_password
 })
 
 // Methods
@@ -148,13 +151,47 @@ async function handleChangePassword() {
   }
   // TODO: Call your API to change password
   // e.g. await ProfileService.changePassword(passwords.value)
-  auth.toastMessage('Password changed successfully', { type: 'success' })
-  passwords.value = { current: '', new: '', confirm: '' }
+  try{
+    await authService.updatePassword(passwords.value)
+    auth.toastMessage('Password changed successfully', { type: 'success' })
+    passwords.value = { old_password: '', new_password: '', confirm_password: '' }
+  }catch(err){
+    console.log(err);
+    
+    if(err.response?.status === 422) {
+      auth.toastMessage(err.response.data.errors, { type: 'error' })
+    }else if(!passwords.value.old_password || !passwords.value.new_password || !passwords.value.confirm_password){
+      auth.toastMessage('All password fields are required', { type: 'error' })
+    }else{
+      auth.toastMessage(err.response?.data?.message || 'Something went wrong', { type: 'error' })
+    }
+  }
 }
 
 function handleDeleteAccount() {
-  // TODO: Implement with a confirmation modal
-  auth.toastMessage('This action requires confirmation', { type: 'warning' })
+  showDeleteModal.value = true
+  deleteConfirmText.value = ''
+}
+
+function cancelDelete() {
+  showDeleteModal.value = false
+  deleteConfirmText.value = ''
+}
+
+async function confirmDeleteAccount() {
+  if (deleteConfirmText.value !== 'DELETE') return
+  isDeleting.value = true
+  try {
+    await authService.deleteAccount()
+    auth.toastMessage('Your account has been deleted.', { type: 'success' })
+    auth.clearAuth();
+    router.push({ name: 'Login' })
+  } catch (err) {
+    auth.toastMessage(err.response?.data?.message || 'Failed to delete account', { type: 'error' })
+  } finally {
+    isDeleting.value = false
+    showDeleteModal.value = false
+  }
 }
 
 function goBack() {
@@ -419,7 +456,7 @@ function goBack() {
               <label class="profile-field-label" for="profile-current-pw">Current Password</label>
               <div class="profile-input-wrapper">
                 <input
-                  v-model="passwords.current"
+                  v-model="passwords.old_password"
                   :type="showCurrentPw ? 'text' : 'password'"
                   class="profile-input"
                   id="profile-current-pw"
@@ -450,7 +487,7 @@ function goBack() {
               <label class="profile-field-label" for="profile-new-pw">New Password</label>
               <div class="profile-input-wrapper">
                 <input
-                  v-model="passwords.new"
+                  v-model="passwords.new_password"
                   :type="showNewPw ? 'text' : 'password'"
                   class="profile-input"
                   id="profile-new-pw"
@@ -486,7 +523,7 @@ function goBack() {
               </label>
               <div class="profile-input-wrapper">
                 <input
-                  v-model="passwords.confirm"
+                  v-model="passwords.confirm_password"
                   :type="showConfirmPw ? 'text' : 'password'"
                   class="profile-input"
                   :style="!passwordsMatch ? 'border-color: rgba(248, 113, 113, 0.4)' : ''"
@@ -519,7 +556,7 @@ function goBack() {
             <button
               class="profile-btn profile-btn-primary"
               @click="handleChangePassword"
-              :disabled="!passwords.current || !passwords.new || !passwordsMatch"
+              :disabled="!passwords.old_password || !passwords.new_password || !passwordsMatch"
               id="btn-change-password"
             >
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -562,6 +599,74 @@ function goBack() {
 
       </div>
     </div>
+
+    <!-- ── DELETE ACCOUNT CONFIRMATION MODAL ── -->
+    <Teleport to="body">
+      <Transition name="modal">
+        <div v-if="showDeleteModal" class="delete-modal-overlay" @click.self="cancelDelete" id="delete-modal-overlay">
+          <div class="delete-modal">
+            <!-- Danger glow -->
+            <div class="delete-modal-glow"></div>
+
+            <!-- Icon -->
+            <div class="delete-modal-icon-wrapper">
+              <div class="delete-modal-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+                  <line x1="12" y1="9" x2="12" y2="13" />
+                  <line x1="12" y1="17" x2="12.01" y2="17" />
+                </svg>
+              </div>
+              <div class="delete-modal-icon-ring"></div>
+            </div>
+
+            <!-- Content -->
+            <h3 class="delete-modal-title">Delete your account?</h3>
+            <p class="delete-modal-desc">
+              This action is <strong>permanent and irreversible</strong>. All your conversations, goals, onboarding data, and profile information will be erased forever.
+            </p>
+
+            <!-- Confirmation input -->
+            <div class="delete-modal-confirm-field">
+              <label class="delete-modal-confirm-label" for="delete-confirm-input">
+                Type <span class="delete-modal-keyword">DELETE</span> to confirm
+              </label>
+              <input
+                v-model="deleteConfirmText"
+                type="text"
+                class="delete-modal-confirm-input"
+                id="delete-confirm-input"
+                placeholder="DELETE"
+                autocomplete="off"
+                spellcheck="false"
+              />
+            </div>
+
+            <!-- Actions -->
+            <div class="delete-modal-actions">
+              <button class="profile-btn profile-btn-ghost" @click="cancelDelete" id="btn-cancel-delete">
+                Cancel
+              </button>
+              <button
+                class="profile-btn delete-modal-btn-confirm"
+                :disabled="deleteConfirmText !== 'DELETE' || isDeleting"
+                @click="confirmDeleteAccount"
+                id="btn-confirm-delete"
+              >
+                <span v-if="isDeleting" class="profile-btn-spinner"></span>
+                <svg v-else xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="3 6 5 6 21 6" />
+                  <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" />
+                  <path d="M10 11v6" /><path d="M14 11v6" />
+                  <path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2" />
+                </svg>
+                {{ isDeleting ? 'Deleting...' : 'Delete Forever' }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </Transition>
+    </Teleport>
   </div>
 </template>
 
