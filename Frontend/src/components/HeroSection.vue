@@ -1,4 +1,15 @@
-<script setup></script>
+<script setup>
+import { useAuthStore } from '@/stores/auth'
+
+const auth = useAuthStore()
+
+defineProps({
+  register: {
+    type: Function,
+    required: true,
+  },
+})
+</script>
 
 <template>
   <section class="hero">
@@ -21,13 +32,15 @@
       future version of yourself who already made it.
     </p>
 
-    <div class="hero-form">
-      <input class="hero-input" type="email" placeholder="Enter your email" />
-      <button class="btn-hero">Start Free →</button>
+    <div v-if="!auth.isAuthenticated">
+      <div class="hero-form">
+        <!-- <input class="hero-input" type="email" placeholder="Enter your email" /> -->
+        <button @click="register" class="btn-hero">Start Free</button>
+      </div>
+      <p class="hero-disclaimer">
+        No credit card required · Free plan available · Cancel anytime
+      </p>
     </div>
-    <p class="hero-disclaimer">
-      No credit card required · Free plan available · Cancel anytime
-    </p>
 
     <!-- Chat preview -->
     <div class="chat-preview">

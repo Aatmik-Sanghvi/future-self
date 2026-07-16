@@ -73,7 +73,8 @@ const form = ref({
   name: auth.user.name,
   email: auth.user.email,
   country_code: auth.user.country_code,
-  mobile: auth.user.mobile
+  mobile: auth.user.mobile,
+  profile_image: auth.user.profile_image || null,
   // bio: 'Aspiring creator who believes in building things that matter. Passionate about AI, design, and self-improvement.',
   // location: 'Mumbai, India',
   // dateOfBirth: '2003-06-15',
@@ -96,6 +97,7 @@ const showSaved = ref(false)
 const showDeleteModal = ref(false)
 const isDeleting = ref(false)
 const deleteConfirmText = ref('')
+const avatarUrl = ref(auth.user.profile_image ? `/storage/${auth.user.profile_image}` : null)
 
 // Computed
 const userInitials = computed(() => {
@@ -121,14 +123,30 @@ const passwordsMatch = computed(() => {
   return passwords.value.new_password === passwords.value.confirm_password
 })
 
+const handleAvatarChange = (event) => {
+  const file = event.target.files[0];
+
+  if(file){
+    avatarUrl.value = URL.createObjectURL(file);
+    form.value.profile_image = file;
+  }
+}
+
 // Methods
 async function handleSaveProfile() {
   isSaving.value = true
   // TODO: Call your API to save profile
   try{
     form.value.country_code = countryCode.value;
-    
-    await authService.updateProfile(form.value)
+
+    const formData = new FormData()
+    Object.keys(form.value).forEach(key => {
+      if (form.value[key] !== null && form.value[key] !== undefined) {
+        formData.append(key, form.value[key])
+      }
+    })
+
+    await authService.updateProfile(formData)
     setTimeout(() => {
       isSaving.value = false
       showSaved.value = true
@@ -229,9 +247,12 @@ function goBack() {
         <!-- ── AVATAR / HEADER CARD ──────────── -->
         <div class="profile-header-card">
           <div class="profile-avatar-wrapper">
-            <div class="profile-avatar">{{ userInitials }}</div>
+            <img v-if="avatarUrl" :src="avatarUrl" alt="User Avatar" class="profile-avatar"/>
+            <span v-else class="profile-avatar">{{ userInitials }}</span>
+            <!-- <div class="profile-avatar">{{ userInitials }}</div> -->
             <div class="profile-avatar-ring"></div>
-            <div class="profile-avatar-badge" title="Change photo" id="btn-change-avatar">
+            <input type="file" name="profile_image" id="uploadAvatar" ref="avatarInput" accept="image/*" style="display: none;" @change="handleAvatarChange">
+            <div class="profile-avatar-badge" title="Change photo" id="btn-change-avatar" @click="$refs.avatarInput.click()">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z" />
                 <circle cx="12" cy="13" r="4" />

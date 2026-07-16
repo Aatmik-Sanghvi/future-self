@@ -9,7 +9,17 @@
       <div class="step-pill" v-if="currentStepNumber < 6">
         Setting up your profile &nbsp;·&nbsp; Step <strong>{{ Math.min(currentStepNumber + 1, 5) }}</strong> of 5
       </div>
-      <div class="nav-actions">
+      <!-- <div class="nav-actions">
+      </div> -->
+      <div class="profile-nav-actions" v-if="auth.isOnboarded">
+        <button class="profile-nav-btn" @click="backToDashboard()" id="btn-back">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12" /><polyline points="12 19 5 12 12 5" />
+          </svg>
+          Back
+        </button>
+      </div>
+      <div class="nav-actions" v-if="!auth.isOnboarded">
         <button class="logout-btn" type="button" @click="handleLogout">Log out</button>
       </div>
     </nav>
@@ -484,11 +494,11 @@ const isStep5 = computed(() => currentStep.value == 5)
 // ── Validation helpers ──
 const validateGoal = () => {
   if (!newGoal.title.trim()) {
-    auth.toastMessage('Goal title is required.', 'error')
+    auth.toastMessage('Goal title is required.', { type: 'error' })
     return false
   }
   if (newGoal.title.trim().length > 255) {
-    auth.toastMessage('Goal title must be under 255 characters.', 'error')
+    auth.toastMessage('Goal title must be under 255 characters.', { type: 'error' })
     return false
   }
   return true
@@ -496,7 +506,7 @@ const validateGoal = () => {
 
 const validateFear = () => {
   if (!newFear.text.trim()) {
-    auth.toastMessage('Please describe your fear.', 'error')
+    auth.toastMessage('Please describe your fear.', { type: 'error' })
     return false
   }
   return true
@@ -504,7 +514,7 @@ const validateFear = () => {
 
 const validateTraits = () => {
   if (selectedTraits.value.size === 0) {
-    auth.toastMessage('Select at least one trait.', 'error')
+    auth.toastMessage('Select at least one trait.', { type: 'error' })
     return false
   }
   return true
@@ -512,7 +522,7 @@ const validateTraits = () => {
 
 const validateRoleModels = () => {
   if (roleModels.value.length === 0) {
-    auth.toastMessage('Add at least one role model.', 'error')
+    auth.toastMessage('Add at least one role model.', { type: 'error' })
     return false
   }
   return true
@@ -520,7 +530,7 @@ const validateRoleModels = () => {
 
 const validateTone = () => {
   if (!selectedTone.value) {
-    auth.toastMessage('Please choose a tone.', 'error')
+    auth.toastMessage('Please choose a tone.', { type: 'error' })
     return false
   }
   return true
@@ -530,9 +540,9 @@ const validateTone = () => {
 const handleApiError = (err, fallbackMsg) => {
   if (err.response?.status === 422 && err.response?.data?.errors) {
     const firstField = Object.keys(err.response.data.errors)[0]
-    auth.toastMessage(err.response.data.errors[firstField][0], 'error')
+    auth.toastMessage(err.response.data.errors[firstField][0], { type: 'error' })
   } else {
-    auth.toastMessage(err.response?.data?.message || fallbackMsg, 'error')
+    auth.toastMessage(err.response?.data?.message || fallbackMsg, { type: 'error' })
   }
 }
 
@@ -804,7 +814,7 @@ const goNext = async () => {
   // Step 0 → 1 : Goals (already saved individually, just validate at least one exists)
   if (currentStep.value === 0) {
     if (!goals.value.length) {
-      auth.toastMessage('Add at least one goal to continue.', 'error')
+      auth.toastMessage('Add at least one goal to continue.', { type: 'error' })
       return
     }
   }
@@ -812,7 +822,7 @@ const goNext = async () => {
   // Step 1 → 2 : Fears (already saved individually, just validate at least one exists)
   if (currentStep.value === 1) {
     if (!fears.value.length) {
-      auth.toastMessage('Add at least one fear to continue.', 'error')
+      auth.toastMessage('Add at least one fear to continue.', { type: 'error' })
       return
     }
   }
@@ -842,6 +852,10 @@ const goBack = () => {
   if (currentStep.value > 0) {
     currentStep.value--
   }
+}
+
+const backToDashboard = () => {
+  router.push({ name: 'Dashboard' })
 }
 
 const handleLogout = async () => {

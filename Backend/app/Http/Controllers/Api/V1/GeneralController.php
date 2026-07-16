@@ -29,10 +29,21 @@ class GeneralController extends ResponseController
             'name' => $this->validationService->loginInputRules(),
             'email' => $this->validationService->emailValidationRules(),
             'mobile' => $this->validationService->mobileOnlyRules(),
+            'profile_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
 
-        $this->user->whereId(auth()->id())->update($request->all());
-        return ResponseHelper::send(200, 'Profile updated successfully.', $this->get_user_data());
+        $user = auth()->user();
+        $data = $request->except('profile_image');
+
+        if ($request->hasFile('profile_image')) {
+            if ($user->profile_image && file_exists(public_path($user->profile_image))) {
+                unlink(public_path($user->profile_image));
+            }
+            $data['profile_image'] = upload_file('profile_image', 'profile_images');
+        }
+
+        $this->user->whereId($user->id)->update($data);
+        return ResponseHelper::send(200, 'Profile has been updated successfully.', $this->get_user_data());
     }
 
     public function updatePassword(Request $request){

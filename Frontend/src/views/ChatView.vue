@@ -3,8 +3,10 @@ import { ref, computed, nextTick, onMounted, watch } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import ChatService from '@/services/chatService'
 import { marked } from 'marked'
+import { useRouter } from 'vue-router'
 
 const auth = useAuthStore()
+const router = useRouter()
 
 // State
 const conversations = ref([])
@@ -232,6 +234,10 @@ function toggleSidebar() {
   sidebarOpen.value = !sidebarOpen.value
 }
 
+const goBack = () => {
+  router.push({name: 'Dashboard'});
+}
+
 // Quick prompts
 const quickPrompts = [
   'Motivate me',
@@ -348,6 +354,14 @@ onMounted(() => {
               <span class="chat-main-status-text">5 years ahead of you</span>
             </div>
           </div>
+        </div>
+        <div class="profile-nav-actions" v-if="auth.isOnboarded">
+          <button class="profile-nav-btn" @click="goBack()" id="btn-back">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="19" y1="12" x2="5" y2="12" /><polyline points="12 19 5 12 12 5" />
+            </svg>
+            Back
+          </button>
         </div>
       </div>
 

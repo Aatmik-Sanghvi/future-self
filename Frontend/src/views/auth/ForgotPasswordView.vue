@@ -198,8 +198,10 @@ const handleResetPassword = async () => {
     })
 
     auth.toastMessage('Password reset successfully! Please sign in with your new password.', { type: 'success' })
-    router.push({ name: 'login' })
+    router.push({ name: 'Login' })
   } catch (err) {
+    console.log(err);
+    
     errorMessage.value = err?.response?.data?.message || 'Failed to reset password.'
   } finally {
     isLoading.value = false

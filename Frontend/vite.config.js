@@ -26,6 +26,11 @@ export default defineConfig({
         secure: false, // If you're using HTTPS, set this to true
         // Remove the rewrite function to preserve the `/api` prefix
       },
+      '/storage': {
+        target: 'http://127.0.0.1:8000',
+        changeOrigin: true,
+        secure: false,
+      },
     },
   },
 })

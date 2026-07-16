@@ -7,17 +7,25 @@
   import PricingSection from '@/components/PricingSection.vue';
   import CTASection from '@/components/CTASection.vue';
   import FeaturesSection from '@/components/FeaturesSection.vue';
+
+  import { useRouter } from 'vue-router';
+
+  const router = useRouter();
+
+  const register = () => {
+      router.push({name: 'Register'});
+  }
 </script>
 
 <template>
   <div>
     <Navbar />
-    <HeroSection />
+    <HeroSection :register="register" />
     <StatsBar />
     <FeaturesSection />
     <HowItWorks />
     <Testimonials />
     <PricingSection />
-    <CTASection />
+    <CTASection :register="register" />
   </div>
 </template>

@@ -31,7 +31,9 @@ class AuthService {
     }
 
     updateProfile(data) {
-        return api.post('/update-profile', data)
+        return api.post('/update-profile', data, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        })
     }
 
     updatePassword(data) {

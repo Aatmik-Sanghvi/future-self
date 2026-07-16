@@ -33,13 +33,11 @@ const handleLogin = async () => {
     await router.push({
       name: response.data?.is_onboarded ? 'Dashboard' : 'Onboarding',
     })
-
-    // window.setTimeout(() => {
-      auth.toastMessage(response?.message || 'Signed in successfully', { type: 'success' })
-    // }, 120)
+    
+    auth.toastMessage(response?.message, { type: 'success' })
   } catch (err) {
     console.error(err)
-    const message = err?.response?.data?.message || err?.response?.message || 'Something went wrong.'
+    const message = err?.response?.data?.message || 'Something went wrong.'
     auth.toastMessage(message, { type: 'error' })
   }
 }
