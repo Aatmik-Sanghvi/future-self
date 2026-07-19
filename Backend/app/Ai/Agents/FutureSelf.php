@@ -9,6 +9,8 @@ use Laravel\Ai\Contracts\Agent;
 use Laravel\Ai\Contracts\Conversational;
 use Laravel\Ai\Contracts\HasTools;
 use Laravel\Ai\Contracts\Tool;
+use Laravel\Ai\Messages\Message;
+use Laravel\Ai\Messages\MessageRole;
 use Laravel\Ai\Promptable;
 use Stringable;
 
@@ -53,6 +55,43 @@ class FutureSelf implements Agent, Conversational, HasTools
 
             Use this information throughout the conversation to personalize your responses.
         ";
+    }
+
+    /**
+     * Get the list of messages comprising the conversation so far.
+     *
+     * Prepends the user's current state summary as context before
+     * the session-specific conversation history.
+     *
+     * @return Message[]
+     */
+    public function messages(): iterable
+    {
+        // Load session-specific conversation history from the database
+        $conversationMessages = $this->conversationId
+            ? resolve(\Laravel\Ai\Contracts\ConversationStore::class)
+                ->getLatestConversationMessages(
+                    $this->conversationId,
+                    $this->maxConversationMessages()
+                )->all()
+            : [];
+
+        $messages = [];
+
+        // Prepend the user's current state summary if available
+        if ($this->user->current_state_summary) {
+            $messages[] = new Message(
+                MessageRole::User,
+                "Here is a summary of my current state and recent progress:\n\n{$this->user->current_state_summary}"
+            );
+
+            $messages[] = new Message(
+                MessageRole::Assistant,
+                "Thank you for sharing your current state. I'll keep this context in mind throughout our conversation."
+            );
+        }
+
+        return array_merge($messages, $conversationMessages);
     }
 
     /**

@@ -52,7 +52,7 @@ const handleLogin = async () => {
         <div class="auth-brand__text">
           <div class="auth-brand__name">
             <router-link to="/">
-              FutureYou
+              Future Self
             </router-link>
           </div>
           <div class="auth-brand__tagline">Your future self is waiting</div>
@@ -164,12 +164,13 @@ const handleLogin = async () => {
           </svg>
           Google
         </button>
-        <button id="login-apple" class="auth-social-btn" type="button">
+        <!-- <button id="login-apple" class="auth-social-btn" type="button">
           <svg class="auth-social-btn__icon" viewBox="0 0 24 24" fill="currentColor">
             <path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.51-3.23 0-1.44.62-2.2.44-3.06-.4C3.79 16.17 4.36 9.02 8.7 8.76c1.26.06 2.14.72 2.88.76.99-.2 1.94-.78 3-.84 1.28-.08 2.25.47 2.88 1.21-2.65 1.56-2.02 5.01.36 5.97-.47 1.24-.73 1.81-1.36 2.89-.53.91-1.28 1.82-2.2 2.79l-.21-.26zM12.05 8.68c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
           </svg>
           Apple
         </button>
+        -->
       </div>
 
       <!-- Footer -->

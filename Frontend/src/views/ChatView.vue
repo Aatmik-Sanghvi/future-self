@@ -2,8 +2,21 @@
 import { ref, computed, nextTick, onMounted, watch } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import ChatService from '@/services/chatService'
+import feedbackService from '@/services/feedbackService'
+import FeedbackModal from '@/components/FeedbackModal.vue'
 import { marked } from 'marked'
 import { useRouter } from 'vue-router'
+
+// Configure marked for clean rendering
+marked.setOptions({
+  breaks: true,
+  gfm: true,
+})
+
+function renderMarkdown(content) {
+  if (!content) return ''
+  return marked(content.trim())
+}
 
 const auth = useAuthStore()
 const router = useRouter()
@@ -19,6 +32,15 @@ const sidebarOpen = ref(false)
 const loadingConversations = ref(false)
 const showDeleteModal = ref(false)
 const conversationToDelete = ref(null)
+const userDailyMessageCount = ref();
+const canMessage = ref();
+const dailyMessageLimit = ref();
+
+// Feedback state
+const showFeedbackModal = ref(false)
+const hasFeedbackSubmitted = ref(false)
+const hasFeedbackSkipped = ref(false)
+const existingFeedback = ref(null)
 
 // Refs
 const messagesContainer = ref(null)
@@ -35,16 +57,47 @@ const userInitials = computed(() => {
     .slice(0, 2)
 })
 
-const canSend = computed(() => inputMessage.value.trim().length > 0 && !isLoading.value)
+const canSend = computed(() => inputMessage.value.trim().length > 0 && !isLoading.value && canMessage.value)
 
 const hasMessages = computed(() => messages.value.length > 0)
+
+async function checkFeedbackStatus() {
+  try {
+    const res = await feedbackService.getFeedbackStatus()
+    hasFeedbackSubmitted.value = res.data.data.hasSubmitted
+    hasFeedbackSkipped.value = res.data.data.hasSkipped
+    existingFeedback.value = res.data.data.feedback || null
+  } catch (err) {
+    console.error('Failed to check feedback status', err)
+  }
+}
+
+function onFeedbackSubmitted(savedData) {
+  hasFeedbackSubmitted.value = true
+  if (savedData) {
+    existingFeedback.value = savedData
+  }
+  auth.toastMessage('Feedback saved successfully. Thank you! ❤️', { type: 'success' })
+}
+
+function onFeedbackSkipped() {
+  hasFeedbackSkipped.value = true
+}
 
 // Methods
 async function loadConversations() {
   loadingConversations.value = true
   try {
     const res = await ChatService.getConversations()
-    conversations.value = res.data.data || []
+    const data = res.data.data
+    conversations.value = data.conversations || []
+    canMessage.value = data.canMessage
+    dailyMessageLimit.value = data.dailyMessageLimit
+    userDailyMessageCount.value = data.userMessageCount
+
+    if (canMessage.value === false) {
+      checkFeedbackStatus()
+    }
   } catch (err) {
     console.error('Failed to load conversations', err)
   } finally {
@@ -60,12 +113,20 @@ async function selectConversation(convo) {
 
   try {
     const res = await ChatService.getMessages(convo.id)
-    messages.value = (res.data.data || []).map(m => ({
+    messages.value = (res.data.data.messages || []).map(m => ({
       id: m.id,
       role: m.role,
       content: m.content,
       time: formatTime(m.created_at)
     }))
+    userDailyMessageCount.value = res.data.data.userMessageCount
+    canMessage.value = res.data.data.canMessage
+    dailyMessageLimit.value = res.data.data.dailyMessageLimit
+
+    if (canMessage.value === false) {
+      checkFeedbackStatus()
+    }
+
     await nextTick()
     scrollToBottom()
   } catch (err) {
@@ -143,6 +204,13 @@ async function sendMessage() {
     const data = res.data.data
     isTyping.value = false
 
+    // Update message limit state
+    if (data.canMessage !== undefined) {
+      canMessage.value = data.canMessage
+      dailyMessageLimit.value = data.dailyMessageLimit
+      userDailyMessageCount.value = data.userMessageCount
+    }
+
     // Set the conversation ID if it's a new conversation
     if (!activeConversationId.value && data.conversation_id) {
       activeConversationId.value = data.conversation_id
@@ -164,13 +232,29 @@ async function sendMessage() {
   } catch (err) {
     isTyping.value = false
     console.error('Failed to send message', err)
-    // Add error message
-    messages.value.push({
-      id: Date.now() + 2,
-      role: 'assistant',
-      content: 'Sorry, I couldn\'t process your message. Please try again.',
-      time: formatTime(new Date().toISOString())
-    })
+    
+    // Check if daily message limit was reached
+    if (err.response && err.response.status === 429) {
+      canMessage.value = false
+      checkFeedbackStatus()
+      if (err.response.data && err.response.data.message) {
+        auth.toastMessage(err.response.data.message, { type: 'warning' })
+      }
+      messages.value.push({
+        id: Date.now() + 2,
+        role: 'assistant',
+        content: '🔒 You have reached your daily message limit. Please come back tomorrow to continue our conversation.',
+        time: formatTime(new Date().toISOString())
+      })
+    } else {
+      // Add general error message
+      messages.value.push({
+        id: Date.now() + 2,
+        role: 'assistant',
+        content: 'Sorry, I couldn\'t process your message. Please try again.',
+        time: formatTime(new Date().toISOString())
+      })
+    }
     await nextTick()
     scrollToBottom()
   } finally {
@@ -211,16 +295,28 @@ function scrollToBottom() {
   }
 }
 
+function parseDate(dateStr) {
+  if (!dateStr) return new Date()
+  if (dateStr instanceof Date) return dateStr
+  
+  // If the date string is a raw database timestamp (e.g., "2026-07-18 09:28:08")
+  // without explicit timezone info, assume it is UTC.
+  if (typeof dateStr === 'string' && !dateStr.includes('T') && !dateStr.includes('Z') && !dateStr.includes('+')) {
+    return new Date(dateStr.replace(' ', 'T') + 'Z')
+  }
+  return new Date(dateStr)
+}
+
 function formatTime(dateStr) {
   if (!dateStr) return ''
-  const d = new Date(dateStr)
+  const d = parseDate(dateStr)
   return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
 }
 
 function formatRelativeTime(dateStr) {
   if (!dateStr) return ''
   const now = new Date()
-  const d = new Date(dateStr)
+  const d = parseDate(dateStr)
   const diff = Math.floor((now - d) / 1000)
 
   if (diff < 60) return 'Just now'
@@ -256,6 +352,14 @@ onMounted(() => {
 
 <template>
   <div class="chat-layout">
+    <!-- Optional Feedback Modal -->
+    <FeedbackModal
+      :show="showFeedbackModal"
+      :initialData="existingFeedback"
+      @close="showFeedbackModal = false"
+      @submitted="onFeedbackSubmitted"
+      @skipped="onFeedbackSkipped"
+    />
     <!-- Mobile sidebar overlay -->
     <div
       class="sidebar-overlay"
@@ -351,7 +455,7 @@ onMounted(() => {
             <div class="chat-main-name">Future You</div>
             <div class="chat-main-status">
               <div class="chat-main-status-dot"></div>
-              <span class="chat-main-status-text">5 years ahead of you</span>
+              <!-- <span class="chat-main-status-text">5 years ahead of you</span> -->
             </div>
           </div>
         </div>
@@ -374,12 +478,15 @@ onMounted(() => {
           :class="msg.role"
         >
           <div v-if="msg.role === 'assistant'" class="msg-avatar ai">✨</div>
-          <div v-else class="msg-avatar user-av">{{ userInitials }}</div>
+          <div v-else class="msg-avatar user-av">
+            <img v-if="auth.user.profile_image != null" :src="'/storage/' + auth.user.profile_image" alt="profile-image" class="profile-image" />
+            <span v-else>{{ userInitials }}</span>
+          </div>
           <div class="msg-content">
             <div
               class="msg-bubble"
               :class="msg.role === 'assistant' ? 'ai-bubble' : 'user-bubble'"
-              v-html="marked(msg.content)"></div>
+              v-html="renderMarkdown(msg.content)"></div>
             <div class="msg-time">{{ msg.time }}</div>
           </div>
         </div>
@@ -401,7 +508,7 @@ onMounted(() => {
         <p class="welcome-sub">
           Ask anything — about your goals, fears, or the road ahead. Your future self is here to guide you.
         </p>
-        <div class="quick-prompts">
+        <div class="quick-prompts" v-if="canMessage !== false">
           <button
             v-for="prompt in quickPrompts"
             :key="prompt"
@@ -411,10 +518,39 @@ onMounted(() => {
             {{ prompt }}
           </button>
         </div>
+        <!-- Daily limit banner inside welcome -->
+        <div v-if="canMessage === false" class="message-limit-banner">
+          <div class="limit-banner-icon">🔒</div>
+          <div class="limit-banner-content">
+            <div class="limit-banner-title">Daily limit reached</div>
+            <div class="limit-banner-text">
+              You've used all <strong>{{ dailyMessageLimit }}</strong> messages for today. Come back tomorrow to continue your conversation.
+            </div>
+            <button class="btn-give-feedback" @click="showFeedbackModal = true" id="btn-give-feedback-welcome">
+              <span>{{ hasFeedbackSubmitted ? '✏️' : '💬' }}</span> {{ hasFeedbackSubmitted ? 'Edit Your Feedback' : 'Give Feedback (Optional)' }}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Limit banner below messages area -->
+      <div v-if="hasMessages && canMessage === false" class="chat-input-bar">
+        <div class="message-limit-banner">
+          <div class="limit-banner-icon">🔒</div>
+          <div class="limit-banner-content">
+            <div class="limit-banner-title">Daily limit reached</div>
+            <div class="limit-banner-text">
+              You've used all <strong>{{ dailyMessageLimit }}</strong> messages for today. Come back tomorrow to continue your conversation.
+            </div>
+            <button class="btn-give-feedback" @click="showFeedbackModal = true" id="btn-give-feedback-messages">
+              <span>{{ hasFeedbackSubmitted ? '✏️' : '💬' }}</span> {{ hasFeedbackSubmitted ? 'Edit Your Feedback' : 'Give Feedback (Optional)' }}
+            </button>
+          </div>
+        </div>
       </div>
 
       <!-- Input Bar -->
-      <div class="chat-input-bar">
+      <div v-if="canMessage !== false" class="chat-input-bar">
         <div class="chat-input-wrapper">
           <textarea
             ref="textareaRef"

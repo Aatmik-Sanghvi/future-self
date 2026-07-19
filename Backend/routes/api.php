@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\V1\AIController;
 use App\Http\Controllers\Api\V1\Auth\GuestController;
 use App\Http\Controllers\Api\V1\GeneralController;
 use App\Http\Controllers\Api\V1\OnboardingController;
+use App\Http\Controllers\Api\V1\FeedbackController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -22,6 +23,10 @@ Route::prefix('V1')->group(function () {
         Route::post('logout',[GeneralController::class, 'logout']);
 
         Route::post('delete-account', [GeneralController::class, 'deleteAccount']);
+
+        // Feedback
+        Route::post('feedback', [FeedbackController::class, 'store']);
+        Route::get('feedback/status', [FeedbackController::class, 'status']);
 
         // Onboarding
         Route::prefix('onboarding')->group(function () {

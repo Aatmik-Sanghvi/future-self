@@ -32,6 +32,7 @@ class GuestController extends ResponseController
             'password' => $this->validationService->passwordRules(),
         ]);
 
+        $request['daily_limit'] = config('constants.message_limit');
         $user = $this->user->create($request->all());
         Auth::login($user);
 

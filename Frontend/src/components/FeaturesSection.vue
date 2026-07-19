@@ -35,7 +35,7 @@
           </div>
           <div class="feature-title">Talk to Your Future Self</div>
           <div class="feature-desc">
-            An AI version of you — 5 years ahead — trained on your goals, fears,
+            An AI version of you — trained on your goals, fears,
             and personality. Real conversations that feel personal.
           </div>
         </div>

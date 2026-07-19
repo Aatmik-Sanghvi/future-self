@@ -1,4 +1,18 @@
-<script setup></script>
+<script setup>
+import { useRouter } from 'vue-router';
+import { useAuthStore } from '@/stores/auth';
+
+const router = useRouter();
+const auth = useAuthStore();
+
+const startMyBetaJourney = () => {
+  router.push({name: 'Login'});
+}
+
+const navigateToChat = () => {
+  router.push({name: 'Chat'});
+}
+</script>
 
 <template>
     <section class="pricing-section" id="pricing">
@@ -8,34 +22,39 @@
                 <h2 class="section-title">Invest in who you're becoming</h2>
                 <p class="section-sub">Less than a coffee a week to talk to the best version of yourself.</p>
             </div>
-            <div class="pricing-grid">
+            <div class="pricing-grid !flex justify-center">
 
-            <div class="pricing-card">
-                <div class="pricing-name">Explorer</div>
+            <div class="pricing-card w-full max-w-md">
+                <div class="pricing-name">🎉 Beta Access</div>
                 <div class="pricing-price"><span class="pricing-amount">Free</span></div>
-                <div class="pricing-tagline">Start your journey.</div>
+                <div class="pricing-tagline">You've been selected as one of our early beta users.</div>
                 <div class="pricing-features">
-                <div class="pricing-feature">
-                    <div class="pricing-check" style="background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.4)">✓</div>
-                    <span>5 chats / month</span>
+                    <div class="pricing-feature">
+                        <div class="pricing-check" style="background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.4)">✓</div>
+                        <span>5 personalized chats every day</span>
+                    </div>
+                    <div class="pricing-feature">
+                        <div class="pricing-check" style="background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.4)">✓</div>
+                        <span>Complete onboarding & personality profile</span>
+                    </div>
+                    <div class="pricing-feature">
+                        <div class="pricing-check" style="background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.4)">✓</div>
+                        <span>Full conversation history</span>
+                    </div>
+                    <div class="pricing-feature">
+                        <div class="pricing-check" style="background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.4)">✓</div>
+                        <span>Help shape Future Self with your feedbacks</span>
+                    </div>
+                    <div class="pricing-feature">
+                        <div class="pricing-check" style="background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.4)">✓</div>
+                        <span>🎁 Lock in exclusive Founder Pricing when Premium launches</span>
+                    </div>
                 </div>
-                <div class="pricing-feature">
-                    <div class="pricing-check" style="background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.4)">✓</div>
-                    <span>Goal &amp; fear profiling</span>
-                </div>
-                <div class="pricing-feature">
-                    <div class="pricing-check" style="background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.4)">✓</div>
-                    <span>Basic tone selection</span>
-                </div>
-                <div class="pricing-feature">
-                    <div class="pricing-check" style="background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.4)">✓</div>
-                    <span>Web access</span>
-                </div>
-                </div>
-                <button class="btn-plan secondary">Get Started Free</button>
+                <button class="btn-plan secondary" @click="startMyBetaJourney()" v-if="!auth.isAuthenticated">Start My Beta Journey</button>
+                <button class="btn-plan secondary" @click="navigateToChat()" v-else>Start chatting</button>
             </div>
 
-            <div class="pricing-card highlight">
+            <!-- <div class="pricing-card highlight">
                 <span class="pricing-badge">Most Popular</span>
                 <div class="pricing-name">Pathfinder</div>
                 <div class="pricing-price"><span class="pricing-amount">$12</span><span class="pricing-period">/mo</span></div>
@@ -96,7 +115,7 @@
                 </div>
                 </div>
                 <button class="btn-plan secondary">Go Visionary</button>
-            </div>
+            </div> -->
 
             </div>
         </div>

@@ -31,12 +31,35 @@ class AIController extends Controller
             $agent->forUser($user);
         }
 
+        $messagesTable = config('ai.conversations.tables.messages', 'agent_conversation_messages');
+
+        $userDailyMessageCount = DB::table($messagesTable)
+            ->where('user_id', $user->id)
+            ->where('role', 'user')
+            ->whereDate('created_at', today())
+            ->count();
+
+        $dailyMessageLimit = config('constants.message_limit');
+
+        if ($userDailyMessageCount >= $dailyMessageLimit) {
+            return ResponseHelper::send(429, 'You have reached your daily message limit.');
+        }
+
         $response = $agent->prompt($request->message);
         Log::info($response);
+
+        $userDailyMessageCountAfter = DB::table($messagesTable)
+            ->where('user_id', $user->id)
+            ->where('role', 'user')
+            ->whereDate('created_at', today())
+            ->count();
 
         return ResponseHelper::send(200, 'Message sent successfully.', [
             'reply' => $response->text,
             'conversation_id' => $response->conversationId,
+            'dailyMessageLimit' => $dailyMessageLimit,
+            'userMessageCount' => $userDailyMessageCountAfter,
+            'canMessage' => $userDailyMessageCountAfter < $dailyMessageLimit,
         ]);
     }
 
@@ -52,7 +75,22 @@ class AIController extends Controller
             ->orderByDesc('updated_at')
             ->get(['id', 'title', 'created_at', 'updated_at']);
 
-        return ResponseHelper::send(200, 'Conversations fetched successfully.', $conversations);
+        $messagesTable = config('ai.conversations.tables.messages', 'agent_conversation_messages');
+
+        $userDailyMessageCount = DB::table($messagesTable)
+            ->where('user_id', auth()->id())
+            ->where('role', 'user')
+            ->whereDate('created_at', today())
+            ->count();
+
+        $dailyMessageLimit = config('constants.message_limit');
+
+        return ResponseHelper::send(200, 'Conversations fetched successfully.', [
+            'conversations' => $conversations,
+            'dailyMessageLimit' => $dailyMessageLimit,
+            'userMessageCount' => $userDailyMessageCount,
+            'canMessage' => $userDailyMessageCount < $dailyMessageLimit,
+        ]);
     }
 
     /**
@@ -72,7 +110,21 @@ class AIController extends Controller
             ->orderBy('created_at')
             ->get(['id', 'role', 'content', 'created_at']);
 
-        return ResponseHelper::send(200, 'Messages fetched successfully.', $messages);
+        $userDailyMessageCount = DB::table($table)
+            ->where('user_id', auth()->id())
+            ->where('role', 'user')
+            ->whereDate('created_at', today())
+            ->count();
+
+        $dailyMessageLimit = config('constants.message_limit');
+        $canMessage = $userDailyMessageCount < $dailyMessageLimit;
+
+        return ResponseHelper::send(200, 'Messages fetched successfully.', [
+            'messages' => $messages,
+            'dailyMessageLimit' => $dailyMessageLimit,
+            'userMessageCount' => $userDailyMessageCount,
+            'canMessage' => $canMessage
+        ]);
     }
 
     /**
