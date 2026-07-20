@@ -3,6 +3,7 @@
 use App\Helpers\ResponseHelper;
 use App\Http\Controllers\Api\V1\AIController;
 use App\Http\Controllers\Api\V1\Auth\GuestController;
+use App\Http\Controllers\Api\V1\Auth\SocialAuthController;
 use App\Http\Controllers\Api\V1\GeneralController;
 use App\Http\Controllers\Api\V1\OnboardingController;
 use App\Http\Controllers\Api\V1\FeedbackController;
@@ -15,6 +16,10 @@ Route::prefix('V1')->group(function () {
     Route::post('forgot-password', [GuestController::class, 'forgotPassword']);
     Route::post('verify-otp', [GuestController::class, 'verifyOtp']);
     Route::post('reset-password', [GuestController::class, 'resetPassword']);
+    
+    // Social Auth routes
+    Route::get('auth/google/redirect', [SocialAuthController::class, 'redirectToGoogle']);
+    Route::get('auth/google/callback', [SocialAuthController::class, 'handleGoogleCallback']);
     
     Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('profile', [GeneralController::class, 'profile']);

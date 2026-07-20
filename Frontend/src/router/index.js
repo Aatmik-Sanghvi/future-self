@@ -33,6 +33,14 @@ const routes = [
     }
   },
   {
+    path: '/auth/callback',
+    name: 'SocialCallback',
+    component: () => import('@/views/auth/SocialCallbackView.vue'),
+    meta: { 
+      title: 'Authenticating - FutureYou' 
+    }
+  },
+  {
     path: '/logout',
     name: 'Logout',
     meta: { 

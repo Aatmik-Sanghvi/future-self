@@ -4,7 +4,7 @@
     <nav>
       <div class="logo">
         <div class="logo-icon">✨</div>
-        <span class="logo-name">FutureYou</span>
+        <span class="logo-name">Future Self</span>
       </div>
       <div class="step-pill" v-if="currentStepNumber < 6">
         Setting up your profile &nbsp;·&nbsp; Step <strong>{{ Math.min(currentStepNumber + 1, 5) }}</strong> of 5

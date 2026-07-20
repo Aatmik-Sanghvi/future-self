@@ -41,4 +41,9 @@ return [
         'model' => env('GITHUB_MODEL', 'openai/gpt-5'),
     ],
 
+    'google' => [
+        'client_id' => env('GOOGLE_CLIENT_ID'),
+        'client_secret' => env('GOOGLE_CLIENT_SECRET'),
+        'redirect' => env('GOOGLE_REDIRECT_URI', env('APP_URL', 'http://localhost:8000').'/api/V1/auth/google/callback'),
+    ],
 ];

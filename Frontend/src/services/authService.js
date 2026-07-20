@@ -10,6 +10,16 @@ class AuthService {
         return api.post('/register', userData)
     }
 
+    getGoogleAuthRedirectUrl() {
+        return api.get('/auth/google/redirect')
+    }
+
+    redirectToGoogle() {
+        const baseURL = api.defaults.baseURL || '/api/V1/'
+        const target = baseURL.startsWith('http') ? `${baseURL}auth/google/redirect` : `${window.location.origin}${baseURL.startsWith('/') ? '' : '/'}${baseURL}auth/google/redirect`
+        window.location.href = target
+    }
+
     forgotPassword(email) {
         return api.post('/forgot-password', email)
     }

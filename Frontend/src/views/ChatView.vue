@@ -30,6 +30,8 @@ const isLoading = ref(false)
 const isTyping = ref(false)
 const sidebarOpen = ref(false)
 const loadingConversations = ref(false)
+const loadingMessages = ref(false)
+let currentRequestToken = 0
 const showDeleteModal = ref(false)
 const conversationToDelete = ref(null)
 const userDailyMessageCount = ref();
@@ -106,13 +108,18 @@ async function loadConversations() {
 }
 
 async function selectConversation(convo) {
-  if (activeConversationId.value === convo.id) return
+  if (activeConversationId.value === convo.id && !loadingMessages.value) return
   activeConversationId.value = convo.id
   messages.value = []
+  loadingMessages.value = true
   sidebarOpen.value = false
+
+  const requestToken = ++currentRequestToken
 
   try {
     const res = await ChatService.getMessages(convo.id)
+    if (requestToken !== currentRequestToken) return
+
     messages.value = (res.data.data.messages || []).map(m => ({
       id: m.id,
       role: m.role,
@@ -130,14 +137,22 @@ async function selectConversation(convo) {
     await nextTick()
     scrollToBottom()
   } catch (err) {
-    console.error('Failed to load messages', err)
+    if (requestToken === currentRequestToken) {
+      console.error('Failed to load messages', err)
+    }
+  } finally {
+    if (requestToken === currentRequestToken) {
+      loadingMessages.value = false
+    }
   }
 }
 
 function startNewChat() {
+  currentRequestToken++
   activeConversationId.value = null
   messages.value = []
   inputMessage.value = ''
+  loadingMessages.value = false
   sidebarOpen.value = false
   nextTick(() => textareaRef.value?.focus())
 }
@@ -158,12 +173,13 @@ async function deleteConversation() {
   const id = conversationToDelete.value.id
 
   try {
-    // TODO: await ChatService.deleteConversation(id)
     const response = await ChatService.deleteConversation(id)
     conversations.value = conversations.value.filter(c => c.id !== id)
     if (activeConversationId.value === id) {
+      currentRequestToken++
       activeConversationId.value = null
       messages.value = []
+      loadingMessages.value = false
     }
     auth.toastMessage(response.data.message, {type:'success'})
   } catch (err) {
@@ -372,7 +388,7 @@ onMounted(() => {
       <div class="sidebar-header">
         <router-link to="/" class="sidebar-logo">
           <div class="sidebar-logo-icon">✨</div>
-          <span class="sidebar-logo-name">FutureYou</span>
+          <span class="sidebar-logo-name">Future Self</span>
         </router-link>
         <button class="btn-new-chat" @click="startNewChat" id="btn-new-chat">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -452,7 +468,7 @@ onMounted(() => {
           </button>
           <div class="chat-main-avatar">✨</div>
           <div>
-            <div class="chat-main-name">Future You</div>
+            <div class="chat-main-name">Future Self</div>
             <div class="chat-main-status">
               <div class="chat-main-status-dot"></div>
               <!-- <span class="chat-main-status-text">5 years ahead of you</span> -->
@@ -470,36 +486,62 @@ onMounted(() => {
       </div>
 
       <!-- Messages or Welcome -->
-      <div v-if="hasMessages" class="chat-messages-area" ref="messagesContainer">
-        <div
-          v-for="msg in messages"
-          :key="msg.id"
-          class="message-row"
-          :class="msg.role"
-        >
-          <div v-if="msg.role === 'assistant'" class="msg-avatar ai">✨</div>
-          <div v-else class="msg-avatar user-av">
-            <img v-if="auth.user.profile_image != null" :src="'/storage/' + auth.user.profile_image" alt="profile-image" class="profile-image" />
-            <span v-else>{{ userInitials }}</span>
+      <div v-if="hasMessages || activeConversationId || loadingMessages" class="chat-messages-area" ref="messagesContainer">
+        <!-- Skeleton loading when fetching conversation messages -->
+        <div v-if="loadingMessages" class="messages-loading-state">
+          <div class="skeleton-row assistant">
+            <div class="skeleton-avatar">✨</div>
+            <div class="skeleton-content">
+              <div class="skeleton-line short"></div>
+              <div class="skeleton-line medium"></div>
+            </div>
           </div>
-          <div class="msg-content">
-            <div
-              class="msg-bubble"
-              :class="msg.role === 'assistant' ? 'ai-bubble' : 'user-bubble'"
-              v-html="renderMarkdown(msg.content)"></div>
-            <div class="msg-time">{{ msg.time }}</div>
+          <div class="skeleton-row user">
+            <div class="skeleton-avatar">user</div>
+            <div class="skeleton-content">
+              <div class="skeleton-line medium"></div>
+            </div>
+          </div>
+          <div class="skeleton-row assistant">
+            <div class="skeleton-avatar">✨</div>
+            <div class="skeleton-content">
+              <div class="skeleton-line long"></div>
+              <div class="skeleton-line short"></div>
+            </div>
           </div>
         </div>
 
-        <!-- Typing indicator -->
-        <div v-if="isTyping" class="typing-indicator">
-          <div class="msg-avatar ai">✨</div>
-          <div class="typing-bubble">
-            <div class="typing-dot"></div>
-            <div class="typing-dot"></div>
-            <div class="typing-dot"></div>
+        <template v-else>
+          <div
+            v-for="msg in messages"
+            :key="msg.id"
+            class="message-row"
+            :class="msg.role"
+          >
+            <div v-if="msg.role === 'assistant'" class="msg-avatar ai">✨</div>
+            <div v-else class="msg-avatar user-av">
+              <img v-if="auth.user.profile_image != null" :src="'/storage/' + auth.user.profile_image" alt="profile-image" class="profile-image" />
+              <span v-else>{{ userInitials }}</span>
+            </div>
+            <div class="msg-content">
+              <div
+                class="msg-bubble"
+                :class="msg.role === 'assistant' ? 'ai-bubble' : 'user-bubble'"
+                v-html="renderMarkdown(msg.content)"></div>
+              <div class="msg-time">{{ msg.time }}</div>
+            </div>
           </div>
-        </div>
+
+          <!-- Typing indicator -->
+          <div v-if="isTyping" class="typing-indicator">
+            <div class="msg-avatar ai">✨</div>
+            <div class="typing-bubble">
+              <div class="typing-dot"></div>
+              <div class="typing-dot"></div>
+              <div class="typing-dot"></div>
+            </div>
+          </div>
+        </template>
       </div>
 
       <div v-else class="chat-welcome">
@@ -534,7 +576,7 @@ onMounted(() => {
       </div>
 
       <!-- Limit banner below messages area -->
-      <div v-if="hasMessages && canMessage === false" class="chat-input-bar">
+      <div v-if="(hasMessages || activeConversationId) && canMessage === false" class="chat-input-bar">
         <div class="message-limit-banner">
           <div class="limit-banner-icon">🔒</div>
           <div class="limit-banner-content">
