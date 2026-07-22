@@ -22,9 +22,9 @@ defineProps({
       Now in Early Access — Join 12,000+ users
     </div>
 
-    <h1 class="hero-h1">
-      Meet the version of you<br />
-      <span class="grad-text">5 years from now.</span>
+    <h1 class="hero-h1 grad-text">
+      Meet your future self.<br />
+      <!-- <span class="grad-text">5 years from now.</span> -->
     </h1>
 
     <p class="hero-sub">
@@ -47,10 +47,10 @@ defineProps({
       <div class="chat-header">
         <div class="chat-avatar">✨</div>
         <div>
-          <div class="chat-name">Future You</div>
+          <div class="chat-name">Future Self</div>
           <div class="chat-status">
             <div class="chat-status-dot"></div>
-            <span class="chat-status-text">5 years ahead of you</span>
+            <span class="chat-status-text"></span>
           </div>
         </div>
       </div>
