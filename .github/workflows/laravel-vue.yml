@@ -76,13 +76,13 @@ jobs:
         username: ${{ secrets.SSH_USER }}
         key: ${{ secrets.SSH_KEY }}
         port: ${{ secrets.SSH_PORT }}
-    script: |
-      cd /var/www/html/future-self
-      sudo git pull
-      cd Backend
-      composer install --no-dev --optimize-autoloader
-      php artisan migrate --force
-      php artisan optimize:clear
-      cd ../Frontend
-      npm install
-      npm run build
+        script: |
+          cd /var/www/html/future-self
+          sudo git pull
+          cd Backend
+          composer install --no-dev --optimize-autoloader
+          php artisan migrate --force
+          php artisan optimize:clear
+          cd ../Frontend
+          npm install
+          npm run build
