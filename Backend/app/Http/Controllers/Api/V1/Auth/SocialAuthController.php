@@ -31,7 +31,7 @@ class SocialAuthController extends ResponseController
                 return ResponseHelper::send(500, 'Failed to initiate Google authentication: ' . $e->getMessage());
             }
 
-            $frontendUrl = config('app.frontend_url', 'http://localhost:5173');
+            $frontendUrl = rtrim(config('app.frontend_url') ?: config('app.url', 'http://localhost:5173'), '/');
             return redirect()->away($frontendUrl . '/login?error=' . urlencode($e->getMessage()));
         }
     }
@@ -41,7 +41,7 @@ class SocialAuthController extends ResponseController
      */
     public function handleGoogleCallback(Request $request)
     {
-        $frontendUrl = config('app.frontend_url', 'http://localhost:5173');
+        $frontendUrl = rtrim(config('app.frontend_url') ?: config('app.url', 'http://localhost:5173'), '/');
 
         try {
             $googleUser = Socialite::driver('google')->stateless()->user();

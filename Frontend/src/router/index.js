@@ -33,6 +33,22 @@ const routes = [
     }
   },
   {
+    path: '/privacy-policy',
+    name: 'PrivacyPolicy',
+    component: () => import('@/views/PrivacyPolicyView.vue'),
+    meta: { 
+      title: 'Privacy Policy - FutureYou' 
+    }
+  },
+  {
+    path: '/terms-of-service',
+    name: 'TermsOfService',
+    component: () => import('@/views/TermsOfServiceView.vue'),
+    meta: { 
+      title: 'Terms of Service - FutureYou' 
+    }
+  },
+  {
     path: '/auth/callback',
     name: 'SocialCallback',
     component: () => import('@/views/auth/SocialCallbackView.vue'),

@@ -14,11 +14,19 @@ class AuthService {
         return api.get('/auth/google/redirect')
     }
 
-    redirectToGoogle() {
-        const baseURL = api.defaults.baseURL || '/api/V1/'
-        console.log(baseURL);
-        const target = baseURL.startsWith('http') ? `${baseURL}auth/google/redirect` : `${window.location.origin}${baseURL.startsWith('/') ? '' : '/'}${baseURL}auth/google/redirect`
-        window.location.href = target
+    async redirectToGoogle() {
+        try {
+            const response = await this.getGoogleAuthRedirectUrl()
+            const redirectUrl = response?.data?.data?.url || response?.data?.url
+            if (redirectUrl) {
+                window.location.href = redirectUrl
+            } else {
+                throw new Error('Google authorization URL was not returned by the server.')
+            }
+        } catch (error) {
+            console.error('Google Auth Error:', error)
+            throw error
+        }
     }
 
     forgotPassword(email) {

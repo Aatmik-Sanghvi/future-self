@@ -5,12 +5,27 @@ import CountryFlag from 'vue-country-flag-next'
 import countryTelephoneData from 'country-telephone-data'
 import { useAuthStore } from '@/stores/auth'
 import AuthService from '@/services/authService'
+import LegalModal from '@/components/LegalModal.vue'
 
 const router = useRouter()
 const auth = useAuthStore()
 
-const handleGoogleLogin = () => {
-  AuthService.redirectToGoogle()
+const isLegalModalOpen = ref(false)
+const legalModalTab = ref('terms')
+
+const openLegalModal = (tab = 'terms') => {
+  legalModalTab.value = tab
+  isLegalModalOpen.value = true
+}
+
+const handleGoogleLogin = async () => {
+  try {
+    await AuthService.redirectToGoogle()
+  } catch (err) {
+    console.error(err)
+    const message = err?.response?.data?.message || err?.message || 'Failed to initiate Google sign in.'
+    auth.toastMessage(message, { type: 'error' })
+  }
 }
 
 const name = ref('')
@@ -355,7 +370,7 @@ const handleRegister = async () => {
             class="auth-terms__checkbox"
           />
           <label for="register-terms" class="auth-terms__text">
-            I agree to the <a href="#" @click.prevent>Terms of Service</a> and <a href="#" @click.prevent>Privacy Policy</a>. I understand this is an AI experience.
+            I agree to the <a href="#" @click.prevent="openLegalModal('terms')">Terms of Service</a> and <a href="#" @click.prevent="openLegalModal('privacy')">Privacy Policy</a>. I understand this is an AI experience.
           </label>
         </div>
 
@@ -403,6 +418,13 @@ const handleRegister = async () => {
         Already have an account? <router-link to="/login">Sign in</router-link>
       </div>
     </div>
+
+    <!-- Legal Modal -->
+    <LegalModal
+      :is-open="isLegalModalOpen"
+      :initial-tab="legalModalTab"
+      @close="isLegalModalOpen = false"
+    />
   </div>
 </template>
 

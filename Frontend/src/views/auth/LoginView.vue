@@ -21,8 +21,14 @@ const togglePassword = () => {
   showPassword.value = !showPassword.value
 }
 
-const handleGoogleLogin = () => {
-  AuthService.redirectToGoogle()
+const handleGoogleLogin = async () => {
+  try {
+    await AuthService.redirectToGoogle()
+  } catch (err) {
+    console.error(err)
+    const message = err?.response?.data?.message || err?.message || 'Failed to initiate Google sign in.'
+    auth.toastMessage(message, { type: 'error' })
+  }
 }
 
 const handleLogin = async () => {
