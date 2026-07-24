@@ -365,7 +365,7 @@
         <div v-show="currentStep === 4" :class="['step', { active: currentStep === 4 }]">
           <button class="btn btn-ghost back-btn" type="button" @click="goBack()">← Back</button>
           <p class="step-label" style="color: var(--violet-light)">Step 5 of 5</p>
-          <h1 class="step-title">How should Future You <span style="color: var(--violet-light)">talk to you?</span></h1>
+          <h1 class="step-title">How should Future self <span style="color: var(--violet-light)">talk to you?</span></h1>
           <p class="step-sub">Choose the voice that moves you most. You can change this anytime.</p>
 
           <div class="tone-grid">
@@ -403,7 +403,7 @@
               <div class="loading-orb">✨</div>
               <div class="loading-ring"></div>
             </div>
-            <h2 class="loading-title">Creating your <span class="grad">Future You</span><span id="l-dots">{{ loadingDots }}</span></h2>
+            <h2 class="loading-title">Creating your <span class="grad">Future Self</span><span id="l-dots">{{ loadingDots }}</span></h2>
             <p class="loading-sub">Shaping a version of you that's 5 years ahead, ready to guide you forward.</p>
             <div class="loading-checklist">
               <div v-for="(item, i) in loadingItems" :key="i" class="check-row">
@@ -477,7 +477,7 @@ const loadingItems = [
   'Shaping your identity',
   'Learning from your heroes',
   'Setting your communication style',
-  'Awakening Future You',
+  'Awakening Future Self',
 ]
 const progressLabels = ['Goals', 'Fears', 'Traits', 'Role Models', 'Tone']
 

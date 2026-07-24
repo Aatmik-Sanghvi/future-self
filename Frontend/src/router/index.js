@@ -80,7 +80,7 @@ const routes = [
     name: 'Dashboard',
     component: () => import('@/views/DashboardView.vue'),
     meta: { 
-      title: 'Home - Future You' ,
+      title: 'Home - Future Self' ,
       redirectTo: true,
     }
   }
