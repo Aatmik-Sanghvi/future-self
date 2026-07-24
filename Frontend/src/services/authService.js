@@ -16,6 +16,7 @@ class AuthService {
 
     redirectToGoogle() {
         const baseURL = api.defaults.baseURL || '/api/V1/'
+        console.log(baseURL);
         const target = baseURL.startsWith('http') ? `${baseURL}auth/google/redirect` : `${window.location.origin}${baseURL.startsWith('/') ? '' : '/'}${baseURL}auth/google/redirect`
         window.location.href = target
     }

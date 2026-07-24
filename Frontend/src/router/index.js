@@ -92,7 +92,7 @@ const router = createRouter({
 })
 
 router.beforeEach(async (to) => {
-  document.title = to.meta.title || 'FutureYou'
+  document.title = to.meta.title || 'FutureSelf'
 
   const auth = useAuthStore()
 
