@@ -64,3 +64,25 @@ jobs:
       # Uncomment if using Vitest
       # - name: Run Vue Tests
       #   run: npm run test
+
+  deploy:
+    needs: [backend, frontend]
+    runs-on: ubuntu-latest
+    steps:
+    - name: Deploy to EC2
+      uses: appleboy/ssh-action@v1.2.0
+      with:
+        host: ${{ secrets.SSH_HOST }}
+        username: ${{ secrets.SSH_USER }}
+        key: ${{ secrets.SSH_KEY }}
+        port: ${{ secrets.SSH_PORT }}
+    script: |
+      cd /var/www/html/future-self
+      sudo git pull
+      cd Backend
+      composer install --no-dev --optimize-autoloader
+      php artisan migrate --force
+      php artisan optimize:clear
+      cd ../Frontend
+      npm install
+      npm run build
