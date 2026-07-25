@@ -17,7 +17,7 @@ class AuthService {
     async redirectToGoogle() {
         try {
             const response = await this.getGoogleAuthRedirectUrl()
-            const redirectUrl = response?.data?.data?.url || response?.data?.url
+            const redirectUrl = response?.data?.data?.url
             if (redirectUrl) {
                 window.location.href = redirectUrl
             } else {
