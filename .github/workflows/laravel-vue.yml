@@ -81,8 +81,8 @@ jobs:
           cd /var/www/html/future-self
           sudo git pull
           cd Backend
-          php artisan migrate --force
-          php artisan optimize:clear
+          sudo php artisan migrate --force
+          sudo php artisan optimize:clear
           cd ../Frontend
-          npm install
-          npm run build
+          sudo npm install
+          sudo npm run build
