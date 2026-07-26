@@ -14,19 +14,9 @@ class AuthService {
         return api.get('/auth/google/redirect')
     }
 
-    async redirectToGoogle() {
-        try {
-            const response = await this.getGoogleAuthRedirectUrl()
-            const redirectUrl = response?.data?.data?.url
-            if (redirectUrl) {
-                window.location.href = redirectUrl
-            } else {
-                throw new Error('Google authorization URL was not returned by the server.')
-            }
-        } catch (error) {
-            console.error('Google Auth Error:', error)
-            throw error
-        }
+    redirectToGoogle() {
+        window.location.href =
+            `${import.meta.env.VITE_API_URL}/auth/google/redirect`;
     }
 
     forgotPassword(email) {
