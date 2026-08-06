@@ -53,7 +53,7 @@ class GuestController extends ResponseController
             return ResponseHelper::send(401, 'User is not authorized to login.');
         }
         
-        // Auth::login($checkUser);
+        Auth::login($checkUser);
 
         // Create token
         $token = $checkUser->createToken('api-token')->plainTextToken;
