@@ -420,3 +420,239 @@ input::placeholder, textarea::placeholder { color: rgba(255,255,255,0.18); }
 @keyframes fadeUp { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:translateY(0); } }
 @keyframes pulse  { 0%,100%{transform:scale(1);opacity:1;}50%{transform:scale(1.05);opacity:.8;} }
 @keyframes spin   { from{transform:rotate(0deg);}to{transform:rotate(360deg);} }
+
+/* ── RESPONSIVE — TABLET (≤ 768px) ───────────── */
+@media (max-width: 768px) {
+  nav {
+    padding: 14px 20px;
+  }
+
+  .progress-wrap {
+    padding: 0 20px;
+  }
+
+  .progress-labels {
+    gap: 4px;
+  }
+
+  .progress-label {
+    font-size: 9px;
+    letter-spacing: 0.06em;
+  }
+
+  main {
+    padding: 32px 16px 60px;
+  }
+
+  .card {
+    padding: 28px;
+    border-radius: 20px;
+  }
+
+  .tone-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .field-row {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .step-title {
+    font-size: 22px;
+  }
+
+  .step-sub {
+    font-size: 13px;
+    margin-bottom: 22px;
+  }
+
+  .saved-ttl {
+    max-width: 200px;
+  }
+
+  .tf-row {
+    flex-wrap: wrap;
+  }
+
+  .tf-btn {
+    flex: 1 1 calc(50% - 5px);
+  }
+
+  .role-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .loading-title {
+    font-size: 22px;
+  }
+
+  .loading-sub {
+    font-size: 13px;
+  }
+
+  .profile-nav-actions {
+    gap: 8px;
+  }
+
+  .profile-nav-btn {
+    padding: 7px 12px;
+    font-size: 12px;
+  }
+}
+
+/* ── RESPONSIVE — MOBILE (≤ 480px) ───────────── */
+@media (max-width: 480px) {
+  nav {
+    padding: 12px 14px;
+  }
+
+  .step-pill {
+    font-size: 11px;
+    padding: 5px 12px;
+  }
+
+  .progress-wrap {
+    padding: 0 14px;
+  }
+
+  .progress-labels {
+    display: none;
+  }
+
+  main {
+    padding: 20px 10px 48px;
+  }
+
+  .card {
+    padding: 20px 16px;
+    border-radius: 16px;
+  }
+
+  .step-title {
+    font-size: 19px;
+  }
+
+  .step-sub {
+    font-size: 12px;
+    margin-bottom: 18px;
+  }
+
+  .tone-card {
+    padding: 14px;
+    border-radius: 14px;
+  }
+
+  .tone-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 18px;
+    border-radius: 10px;
+  }
+
+  .tone-name {
+    font-size: 13px;
+  }
+
+  .tone-desc {
+    font-size: 11px;
+  }
+
+  .chip {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+
+  .trait-chip {
+    padding: 7px 14px;
+    font-size: 12px;
+  }
+
+  .saved-goal,
+  .saved-fear {
+    padding: 12px 14px;
+    border-radius: 12px;
+  }
+
+  .saved-ttl {
+    max-width: 160px;
+    font-size: 13px;
+  }
+
+  .saved-desc {
+    font-size: 11px;
+  }
+
+  .btn-continue {
+    padding: 15px;
+    font-size: 15px;
+    border-radius: 14px;
+  }
+
+  .btn-skip {
+    font-size: 13px;
+  }
+
+  .btn-add-more {
+    padding: 11px;
+    font-size: 12px;
+  }
+
+  .panel {
+    padding: 16px;
+    border-radius: 14px;
+  }
+
+  .panel-hd {
+    font-size: 9px;
+  }
+
+  .intensity-row {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .int-bars {
+    width: 100%;
+  }
+
+  .stars {
+    gap: 4px;
+  }
+
+  .star {
+    font-size: 18px;
+  }
+
+  .loading-orb {
+    width: 80px;
+    height: 80px;
+    font-size: 32px;
+  }
+
+  .loading-title {
+    font-size: 20px;
+  }
+
+  .loading-sub {
+    font-size: 12px;
+    margin-bottom: 32px;
+  }
+
+  .logout-btn {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+
+  .profile-nav-actions {
+    gap: 6px;
+  }
+
+  .profile-nav-btn {
+    padding: 6px 10px;
+    font-size: 11px;
+  }
+}

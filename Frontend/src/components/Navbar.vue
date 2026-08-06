@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { useRouter } from 'vue-router'
 
@@ -7,6 +7,7 @@ const auth = useAuthStore()
 const router = useRouter()
 const dropdownOpen = ref(false)
 const dropdownRef = ref(null)
+const menuOpen = ref(false)
 
 const userInitials = computed(() => {
   if (!auth.user?.name) return '?'
@@ -28,14 +29,29 @@ function closeDropdown(e) {
   }
 }
 
+function toggleMobileMenu() {
+  menuOpen.value = !menuOpen.value
+}
+
+function closeMobileMenu() {
+  menuOpen.value = false
+}
+
+// Lock body scroll when mobile menu is open
+watch(menuOpen, (val) => {
+  document.body.style.overflow = val ? 'hidden' : ''
+})
+
 async function handleLogout() {
   dropdownOpen.value = false
+  closeMobileMenu()
   await auth.logout()
   router.push({ name: 'Login' })
 }
 
 function navigateTo(routePath) {
   dropdownOpen.value = false
+  closeMobileMenu()
   router.push(routePath)
 }
 
@@ -45,6 +61,7 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   document.removeEventListener('click', closeDropdown)
+  document.body.style.overflow = ''
 })
 </script>
 
@@ -69,10 +86,24 @@ onBeforeUnmount(() => {
     <div class="nav-actions" v-if="!auth.isAuthenticated">
       <router-link to="/login" class="btn-secondary">Login</router-link>
       <router-link to="/register" class="btn-primary">Start Free</router-link>
+
+      <!-- Mobile hamburger -->
+      <button class="nav-mobile-toggle" @click="toggleMobileMenu" type="button" aria-label="Open menu">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+        </svg>
+      </button>
     </div>
 
     <!-- Authenticated: user dropdown -->
     <div class="nav-actions" v-else>
+      <!-- Mobile hamburger (authenticated) -->
+      <button class="nav-mobile-toggle" @click="toggleMobileMenu" type="button" aria-label="Open menu">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+        </svg>
+      </button>
+
       <div class="nav-user-dropdown" ref="dropdownRef">
         <button
           class="nav-user-avatar"
@@ -123,9 +154,44 @@ onBeforeUnmount(() => {
         </Transition>
       </div>
     </div>
+
+    <!-- Mobile Menu Overlay -->
+    <div
+      class="nav-mobile-overlay"
+      :class="{ show: menuOpen }"
+      @click="closeMobileMenu"
+    ></div>
+
+    <!-- Mobile Slide-in Menu -->
+    <div class="nav-mobile-menu" :class="{ open: menuOpen }">
+      <button class="nav-mobile-close" @click="closeMobileMenu" type="button" aria-label="Close menu">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+
+      <a href="#features" class="nav-mobile-link" @click="closeMobileMenu">Features</a>
+      <a href="#how" class="nav-mobile-link" @click="closeMobileMenu">How It Works</a>
+      <a href="#testimonials" class="nav-mobile-link" @click="closeMobileMenu">Testimonials</a>
+      <a href="#pricing" class="nav-mobile-link" @click="closeMobileMenu">Pricing</a>
+
+      <template v-if="auth.isAuthenticated">
+        <router-link to="/chat" class="nav-mobile-link" @click="closeMobileMenu">Chat</router-link>
+        <div class="nav-mobile-divider"></div>
+      </template>
+
+      <template v-else>
+        <div class="nav-mobile-divider"></div>
+        <div class="nav-mobile-actions">
+          <router-link to="/login" class="btn-mobile-login" @click="closeMobileMenu">Login</router-link>
+          <router-link to="/register" class="btn-mobile-primary" @click="closeMobileMenu">Start Free</router-link>
+        </div>
+      </template>
+    </div>
   </nav>
 </template>
 
 <style scoped>
 
 </style>
+

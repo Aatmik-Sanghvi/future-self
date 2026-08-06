@@ -765,6 +765,61 @@ body {
   .auth-socials {
     flex-direction: column;
   }
+
+  .auth-brand__icon {
+    width: 44px;
+    height: 44px;
+    font-size: 20px;
+  }
+
+  .otp-group {
+    gap: 8px;
+  }
+
+  .otp-input {
+    width: 44px;
+    height: 52px;
+    font-size: 1.2rem;
+  }
+
+  .auth-heading__subtitle {
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 380px) {
+  .auth-card {
+    padding: 28px 18px;
+  }
+
+  .auth-heading__title {
+    font-size: 1.35rem;
+  }
+
+  .auth-submit {
+    padding: 14px;
+    font-size: 0.92rem;
+  }
+
+  .otp-group {
+    gap: 6px;
+  }
+
+  .otp-input {
+    width: 38px;
+    height: 46px;
+    font-size: 1.1rem;
+    border-radius: 8px;
+  }
+
+  .auth-brand__tagline {
+    font-size: 0.72rem;
+  }
+
+  .auth-field__input {
+    padding: 12px 14px 12px 40px;
+    font-size: 0.9rem;
+  }
 }
 
 /* ---------- Transitions (page) ---------- */
