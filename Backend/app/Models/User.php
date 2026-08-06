@@ -59,6 +59,10 @@ class User extends Authenticatable
         }
     }
 
+    public function getProfileImageAttribute($value){
+        return checkFileExist($value);
+    }
+
     public function goals()
     {
         return $this->hasOne(Goals::class);

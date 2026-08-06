@@ -80,14 +80,14 @@ onBeforeUnmount(() => {
           id="nav-user-avatar"
           type="button"
         >
-          <img v-if="auth.user.profile_image" :src="'/storage/' + auth.user.profile_image" class="profile-image"> 
+          <img v-if="auth.user.profile_image" :src="auth.user.profile_image" class="profile-image"> 
           <span v-else>{{ userInitials }}</span>
         </button>
 
         <Transition name="dropdown-fade">
           <div v-if="dropdownOpen" class="nav-dropdown-menu" id="nav-dropdown-menu">
             <div class="nav-dropdown-header">
-              <img v-if="auth.user.profile_image" :src="'/storage/' + auth.user.profile_image" class="profile-image"> 
+              <img v-if="auth.user.profile_image" :src="auth.user.profile_image" class="profile-image"> 
               <div class="nav-dropdown-user-avatar" v-else>{{ userInitials }}</div>
               <div class="nav-dropdown-user-info">
                 <div class="nav-dropdown-user-name">{{ auth.user?.name || 'User' }}</div>

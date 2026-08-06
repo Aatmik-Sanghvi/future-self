@@ -61,8 +61,11 @@ if (! function_exists('get_header_auth_token')) {
 if (! function_exists('checkFileExist')) {
     function checkFileExist($path = '', $no_image = 'no_image')
     {
-        if (! empty($path) && file_exists(public_path($path))) {
-            $url = url($path);  // This will return the full URL
+        if (! empty($path)) {
+            if(filter_var($path, FILTER_VALIDATE_URL)){
+                return $path;
+            }
+            $url = url('storage/'.$path);  // This will return the full URL
         } else {
             if ($no_image == 'no_user_image') {
                 $url = url('default/no_user_image.png');

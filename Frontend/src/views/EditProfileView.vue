@@ -97,7 +97,7 @@ const showSaved = ref(false)
 const showDeleteModal = ref(false)
 const isDeleting = ref(false)
 const deleteConfirmText = ref('')
-const avatarUrl = ref(auth.user.profile_image ? `/storage/${auth.user.profile_image}` : null)
+const avatarUrl = ref(auth.user.profile_image || null)
 
 // Computed
 const userInitials = computed(() => {
