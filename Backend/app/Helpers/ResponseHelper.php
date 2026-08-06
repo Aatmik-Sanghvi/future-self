@@ -30,9 +30,7 @@ class ResponseHelper
         $validStatus = [200, 401, 412]; // Define valid statuses
         $headerStatus = in_array($status, $validStatus) ? $status : 412;
 
-        // Send the JSON response
-        response()->json($data, $headerStatus)
-            ->header('Content-Type', 'application/json')->send();
-        exit(0);
+        // Return the JSON response through the middleware pipeline
+        return response()->json($data, $headerStatus);
     }
 }
