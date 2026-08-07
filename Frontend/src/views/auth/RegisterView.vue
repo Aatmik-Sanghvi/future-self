@@ -343,7 +343,7 @@ const handleRegister = async () => {
               v-model="confirmPassword"
               :type="showConfirmPassword ? 'text' : 'password'"
               class="auth-field__input"
-              placeholder="Re-enter your password"
+              placeholder="Re-enter password"
               autocomplete="new-password"
               required
             />

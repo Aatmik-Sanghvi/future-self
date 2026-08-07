@@ -512,4 +512,151 @@ const closeModal = () => {
 .legal-modal-leave-to .legal-modal-card {
   transform: scale(0.95) translateY(10px);
 }
+
+/* ── Responsive ── */
+@media (max-width: 640px) {
+  .legal-modal-overlay {
+    padding: 10px;
+    align-items: flex-end;
+  }
+
+  .legal-modal-card {
+    max-height: 90vh;
+    border-radius: 18px 18px 0 0;
+    max-width: 100%;
+  }
+
+  .legal-modal-header {
+    padding: 12px 16px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .legal-modal-tabs {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .legal-tab-btn {
+    padding: 7px 10px;
+    font-size: 12.5px;
+    gap: 5px;
+    flex: 1;
+    justify-content: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .legal-tab-btn svg {
+    flex-shrink: 0;
+  }
+
+  .legal-modal-close {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    flex-shrink: 0;
+  }
+
+  .legal-modal-close svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .legal-modal-body {
+    padding: 16px;
+  }
+
+  .legal-title {
+    font-size: 20px;
+    margin-bottom: 16px;
+  }
+
+  .legal-section {
+    margin-bottom: 16px;
+  }
+
+  .legal-section h3 {
+    font-size: 14px;
+  }
+
+  .legal-section p {
+    font-size: 13px;
+  }
+
+  .alert-section {
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px;
+  }
+
+  .legal-list {
+    font-size: 13px;
+    padding-left: 16px;
+  }
+
+  .legal-modal-footer {
+    padding: 12px 16px;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .legal-fullpage-link {
+    font-size: 12.5px;
+  }
+
+  .legal-close-btn {
+    width: 100%;
+    text-align: center;
+    padding: 10px 20px;
+  }
+}
+
+@media (max-width: 400px) {
+  .legal-modal-card {
+    max-height: 94vh;
+  }
+
+  .legal-modal-header {
+    padding: 10px 12px;
+  }
+
+  .legal-modal-tabs {
+    gap: 4px;
+    padding: 3px;
+  }
+
+  .legal-tab-btn {
+    padding: 6px 8px;
+    font-size: 11.5px;
+    gap: 4px;
+  }
+
+  .legal-tab-btn svg {
+    width: 13px;
+    height: 13px;
+  }
+
+  .legal-modal-body {
+    padding: 14px 12px;
+  }
+
+  .legal-title {
+    font-size: 18px;
+    margin-bottom: 14px;
+  }
+
+  .legal-section h3 {
+    font-size: 13px;
+  }
+
+  .legal-section p {
+    font-size: 12.5px;
+  }
+
+  .legal-list {
+    font-size: 12.5px;
+  }
+}
 </style>

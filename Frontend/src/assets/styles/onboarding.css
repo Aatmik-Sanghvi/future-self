@@ -508,11 +508,21 @@ input::placeholder, textarea::placeholder { color: rgba(255,255,255,0.18); }
 @media (max-width: 480px) {
   nav {
     padding: 12px 14px;
+    gap: 8px;
+  }
+
+  .logo-name {
+    font-size: 15px;
   }
 
   .step-pill {
-    font-size: 11px;
-    padding: 5px 12px;
+    font-size: 10px;
+    padding: 4px 10px;
+    gap: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 140px;
   }
 
   .progress-wrap {
@@ -610,6 +620,15 @@ input::placeholder, textarea::placeholder { color: rgba(255,255,255,0.18); }
     font-size: 9px;
   }
 
+  .inline-add {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .inline-add .btn {
+    width: 100%;
+  }
+
   .intensity-row {
     flex-wrap: wrap;
     gap: 8px;
@@ -645,6 +664,7 @@ input::placeholder, textarea::placeholder { color: rgba(255,255,255,0.18); }
   .logout-btn {
     padding: 6px 10px;
     font-size: 12px;
+    white-space: nowrap;
   }
 
   .profile-nav-actions {
@@ -654,5 +674,82 @@ input::placeholder, textarea::placeholder { color: rgba(255,255,255,0.18); }
   .profile-nav-btn {
     padding: 6px 10px;
     font-size: 11px;
+  }
+
+  .role-row {
+    gap: 10px;
+  }
+
+  .role-name {
+    font-size: 13px;
+  }
+}
+
+/* ── RESPONSIVE — SMALL MOBILE (≤ 360px) ─────── */
+@media (max-width: 360px) {
+  nav {
+    padding: 10px 12px;
+  }
+
+  .step-pill {
+    display: none;
+  }
+
+  .logo-name {
+    font-size: 14px;
+  }
+
+  .logo-icon {
+    width: 28px;
+    height: 28px;
+    font-size: 13px;
+  }
+
+  main {
+    padding: 16px 8px 40px;
+  }
+
+  .card {
+    padding: 18px 14px;
+    border-radius: 14px;
+  }
+
+  .step-title {
+    font-size: 18px;
+  }
+
+  .step-sub {
+    font-size: 12px;
+    margin-bottom: 16px;
+  }
+
+  .saved-ttl {
+    max-width: 120px;
+  }
+
+  .saved-row {
+    gap: 6px;
+  }
+
+  .badge {
+    font-size: 10px;
+    padding: 2px 8px;
+  }
+
+  .btn-continue {
+    padding: 14px;
+    font-size: 14px;
+  }
+
+  .loading-title {
+    font-size: 18px;
+  }
+
+  .check-txt {
+    font-size: 13px;
+  }
+
+  .loading-checklist {
+    max-width: 260px;
   }
 }
