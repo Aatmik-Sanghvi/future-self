@@ -520,7 +520,7 @@ onMounted(() => {
           >
             <div v-if="msg.role === 'assistant'" class="msg-avatar ai">✨</div>
             <div v-else class="msg-avatar user-av">
-              <img v-if="auth.user.profile_image != null" :src="'/storage/' + auth.user.profile_image" alt="profile-image" class="profile-image" />
+              <img v-if="auth.user.profile_image != null" :src="auth.user.profile_image" alt="profile-image" class="profile-image" />
               <span v-else>{{ userInitials }}</span>
             </div>
             <div class="msg-content">
