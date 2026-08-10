@@ -10,11 +10,13 @@
     "license": "MIT",
     "require": {
         "php": "^8.3",
+        "bacon/bacon-qr-code": "*",
         "laravel/ai": "*",
         "laravel/framework": "^13.0",
         "laravel/sanctum": "^4.0",
         "laravel/socialite": "*",
-        "laravel/tinker": "^3.0"
+        "laravel/tinker": "^3.0",
+        "pragmarx/google2fa": "*"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",

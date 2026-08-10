@@ -31,9 +31,24 @@ class User extends Authenticatable
         'profile_image',
         'is_onboarded',
         'is_admin',
+        'google2fa_secret',
+        'google2fa_enabled',
+        'two_factor_recovery_codes',
         'current_state_summary',
         'future_self_summary',
         'daily_limit',
+    ];
+
+    /**
+     * The attributes that should be hidden for serialization.
+     *
+     * @var array<int, string>
+     */
+    protected $hidden = [
+        'password',
+        'remember_token',
+        'google2fa_secret',
+        'two_factor_recovery_codes',
     ];
 
     /**
@@ -46,6 +61,8 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'google2fa_enabled' => 'boolean',
+            'two_factor_recovery_codes' => 'array',
         ];
     }
 
