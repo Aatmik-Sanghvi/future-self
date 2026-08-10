@@ -21,7 +21,7 @@ Route::prefix('V1')->group(function () {
     Route::get('auth/google/redirect', [SocialAuthController::class, 'redirectToGoogle']);
     Route::get('auth/google/callback', [SocialAuthController::class, 'handleGoogleCallback']);
     
-    Route::middleware(['auth:sanctum'])->group(function () {
+    Route::middleware(['auth:sanctum', 'log.activity'])->group(function () {
         Route::get('profile', [GeneralController::class, 'profile']);
         Route::post('update-profile',[GeneralController::class, 'updateProfile']);
         Route::post('update-password',[GeneralController::class, 'updatePassword']);

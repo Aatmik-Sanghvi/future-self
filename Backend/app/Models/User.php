@@ -30,6 +30,7 @@ class User extends Authenticatable
         'mobile',
         'profile_image',
         'is_onboarded',
+        'is_admin',
         'current_state_summary',
         'future_self_summary',
         'daily_limit',
@@ -66,5 +67,29 @@ class User extends Authenticatable
     public function goals()
     {
         return $this->hasOne(Goals::class);
+    }
+
+    /**
+     * Get all activity logs for this user.
+     */
+    public function activityLogs()
+    {
+        return $this->hasMany(UserActivityLog::class);
+    }
+
+    /**
+     * Get all daily active user records for this user.
+     */
+    public function dailyActiveRecords()
+    {
+        return $this->hasMany(DailyActiveUser::class);
+    }
+
+    /**
+     * Check if the user is an admin.
+     */
+    public function isAdmin(): bool
+    {
+        return (bool) $this->is_admin;
     }
 }
