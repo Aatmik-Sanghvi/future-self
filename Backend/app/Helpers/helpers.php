@@ -430,12 +430,22 @@ if (! function_exists('register_user_email')) {
             // Update OTP and timestamp
             $user->update([
                 'otp' => $otp,
-                'otp_expires_at' => now()->addMinutes(10),
+                'otp_expires_at' => now()->addMinutes(5),
             ]);
 
             $name = !is_null($user->name) ? $user->name : 'User';
+
+            // Construct dynamic subject to prevent static spam filter matching
+            if (in_array(strtolower($subjectTomail), ['signup process', 'email verification'])) {
+                $emailSubject = "{$otp} is your FutureSelf verification code";
+            } elseif (in_array(strtolower($subjectTomail), ['forgot password', 'reset password'])) {
+                $emailSubject = "{$otp} is your FutureSelf password reset code";
+            } else {
+                $emailSubject = "{$otp} — {$subjectTomail} (FutureSelf)";
+            }
+
             // Send OTP email
-            Mail::to($user->email)->send(new User_Password_Send_OTP_Mail($name, $otp, $subjectTomail));
+            Mail::to($user->email)->send(new User_Password_Send_OTP_Mail($name, $otp, $emailSubject));
 
             return true;
         }

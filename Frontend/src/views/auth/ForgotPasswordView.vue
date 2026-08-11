@@ -37,9 +37,15 @@ const handleSendEmail = async () => {
 // Step 2: OTP
 const otp = ref(['', '', '', ''])
 const otpInputs = ref([])
-const resendCooldown = ref(60)
+const resendCooldown = ref(300)
 let timerInterval = null
 const resetToken = ref('')
+
+const formattedTimer = computed(() => {
+  const mins = Math.floor(resendCooldown.value / 60).toString().padStart(2, '0')
+  const secs = (resendCooldown.value % 60).toString().padStart(2, '0')
+  return `${mins}:${secs}`
+})
 
 const maskedEmail = computed(() => {
   if (!email.value) return ''
@@ -107,7 +113,7 @@ const focusOtpInput = (index) => {
 }
 
 const startCountdown = () => {
-  resendCooldown.value = 60
+  resendCooldown.value = 300
   clearInterval(timerInterval)
   timerInterval = setInterval(() => {
     if (resendCooldown.value > 0) {
@@ -315,8 +321,8 @@ onUnmounted(() => {
                 </div>
                 
                 <div class="otp-meta">
-                  <span class="otp-timer" :class="{'otp-timer--warning': resendCooldown <= 10}">
-                    {{ resendCooldown > 0 ? `00:${resendCooldown.toString().padStart(2, '0')}` : 'Code expired' }}
+                  <span class="otp-timer" :class="{'otp-timer--warning': resendCooldown <= 30}">
+                    {{ resendCooldown > 0 ? formattedTimer : 'Code expired' }}
                   </span>
                   <button 
                     type="button" 

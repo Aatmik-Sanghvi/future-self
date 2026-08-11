@@ -23,22 +23,94 @@ class GuestController extends ResponseController
         $this->validationService = new ValidationService;
     }
 
-    public function register(Request $request)
+    public function registerSendOtp(Request $request)
     {
         $request->validate([
             'name' => $this->validationService->loginInputRules(),
-            'email' => $this->validationService->emailUniqueRules(),
+            'email' => $this->validationService->emailAuthenticUniqueRules(),
             'mobile' => $this->validationService->mobileOnlyRules(),
             'password' => $this->validationService->passwordRules(),
         ]);
 
-        $request['daily_limit'] = config('constants.message_limit');
-        $user = $this->user->create($request->all());
+        // Store registration data in cache (5 min TTL) — no user created yet
+        Cache::put('register_data_' . $request->email, [
+            'name' => $request->name,
+            'email' => $request->email,
+            'mobile' => $request->mobile,
+            'country_code' => $request->country_code,
+            'password' => $request->password,
+        ], now()->addMinutes(5));
+
+        // Send OTP email using existing helper
+        register_user_email($request->email, 'Email Verification');
+
+        return ResponseHelper::send(200, 'OTP sent to your email for verification.');
+    }
+
+    public function registerVerifyOtp(Request $request)
+    {
+        $request->validate([
+            'email' => $this->validationService->emailForOTPRules(),
+            'otp'   => ['required', 'digits:4'],
+        ]);
+
+        $emailLog = UserEmailLog::where('email', $request->email)->first();
+
+        if (!$emailLog) {
+            return ResponseHelper::send(412, 'No OTP request found for this email.');
+        }
+
+        // Check if OTP has expired
+        if ($emailLog->otp_expires_at && now()->gt($emailLog->otp_expires_at)) {
+            return ResponseHelper::send(412, 'OTP has expired. Please request a new one.');
+        }
+
+        // Check if OTP matches
+        if ((string) $emailLog->otp !== (string) $request->otp) {
+            return ResponseHelper::send(412, 'Invalid OTP. Please try again.');
+        }
+
+        // Retrieve cached registration data
+        $registerData = Cache::get('register_data_' . $request->email);
+
+        if (!$registerData) {
+            return ResponseHelper::send(412, 'Registration session expired. Please start again.');
+        }
+
+        // Create the user now that email is verified
+        $registerData['daily_limit'] = config('constants.message_limit');
+        $user = $this->user->create($registerData);
+        $user->email_verified_at = now();
+        $user->save();
+
         Auth::login($user);
 
         $token = $user->createToken('api-token')->plainTextToken;
 
-        return ResponseHelper::send(200, 'User registered successfully', $this->get_user_data($token));
+        // Clean up: clear cache and OTP
+        Cache::forget('register_data_' . $request->email);
+        $emailLog->update(['otp' => null, 'otp_expires_at' => null]);
+
+        return ResponseHelper::send(200, 'Email verified and account created successfully.', $this->get_user_data($token));
+    }
+
+    public function registerResendOtp(Request $request)
+    {
+        $request->validate([
+            'email' => $this->validationService->emailForOTPRules(),
+        ]);
+
+        // Check if registration data exists in cache
+        $registerData = Cache::get('register_data_' . $request->email);
+
+        if (!$registerData) {
+            return ResponseHelper::send(412, 'No pending registration found. Please start again.');
+        }
+
+        // Resend OTP
+        register_user_email($request->email, 'Email Verification');
+
+        return ResponseHelper::send(200, 'A new OTP has been sent to your email.');
     }
 
     public function login(Request $request){

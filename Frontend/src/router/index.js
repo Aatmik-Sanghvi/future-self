@@ -11,7 +11,7 @@ const routes = [
     name: 'Login',
     component: () => import('@/views/auth/LoginView.vue'),
     meta: {
-      title: 'Sign In - FutureYou',
+      title: 'Sign In - Future Self',
       guestOnly: true, 
     }
   },
@@ -20,7 +20,7 @@ const routes = [
     name: 'Register',
     component: () => import('@/views/auth/RegisterView.vue'),
     meta: { 
-      title: 'Create Account - FutureYou',
+      title: 'Create Account - Future Self',
       guestOnly: true,
     }
   },
@@ -29,7 +29,7 @@ const routes = [
     name: 'ForgotPassword',
     component: () => import('@/views/auth/ForgotPasswordView.vue'),
     meta: { 
-      title: 'Forgot Password - FutureYou' 
+      title: 'Forgot Password - Future Self' 
     }
   },
   {
@@ -37,7 +37,7 @@ const routes = [
     name: 'PrivacyPolicy',
     component: () => import('@/views/PrivacyPolicyView.vue'),
     meta: { 
-      title: 'Privacy Policy - FutureYou' 
+      title: 'Privacy Policy - Future Self' 
     }
   },
   {
@@ -45,7 +45,7 @@ const routes = [
     name: 'TermsOfService',
     component: () => import('@/views/TermsOfServiceView.vue'),
     meta: { 
-      title: 'Terms of Service - FutureYou' 
+      title: 'Terms of Service - Future Self' 
     }
   },
   {
@@ -53,14 +53,14 @@ const routes = [
     name: 'SocialCallback',
     component: () => import('@/views/auth/SocialCallbackView.vue'),
     meta: { 
-      title: 'Authenticating - FutureYou' 
+      title: 'Authenticating - Future Self' 
     }
   },
   {
     path: '/logout',
     name: 'Logout',
     meta: { 
-      title: 'Logout - FutureYou',
+      title: 'Logout - Future Self',
       guestOnly: true,
     }
   },
@@ -69,7 +69,7 @@ const routes = [
     name: 'Onboarding',
     component: () => import('@/views/OnboardingView.vue'),
     meta: { 
-      title: 'Onboarding - FutureYou',
+      title: 'Onboarding - Future Self',
       requiresAuth: true,
     }
   },
@@ -78,7 +78,7 @@ const routes = [
     name: 'Chat',
     component: () => import('@/views/ChatView.vue'),
     meta: {
-      title: 'Chat - FutureYou',
+      title: 'Chat - Future Self',
       requiresAuth: true,
     }
   },
@@ -87,7 +87,7 @@ const routes = [
     name: 'EditProfile',
     component: () => import('@/views/EditProfileView.vue'),
     meta: {
-      title: 'Edit Profile - FutureYou',
+      title: 'Edit Profile - Future Self',
       requiresAuth: true,
     }
   },
@@ -108,7 +108,7 @@ const router = createRouter({
 })
 
 router.beforeEach(async (to) => {
-  document.title = to.meta.title || 'FutureSelf'
+  document.title = to.meta.title || 'Future Self'
 
   const auth = useAuthStore()
 

@@ -75,7 +75,7 @@
                                             </tr>
                                             <tr>
                                                 <td align="center" style="padding-top: 14px; font-size: 18px; font-weight: 700; color: #f0eef6; letter-spacing: -0.01em;">
-                                                    FutureYou
+                                                    FutureSelf
                                                 </td>
                                             </tr>
                                         </table>
@@ -96,7 +96,7 @@
                                     <td align="center" style="padding-bottom: 36px;">
                                         <p style="margin: 0; font-size: 14px; color: rgba(200, 195, 230, 0.65); line-height: 1.6;">
                                             Use the code below to verify your identity.<br>
-                                            This code will expire in <strong style="color: rgba(200, 195, 230, 0.85);">10 minutes</strong>.
+                                            This code will expire in <strong style="color: rgba(200, 195, 230, 0.85);">5 minutes</strong>.
                                         </p>
                                     </td>
                                 </tr>
@@ -136,12 +136,8 @@
                                     <td align="center">
                                         <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="background: rgba(139, 92, 246, 0.06); border: 1px solid rgba(139, 92, 246, 0.1); border-radius: 12px; padding: 16px 20px; width: 100%;">
                                             <tr>
-                                                <td style="width: 24px; vertical-align: top; padding-right: 12px; padding-top: 1px;">
-                                                    <!-- Shield icon -->
-                                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: block;">
-                                                        <path d="M12 2L3 7V12C3 17.52 6.84 22.74 12 24C17.16 22.74 21 17.52 21 12V7L12 2Z" stroke="#8b5cf6" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-                                                        <path d="M9 12L11 14L15 10" stroke="#8b5cf6" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-                                                    </svg>
+                                                <td style="width: 24px; vertical-align: top; padding-right: 8px; font-size: 16px; line-height: 1;">
+                                                    🛡️
                                                 </td>
                                                 <td style="font-size: 12.5px; color: rgba(200, 195, 230, 0.55); line-height: 1.55;">
                                                     If you didn't request this code, you can safely ignore this email. Never share this code with anyone.

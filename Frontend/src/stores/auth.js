@@ -36,16 +36,48 @@ export const useAuthStore = defineStore('auth', () => {
         }
     }
 
-    async function register(userData) {
+    async function registerSendOtp(userData) {
         loading.value = true
         error.value = null
 
         try {
-            const response = await AuthService.register(userData)
-            console.log('Register response:', response.data);
+            const response = await AuthService.registerSendOtp(userData)
+            console.log('Register send OTP response:', response.data);
+            return response.data            
+        } catch(err) {
+            error.value = err.response?.data?.message ?? 'Something went wrong.'
+            throw err
+        } finally {
+            loading.value = false
+        }
+    }
+
+    async function registerVerifyOtp(data) {
+        loading.value = true
+        error.value = null
+
+        try {
+            const response = await AuthService.registerVerifyOtp(data)
+            console.log('Register verify OTP response:', response.data);
             token.value = response.data.data.token
             localStorage.setItem('token', token.value)
             await fetchUser()
+            return response.data            
+        } catch(err) {
+            error.value = err.response?.data?.message ?? 'Something went wrong.'
+            throw err
+        } finally {
+            loading.value = false
+        }
+    }
+
+    async function registerResendOtp(data) {
+        loading.value = true
+        error.value = null
+
+        try {
+            const response = await AuthService.registerResendOtp(data)
+            console.log('Register resend OTP response:', response.data);
             return response.data            
         } catch(err) {
             error.value = err.response?.data?.message ?? 'Something went wrong.'
@@ -156,7 +188,9 @@ export const useAuthStore = defineStore('auth', () => {
         isAuthenticated,
         isOnboarded,
         login,
-        register,
+        registerSendOtp,
+        registerVerifyOtp,
+        registerResendOtp,
         forgotPassword,
         verifyOtp,
         resetPassword,

@@ -6,8 +6,16 @@ class AuthService {
         return api.post('/login', credentials)
     }
 
-    register(userData) {
-        return api.post('/register', userData)
+    registerSendOtp(userData) {
+        return api.post('/register/send-otp', userData)
+    }
+
+    registerVerifyOtp(data) {
+        return api.post('/register/verify-otp', data)
+    }
+
+    registerResendOtp(data) {
+        return api.post('/register/resend-otp', data)
     }
 
     getGoogleAuthRedirectUrl() {

@@ -44,6 +44,7 @@ class User_Password_Send_OTP_Mail extends Mailable
     {
         return new Content(
             view: 'emails.otp_mail',
+            text: 'emails.otp_mail_plain',
             with: [
                 'name' => $this->name,
                 'otp' => $this->otp,

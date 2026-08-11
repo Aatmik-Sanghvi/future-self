@@ -128,6 +128,17 @@ class ValidationService
     //         Rule::unique('social_accounts', 'email')->ignore($social_id,'provider_id'),
     //     ];
     // }
+    // Email validation with RFC + DNS (MX record) check + uniqueness for registration
+    public function emailAuthenticUniqueRules()
+    {
+        return [
+            'required',
+            'email:rfc,dns',
+            'max:100',
+            Rule::unique('users', 'email')->whereNull('deleted_at'),
+        ];
+    }
+
     public function emailSocialUniqueRules()
     {
         return [

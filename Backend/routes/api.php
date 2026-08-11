@@ -11,7 +11,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('V1')->group(function () {
-    Route::post('register', [GuestController::class, 'register']);
+    Route::post('register/send-otp', [GuestController::class, 'registerSendOtp']);
+    Route::post('register/verify-otp', [GuestController::class, 'registerVerifyOtp']);
+    Route::post('register/resend-otp', [GuestController::class, 'registerResendOtp']);
     Route::post('login',[GuestController::class, 'login']);
     Route::post('forgot-password', [GuestController::class, 'forgotPassword']);
     Route::post('verify-otp', [GuestController::class, 'verifyOtp']);
