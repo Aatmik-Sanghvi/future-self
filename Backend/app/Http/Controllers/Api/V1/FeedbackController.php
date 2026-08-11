@@ -60,14 +60,27 @@ class FeedbackController extends Controller
             $feedback = Feedback::create(array_merge(['user_id' => $user->id], $data));
         }
 
+        // Grant one-time bonus of 5 extra chats for submitting feedback (not skipping)
+        $rewardGranted = false;
+        if (!$feedback->is_skipped && !$user->feedback_reward_claimed) {
+            $user->bonus_chats = ($user->bonus_chats ?? 0) + 5;
+            $user->feedback_reward_claimed = true;
+            $user->save();
+            $rewardGranted = true;
+        }
+
         $message = !empty($validated['is_skipped'])
             ? 'Feedback skipped successfully.'
-            : 'Thank you for your feedback!';
+            : ($rewardGranted
+                ? 'Thank you for your feedback! You earned 5 bonus chats.'
+                : 'Thank you for your feedback!');
 
         return ResponseHelper::send(200, $message, [
             'feedback' => $feedback,
             'hasSubmitted' => !$feedback->is_skipped,
             'hasSkipped' => (bool) $feedback->is_skipped,
+            'rewardGranted' => $rewardGranted,
+            'bonusChats' => $user->bonus_chats ?? 0,
         ]);
     }
 

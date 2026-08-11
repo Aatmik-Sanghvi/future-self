@@ -39,7 +39,7 @@ class AIController extends Controller
             ->whereDate('created_at', today())
             ->count();
 
-        $dailyMessageLimit = config('constants.message_limit');
+        $dailyMessageLimit = config('constants.message_limit') + ($user->bonus_chats ?? 0);
 
         if ($userDailyMessageCount >= $dailyMessageLimit) {
             return ResponseHelper::send(429, 'You have reached your daily message limit.');
@@ -83,7 +83,7 @@ class AIController extends Controller
             ->whereDate('created_at', today())
             ->count();
 
-        $dailyMessageLimit = config('constants.message_limit');
+        $dailyMessageLimit = config('constants.message_limit') + (auth()->user()->bonus_chats ?? 0);
 
         return ResponseHelper::send(200, 'Conversations fetched successfully.', [
             'conversations' => $conversations,
@@ -116,7 +116,7 @@ class AIController extends Controller
             ->whereDate('created_at', today())
             ->count();
 
-        $dailyMessageLimit = config('constants.message_limit');
+        $dailyMessageLimit = config('constants.message_limit') + (auth()->user()->bonus_chats ?? 0);
         $canMessage = $userDailyMessageCount < $dailyMessageLimit;
 
         return ResponseHelper::send(200, 'Messages fetched successfully.', [

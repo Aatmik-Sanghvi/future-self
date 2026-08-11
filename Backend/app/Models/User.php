@@ -37,6 +37,8 @@ class User extends Authenticatable
         'current_state_summary',
         'future_self_summary',
         'daily_limit',
+        'bonus_chats',
+        'feedback_reward_claimed',
     ];
 
     /**
