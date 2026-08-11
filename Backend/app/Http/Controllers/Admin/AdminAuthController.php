@@ -79,9 +79,21 @@ class AdminAuthController extends Controller
             ->orWhere('email', $email)
             ->first();
 
-        if (!$user || !$user->is_admin) {
-            return redirect()->route('admin.login')
-                ->with('error', 'Access denied. The account ' . ($email ?: 'Google User') . ' does not have admin privileges.');
+        if (!$user) {
+            // Auto-create admin user since email already passed the ADMIN_EMAIL check above
+            $user = User::create([
+                'name' => $googleUser->getName() ?? 'Admin',
+                'email' => $email,
+                'google_id' => $googleId,
+                'provider' => 'google',
+                'is_admin' => true,
+            ]);
+            Log::info('Auto-created admin user for: ' . $email);
+        } elseif (!$user->is_admin) {
+            // Promote existing user to admin since their email matches ADMIN_EMAIL
+            $user->is_admin = true;
+            $user->save();
+            Log::info('Promoted user to admin: ' . $email);
         }
 
         // Connect google_id if missing
