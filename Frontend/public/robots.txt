@@ -1,4 +1,14 @@
 User-agent: *
 Allow: /
+Allow: /login
+Allow: /register
+Allow: /privacy-policy
+Allow: /terms-of-service
+
+Disallow: /chat
+Disallow: /onboarding
+Disallow: /edit-profile
+Disallow: /auth/
+Disallow: /api/
 
 Sitemap: https://futureself.in/sitemap.xml

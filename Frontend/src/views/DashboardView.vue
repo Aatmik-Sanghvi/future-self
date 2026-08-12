@@ -5,8 +5,10 @@
   import HowItWorks from '@/components/HowItWorks.vue';
   import Testimonials from '@/components/Testimonials.vue';
   import PricingSection from '@/components/PricingSection.vue';
+  import FAQSection from '@/components/FAQSection.vue';
   import CTASection from '@/components/CTASection.vue';
   import FeaturesSection from '@/components/FeaturesSection.vue';
+  import FooterSection from '@/components/FooterSection.vue';
 
   import { useRouter } from 'vue-router';
 
@@ -26,6 +28,8 @@
     <HowItWorks />
     <Testimonials />
     <PricingSection />
+    <FAQSection />
     <CTASection :register="register" />
+    <FooterSection />
   </div>
 </template>

@@ -79,6 +79,7 @@ onBeforeUnmount(() => {
       <a href="#how">How It Works</a>
       <a href="#testimonials">Testimonials</a>
       <a href="#pricing">Pricing</a>
+      <a href="#faq">FAQ</a>
       <router-link v-if="auth.isAuthenticated" to="/chat" class="nav-chat-btn">Chat</router-link>
     </div>
 

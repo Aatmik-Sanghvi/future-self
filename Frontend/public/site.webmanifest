@@ -1,0 +1,16 @@
+{
+  "name": "FutureSelf — Meet the Future Version of Yourself",
+  "short_name": "FutureSelf",
+  "description": "Connect with the person you want to become. Set goals, overcome fears, and chat with your future self using AI.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0a1a",
+  "theme_color": "#0a0a1a",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    }
+  ]
+}
