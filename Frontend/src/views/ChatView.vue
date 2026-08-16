@@ -39,10 +39,13 @@ const canMessage = ref();
 const dailyMessageLimit = ref();
 
 // Feedback state
+const FEEDBACK_MODAL_THRESHOLD = 2
 const showFeedbackModal = ref(false)
 const hasFeedbackSubmitted = ref(false)
 const hasFeedbackSkipped = ref(false)
 const existingFeedback = ref(null)
+const feedbackStatusChecked = ref(false)
+const hasAutoPromptedFeedback = ref(false)
 
 // Refs
 const messagesContainer = ref(null)
@@ -69,6 +72,7 @@ async function checkFeedbackStatus() {
     hasFeedbackSubmitted.value = res.data.data.hasSubmitted
     hasFeedbackSkipped.value = res.data.data.hasSkipped
     existingFeedback.value = res.data.data.feedback || null
+    feedbackStatusChecked.value = true
   } catch (err) {
     console.error('Failed to check feedback status', err)
   }
@@ -76,6 +80,8 @@ async function checkFeedbackStatus() {
 
 function onFeedbackSubmitted(savedData) {
   hasFeedbackSubmitted.value = true
+  showFeedbackModal.value = false
+  hasAutoPromptedFeedback.value = true
   if (savedData) {
     existingFeedback.value = savedData
   }
@@ -84,6 +90,13 @@ function onFeedbackSubmitted(savedData) {
 
 function onFeedbackSkipped() {
   hasFeedbackSkipped.value = true
+  showFeedbackModal.value = false
+  hasAutoPromptedFeedback.value = true
+}
+
+function onFeedbackClosed() {
+  showFeedbackModal.value = false
+  hasAutoPromptedFeedback.value = true
 }
 
 // Methods
@@ -225,6 +238,11 @@ async function sendMessage() {
       canMessage.value = data.canMessage
       dailyMessageLimit.value = data.dailyMessageLimit
       userDailyMessageCount.value = data.userMessageCount
+
+      // Check feedback status once the user crosses the modal threshold
+      if (data.userMessageCount >= FEEDBACK_MODAL_THRESHOLD && !feedbackStatusChecked.value) {
+        checkFeedbackStatus()
+      }
     }
 
     // Set the conversation ID if it's a new conversation
@@ -245,6 +263,21 @@ async function sendMessage() {
 
     await nextTick()
     scrollToBottom()
+
+    // Automatically trigger centered feedback modal after reaching chat threshold
+    if (
+      userDailyMessageCount.value >= FEEDBACK_MODAL_THRESHOLD &&
+      !hasFeedbackSubmitted.value &&
+      !hasFeedbackSkipped.value &&
+      !hasAutoPromptedFeedback.value
+    ) {
+      hasAutoPromptedFeedback.value = true
+      setTimeout(() => {
+        if (!hasFeedbackSubmitted.value && !hasFeedbackSkipped.value) {
+          showFeedbackModal.value = true
+        }
+      }, 700)
+    }
   } catch (err) {
     isTyping.value = false
     console.error('Failed to send message', err)
@@ -361,8 +394,23 @@ const quickPrompts = [
 ]
 
 // Load conversations on mount
-onMounted(() => {
-  loadConversations()
+onMounted(async () => {
+  await Promise.all([loadConversations(), checkFeedbackStatus()])
+
+  // If user already has >= 2 messages today, hasn't submitted/skipped, and hasn't been prompted in this session
+  if (
+    userDailyMessageCount.value >= FEEDBACK_MODAL_THRESHOLD &&
+    !hasFeedbackSubmitted.value &&
+    !hasFeedbackSkipped.value &&
+    !hasAutoPromptedFeedback.value
+  ) {
+    hasAutoPromptedFeedback.value = true
+    setTimeout(() => {
+      if (!hasFeedbackSubmitted.value && !hasFeedbackSkipped.value) {
+        showFeedbackModal.value = true
+      }
+    }, 1000)
+  }
 })
 </script>
 
@@ -372,7 +420,8 @@ onMounted(() => {
     <FeedbackModal
       :show="showFeedbackModal"
       :initialData="existingFeedback"
-      @close="showFeedbackModal = false"
+      :isLimitReached="canMessage === false"
+      @close="onFeedbackClosed"
       @submitted="onFeedbackSubmitted"
       @skipped="onFeedbackSkipped"
     />

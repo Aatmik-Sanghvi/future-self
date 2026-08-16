@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\DailyActiveUser;
+use App\Models\Feedback;
 use App\Models\User;
 use App\Models\UserActivityLog;
 use Carbon\Carbon;
@@ -310,6 +311,138 @@ class AdminDashboardController extends Controller
             'trendRequests',
             'peakLabels',
             'peakValues'
+        ));
+    }
+
+    /**
+     * User feedbacks with filtering, stats, and charts.
+     */
+    public function feedbacks(Request $request)
+    {
+        $request->validate([
+            'search'   => 'nullable|string|max:100',
+            'status'   => 'nullable|string|in:submitted,skipped',
+            'date_from' => 'nullable|date',
+            'date_to'   => 'nullable|date|after_or_equal:date_from',
+            'per_page'  => 'nullable|integer|min:10|max:100',
+        ]);
+
+        // --- Summary Stats ---
+        $totalFeedbacks   = Feedback::count();
+        $submittedCount   = Feedback::where('is_skipped', false)->count();
+        $skippedCount     = Feedback::where('is_skipped', true)->count();
+        $avgNps           = Feedback::where('is_skipped', false)->whereNotNull('nps_score')->avg('nps_score');
+        $avgRating        = Feedback::where('is_skipped', false)->whereNotNull('helpful_rating')->avg('helpful_rating');
+
+        // --- Charts ---
+
+        // 1. NPS Score Distribution (0-10)
+        $npsDistribution = Feedback::where('is_skipped', false)
+            ->whereNotNull('nps_score')
+            ->select('nps_score', DB::raw('COUNT(*) as count'))
+            ->groupBy('nps_score')
+            ->orderBy('nps_score')
+            ->get()
+            ->keyBy('nps_score');
+
+        $npsLabels = [];
+        $npsValues = [];
+        for ($i = 0; $i <= 10; $i++) {
+            $npsLabels[] = (string) $i;
+            $npsValues[] = $npsDistribution->has($i) ? (int) $npsDistribution[$i]->count : 0;
+        }
+
+        // 2. Feedback over time (last 30 days)
+        $chartFrom = $request->input('date_from', Carbon::now()->subDays(30)->toDateString());
+        $chartTo   = $request->input('date_to', Carbon::now()->toDateString());
+
+        $feedbackOverTime = Feedback::select(
+                DB::raw('DATE(created_at) as fb_date'),
+                DB::raw('SUM(CASE WHEN is_skipped = 0 THEN 1 ELSE 0 END) as submitted'),
+                DB::raw('SUM(CASE WHEN is_skipped = 1 THEN 1 ELSE 0 END) as skipped')
+            )
+            ->whereBetween(DB::raw('DATE(created_at)'), [$chartFrom, $chartTo])
+            ->groupBy(DB::raw('DATE(created_at)'))
+            ->orderBy('fb_date')
+            ->get()
+            ->keyBy('fb_date');
+
+        $timeLabels    = [];
+        $timeSubmitted = [];
+        $timeSkipped   = [];
+        $start = Carbon::parse($chartFrom);
+        $end   = Carbon::parse($chartTo);
+        while ($start->lte($end)) {
+            $dateStr         = $start->toDateString();
+            $timeLabels[]    = $start->format('M d');
+            $record          = $feedbackOverTime->get($dateStr);
+            $timeSubmitted[] = $record ? (int) $record->submitted : 0;
+            $timeSkipped[]   = $record ? (int) $record->skipped : 0;
+            $start->addDay();
+        }
+
+        // 3. Helpful Rating Distribution (1-5 stars)
+        $ratingDistribution = Feedback::where('is_skipped', false)
+            ->whereNotNull('helpful_rating')
+            ->select('helpful_rating', DB::raw('COUNT(*) as count'))
+            ->groupBy('helpful_rating')
+            ->orderBy('helpful_rating')
+            ->get()
+            ->keyBy('helpful_rating');
+
+        $ratingLabels = [];
+        $ratingValues = [];
+        for ($i = 1; $i <= 5; $i++) {
+            $ratingLabels[] = $i . ' Star' . ($i > 1 ? 's' : '');
+            $ratingValues[] = $ratingDistribution->has($i) ? (int) $ratingDistribution[$i]->count : 0;
+        }
+
+        // --- Filtered Table Query ---
+        $query = Feedback::with('user:id,name,email');
+
+        // Search by user name or email
+        if ($search = $request->input('search')) {
+            $query->whereHas('user', function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+
+        // Filter by status
+        if ($status = $request->input('status')) {
+            if ($status === 'submitted') {
+                $query->where('is_skipped', false);
+            } elseif ($status === 'skipped') {
+                $query->where('is_skipped', true);
+            }
+        }
+
+        // Filter by date range
+        if ($request->filled('date_from')) {
+            $query->whereDate('created_at', '>=', $request->input('date_from'));
+        }
+        if ($request->filled('date_to')) {
+            $query->whereDate('created_at', '<=', $request->input('date_to'));
+        }
+
+        $feedbacks = $query->latest()
+            ->paginate($request->input('per_page', 25))
+            ->withQueryString();
+
+        return view('admin.feedbacks', compact(
+            'totalFeedbacks',
+            'submittedCount',
+            'skippedCount',
+            'avgNps',
+            'avgRating',
+            'npsLabels',
+            'npsValues',
+            'timeLabels',
+            'timeSubmitted',
+            'timeSkipped',
+            'ratingLabels',
+            'ratingValues',
+            'feedbacks'
         ));
     }
 }

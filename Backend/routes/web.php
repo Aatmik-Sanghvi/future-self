@@ -35,5 +35,6 @@ Route::prefix('admin')->group(function () {
         Route::get('dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
         Route::get('activity-logs', [AdminDashboardController::class, 'activityLogs'])->name('admin.activity-logs');
         Route::get('daily-active-users', [AdminDashboardController::class, 'dailyActiveUsers'])->name('admin.daily-active-users');
+        Route::get('feedbacks', [AdminDashboardController::class, 'feedbacks'])->name('admin.feedbacks');
     });
 });

@@ -931,6 +931,12 @@
                     <i data-lucide="users"></i>
                     <span>Daily Active Users</span>
                 </a>
+
+                <div class="nav-section-title">Engagement</div>
+                <a href="{{ route('admin.feedbacks') }}" class="nav-link {{ request()->routeIs('admin.feedbacks') ? 'active' : '' }}">
+                    <i data-lucide="message-square-heart"></i>
+                    <span>Feedbacks</span>
+                </a>
             </nav>
 
             <div class="sidebar-footer">

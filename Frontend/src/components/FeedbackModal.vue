@@ -10,6 +10,10 @@ const props = defineProps({
   initialData: {
     type: Object,
     default: () => null
+  },
+  isLimitReached: {
+    type: Boolean,
+    default: false
   }
 })
 
@@ -94,6 +98,11 @@ function prevStep() {
   }
 }
 
+function handleClose() {
+  emit('close')
+  resetForm()
+}
+
 async function handleSkip() {
   try {
     await feedbackService.skipFeedback()
@@ -145,11 +154,11 @@ function resetForm() {
 <template>
   <Teleport to="body">
     <Transition name="feedback-modal-fade">
-      <div v-if="show" class="feedback-modal-overlay" @click.self="handleSkip">
+      <div v-if="show" class="feedback-modal-overlay" @click.self="handleClose">
         <div class="feedback-modal-container">
           
-          <!-- Close / Skip Button top right -->
-          <button class="feedback-close-btn" @click="handleSkip" title="Skip feedback" id="btn-feedback-close">
+          <!-- Close Button top right -->
+          <button class="feedback-close-btn" @click="handleClose" title="Close" id="btn-feedback-close">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
             </svg>
@@ -169,8 +178,10 @@ function resetForm() {
             <!-- Header -->
             <div class="feedback-modal-header">
               <div class="feedback-badge">Beta Feedback</div>
-              <h2 class="feedback-modal-title">Help Shape FutureYou</h2>
-              <p class="feedback-modal-subtitle">Daily limit reached — take a moment to share your experience (Optional)</p>
+              <h2 class="feedback-modal-title">Help Shape Future Self</h2>
+              <p class="feedback-modal-subtitle">
+                {{ isLimitReached ? 'Daily limit reached — take a moment to share your experience (Optional)' : 'Take a moment to share your experience and help shape Future Self (Optional)' }}
+              </p>
             </div>
 
             <!-- Progress Bar -->
