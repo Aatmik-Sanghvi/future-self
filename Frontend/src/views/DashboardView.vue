@@ -10,6 +10,7 @@
   import FeaturesSection from '@/components/FeaturesSection.vue';
   import FooterSection from '@/components/FooterSection.vue';
 
+  import { ref } from 'vue'
   import { useRouter } from 'vue-router';
 
   const router = useRouter();
@@ -17,13 +18,16 @@
   const register = () => {
       router.push({name: 'Register'});
   }
+
+  const users = ref(0)
+  
 </script>
 
 <template>
   <div>
     <Navbar />
-    <HeroSection :register="register" />
-    <StatsBar />
+    <HeroSection :register="register" :users="users"/>
+    <StatsBar v-model="users"/>
     <FeaturesSection />
     <HowItWorks />
     <Testimonials />

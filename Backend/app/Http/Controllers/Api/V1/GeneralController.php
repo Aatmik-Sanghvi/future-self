@@ -5,17 +5,20 @@ namespace App\Http\Controllers\Api\V1;
 use App\Helpers\ResponseHelper;
 use App\Http\Controllers\Api\ResponseController;
 use App\Http\Controllers\Controller;
+use App\Models\Feedback;
 use App\Models\User;
 use App\Services\ValidationService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
 class GeneralController extends ResponseController
 {
-    protected $user;
+    protected $user, $feedback;
 
     public function __construct(ValidationService $validationService){
         $this->user = new User;
+        $this->feedback = new Feedback;
         $this->validationService = $validationService;
     }
 
@@ -75,5 +78,31 @@ class GeneralController extends ResponseController
     public function deleteAccount(){
         auth()->user()->delete();
         return ResponseHelper::send(200, 'Account deleted successfully.');
+    }
+
+    public function stats(){
+        try {
+            $users_count = $this->user->count();
+            $messages_count = DB::table('agent_conversation_messages')
+                ->where('role', 'user')
+                ->count();
+            $app_rating = $this->feedback->avg('helpful_rating') ?? 0;
+
+            $total_feedbacks = $this->feedback->count();
+            $recommend_to_other = 0;
+            if ($total_feedbacks > 0) {
+                $promoters = $this->feedback->where('nps_score', '>=', 7)->count();
+                $recommend_to_other = round(($promoters / $total_feedbacks) * 100);
+            }
+
+            return ResponseHelper::send(200, 'Stats fetched successfully.', [
+                'users_count' => $users_count,
+                'messages_count' => $messages_count,
+                'app_rating' => round($app_rating, 1),
+                'recommend_to_other' => $recommend_to_other,
+            ]);
+        } catch (\Exception $e) {
+            return ResponseHelper::send(500, 'Failed to fetch stats.');
+        }
     }
 }

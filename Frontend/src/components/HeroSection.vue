@@ -8,6 +8,10 @@ defineProps({
     type: Function,
     required: true,
   },
+  users: {
+    type: Number,
+    default: 0,
+  },
 })
 </script>
 
@@ -19,7 +23,7 @@ defineProps({
 
     <div class="hero-badge">
       <span class="hero-badge-dot">●</span>
-      Now in Early Access — Join 12,000+ users
+      Now in Early Access — Join {{ users }}+ users
     </div>
 
     <h1 class="hero-h1 grad-text">

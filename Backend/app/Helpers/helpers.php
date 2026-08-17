@@ -59,7 +59,7 @@ if (! function_exists('get_header_auth_token')) {
 }
 
 if (! function_exists('checkFileExist')) {
-    function checkFileExist($path = '', $no_image = 'no_image')
+    function checkFileExist($path = '', $no_image = 'no_user_image')
     {
         if (! empty($path)) {
             if(filter_var($path, FILTER_VALIDATE_URL)){

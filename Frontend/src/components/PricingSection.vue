@@ -50,8 +50,8 @@ const navigateToChat = () => {
                         <span>🎁 Lock in exclusive Founder Pricing when Premium launches</span>
                     </div>
                 </div>
-                <button class="btn-plan secondary" @click="startMyBetaJourney()" v-if="!auth.isAuthenticated">Start My Beta Journey</button>
-                <button class="btn-plan secondary" @click="navigateToChat()" v-else>Start chatting</button>
+                <button class="btn-plan primary" @click="startMyBetaJourney()" v-if="!auth.isAuthenticated">Start My Beta Journey</button>
+                <button class="btn-plan primary" @click="navigateToChat()" v-else>Start chatting</button>
             </div>
 
             <!-- <div class="pricing-card highlight">

@@ -19,6 +19,7 @@ Route::prefix('V1')->group(function () {
     Route::post('verify-otp', [GuestController::class, 'verifyOtp']);
     Route::post('reset-password', [GuestController::class, 'resetPassword']);
     
+    Route::get('stats', [GeneralController::class, 'stats']);
     // Social Auth routes
     Route::get('auth/google/redirect', [SocialAuthController::class, 'redirectToGoogle']);
     Route::get('auth/google/callback', [SocialAuthController::class, 'handleGoogleCallback']);
