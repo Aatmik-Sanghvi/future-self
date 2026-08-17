@@ -106,7 +106,7 @@
   }
 
   /* ── CHAT BUTTON (nav) ──────────────────────── */
-  /* .nav-chat-btn {
+  .nav-chat-btn {
     padding: 8px 20px;
     border-radius: 10px;
     font-size: 13px;
@@ -126,7 +126,7 @@
   }
   .nav-chat-btn:active {
     transform: translateY(0);
-  } */
+  }
 
   /* ── USER DROPDOWN ─────────────────────────── */
   .nav-user-dropdown {

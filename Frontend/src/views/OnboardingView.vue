@@ -101,7 +101,7 @@
               </div> -->
             </div>
             <div class="field">
-              <label class="lbl">Description</label>
+              <label class="lbl">Description <span>*</span></label>
               <textarea v-model="newGoal.desc" rows="2" placeholder="What does achieving this mean to you?"></textarea>
             </div>
             <div class="field-row">
@@ -148,7 +148,7 @@
             </div>
             <div class="divider"></div>
             <div class="panel-foot">
-              <button class="btn btn-dim" @click="addGoal()" style="flex: 1">Add Goal</button>
+              <button class="btn" :class="newGoal.title.trim() ? 'btn-v' : 'btn-dim'" @click="addGoal()" style="flex: 1">Add Goal</button>
               <button v-if="goals.length" class="btn btn-ghost" @click="showGoalPanel = false">Cancel</button>
             </div>
           </div>
@@ -230,7 +230,7 @@
             </div>
             <div class="divider"></div>
             <div class="panel-foot">
-              <button class="btn btn-dim" @click="addFear()" style="flex: 1">Add Fear</button>
+              <button class="btn" :class="newFear.text.trim() ? 'btn-p' : 'btn-dim'" @click="addFear()" style="flex: 1">Add Fear</button>
               <button v-if="fears.length" class="btn btn-ghost" @click="showFearPanel = false">Cancel</button>
             </div>
           </div>
@@ -404,7 +404,7 @@
               <div class="loading-ring"></div>
             </div>
             <h2 class="loading-title">Creating your <span class="grad">Future Self</span><span id="l-dots">{{ loadingDots }}</span></h2>
-            <p class="loading-sub">Shaping a version of you that's 5 years ahead, ready to guide you forward.</p>
+            <p class="loading-sub">Shaping a version of you that's years ahead, ready to guide you forward.</p>
             <div class="loading-checklist">
               <div v-for="(item, i) in loadingItems" :key="i" class="check-row">
                 <div class="check-dot" :class="{ done: i < completedLoadingSteps }">

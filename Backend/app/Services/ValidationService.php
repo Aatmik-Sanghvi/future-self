@@ -63,6 +63,16 @@ class ValidationService
         ];
     }
 
+    // Custom messages for password validation
+    public function passwordMessages($field = 'password')
+    {
+        return [
+            "{$field}.required"  => 'The password field is required.',
+            "{$field}.min"       => 'The password must be at least 8 characters long.',
+            "{$field}.regex"     => 'The password must include at least one uppercase letter, one lowercase letter, one number, and one special character (@$!%*#?&).',
+        ];
+    }
+
     // Common email exists validation rule
     public function mobileRules(Request $request, $userId = null)
     {

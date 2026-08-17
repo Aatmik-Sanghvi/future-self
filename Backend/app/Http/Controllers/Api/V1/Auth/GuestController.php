@@ -30,7 +30,7 @@ class GuestController extends ResponseController
             'email' => $this->validationService->emailAuthenticUniqueRules(),
             'mobile' => $this->validationService->mobileOnlyRules(),
             'password' => $this->validationService->passwordRules(),
-        ]);
+        ], $this->validationService->passwordMessages());
 
         // Store registration data in cache (5 min TTL) — no user created yet
         Cache::put('register_data_' . $request->email, [
@@ -117,7 +117,7 @@ class GuestController extends ResponseController
         $request->validate([
             'email' => $this->validationService->emailExistsRules(),
             'password' => $this->validationService->passwordRules()
-        ]);
+        ], $this->validationService->passwordMessages());
 
         $checkUser = User::where('email',$request->email)->first();
 
@@ -185,7 +185,7 @@ class GuestController extends ResponseController
             'password'              => $this->validationService->passwordRules(),
             'password_confirmation' => ['required', 'same:password'],
             'reset_token'           => ['required', 'string'],
-        ]);
+        ], $this->validationService->passwordMessages());
 
         // Verify the reset token from cache
         $cachedToken = Cache::get('password_reset_' . $request->email);

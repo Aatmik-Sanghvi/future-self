@@ -51,7 +51,10 @@ class GeneralController extends ResponseController
             'old_password' => $this->validationService->passwordRules(),
             'new_password' => $this->validationService->passwordRules(),
             'confirm_password' => 'same:new_password',
-        ]);
+        ], array_merge(
+            $this->validationService->passwordMessages('old_password'),
+            $this->validationService->passwordMessages('new_password')
+        ));
 
         if (!Hash::check($request->old_password, auth()->user()->password)) {
             return ResponseHelper::send(422, 'Incorrect old password.');
