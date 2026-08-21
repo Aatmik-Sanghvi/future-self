@@ -19,4 +19,18 @@ api.interceptors.request.use((config) => {
     return config
 })
 
+api.interceptors.response.use(
+    (response) => response,
+    (error) => {
+        if (error.response && error.response.status === 503) {
+            import('@/router').then(({ default: router }) => {
+                if (router.currentRoute.value.name !== 'Maintenance') {
+                    router.push({ name: 'Maintenance' })
+                }
+            })
+        }
+        return Promise.reject(error)
+    }
+)
+
 export default api
