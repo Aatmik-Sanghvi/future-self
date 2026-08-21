@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\V1\Auth\SocialAuthController;
 use App\Http\Controllers\Api\V1\GeneralController;
 use App\Http\Controllers\Api\V1\OnboardingController;
 use App\Http\Controllers\Api\V1\FeedbackController;
+use App\Http\Controllers\Api\V1\MoodController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -56,5 +57,8 @@ Route::prefix('V1')->group(function () {
         Route::get('conversations', [AIController::class, 'conversations']);
         Route::post('messages', [AIController::class, 'messages']);
         Route::post('delete-conversation', [AIController::class, 'deleteConversation']);
+
+        // Daily moods checkin
+        Route::post('daily-mood-checkin', [MoodController::class, 'mood']);
     });
 });

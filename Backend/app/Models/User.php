@@ -3,6 +3,8 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
@@ -39,6 +41,8 @@ class User extends Authenticatable
         'daily_limit',
         'bonus_chats',
         'feedback_reward_claimed',
+        'daily_streak',
+        'last_login'
     ];
 
     /**
@@ -53,6 +57,10 @@ class User extends Authenticatable
         'two_factor_recovery_codes',
     ];
 
+    protected $appends = [
+        'is_daily_mood_check_in',
+    ];
+
     /**
      * Get the attributes that should be cast.
      *
@@ -65,11 +73,13 @@ class User extends Authenticatable
             'password' => 'hashed',
             'google2fa_enabled' => 'boolean',
             'two_factor_recovery_codes' => 'array',
+            'last_login' => 'datetime',
+            'daily_streak' => 'integer',
         ];
     }
 
     public function scopeDetails($query){
-        return $query->select('id', 'name', 'email', 'country_code', 'mobile', 'profile_image', 'is_onboarded', 'created_at');
+        return $query->select('id', 'name', 'email', 'country_code', 'mobile', 'profile_image', 'is_onboarded', 'daily_streak', 'created_at');
     }
 
     public function setPasswordAttribute($password)
@@ -81,6 +91,10 @@ class User extends Authenticatable
 
     public function getProfileImageAttribute($value){
         return checkFileExist($value);
+    }
+
+    public function mood(){
+        return $this->hasMany(Mood::class);
     }
 
     public function goals()
@@ -110,5 +124,14 @@ class User extends Authenticatable
     public function isAdmin(): bool
     {
         return (bool) $this->is_admin;
+    }
+
+    protected function isDailyMoodCheckIn(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->mood()
+                ->whereDate('created_at', today())
+                ->exists()
+        );
     }
 }

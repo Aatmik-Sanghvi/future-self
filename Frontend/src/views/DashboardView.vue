@@ -9,8 +9,10 @@
   import CTASection from '@/components/CTASection.vue';
   import FeaturesSection from '@/components/FeaturesSection.vue';
   import FooterSection from '@/components/FooterSection.vue';
+  import MoodPopup from '@/components/MoodPopup.vue';
+  import { useAuthStore } from '@/stores/auth';
 
-  import { ref } from 'vue'
+  import { ref, computed } from 'vue'
   import { useRouter } from 'vue-router';
 
   const router = useRouter();
@@ -20,11 +22,25 @@
   }
 
   const users = ref(0)
+
+  const auth = useAuthStore()
+  // Mood popup state
+  const showMoodPopup = computed(() => auth.isAuthenticated && !auth.isDailyMoodCheckIn)
+  const moodDismissed = ref(false)
+  
+
+  function onMoodClosed() {
+    moodDismissed.value = true
+  }
   
 </script>
 
 <template>
   <div>
+    <MoodPopup
+      v-if="showMoodPopup && !moodDismissed"
+      @close="onMoodClosed"
+    />
     <Navbar />
     <HeroSection :register="register" :users="users"/>
     <StatsBar v-model="users"/>

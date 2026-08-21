@@ -72,6 +72,8 @@ class ResponseController extends Controller
             'mobile' => $user_data->mobile ?? '',
             'profile_image' => $user_data->profile_image ?? '',
             'is_onboarded' => $user_data->is_onboarded ?? false,
+            'is_daily_mood_check_in' => $user_data->is_daily_mood_check_in,
+            'daily_streak' => $user_data->daily_streak,
             'token' => $token ?? request()->bearerToken() ?? '',
             'created_at' => $user_data->created_at ?? now(),
         ];

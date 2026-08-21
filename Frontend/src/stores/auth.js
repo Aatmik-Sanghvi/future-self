@@ -17,6 +17,10 @@ export const useAuthStore = defineStore('auth', () => {
 
     const isOnboarded = computed(() => user.value?.is_onboarded)
 
+    const isDailyMoodCheckIn = computed(() => user.value?.is_daily_mood_check_in)    
+
+    const dailyStreak = computed(() => user.value?.daily_streak ?? 0)
+
     async function login(credentials) {
         loading.value = true
         error.value = null
@@ -187,6 +191,8 @@ export const useAuthStore = defineStore('auth', () => {
         error,
         isAuthenticated,
         isOnboarded,
+        isDailyMoodCheckIn,
+        dailyStreak,
         login,
         registerSendOtp,
         registerVerifyOtp,
