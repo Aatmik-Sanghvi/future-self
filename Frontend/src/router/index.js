@@ -138,6 +138,15 @@ const routes = [
       requiresAuth: true,
       noIndex: true,
     }
+  },
+  {
+    path: '/maintenance',
+    name: 'Maintenance',
+    component: () => import('@/views/MaintenanceView.vue'),
+    meta: {
+      title: 'Under Maintenance — FutureSelf',
+      noIndex: true,
+    }
   }
 ]
 
