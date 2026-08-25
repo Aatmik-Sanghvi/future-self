@@ -26,68 +26,28 @@ class OnboardingSummary implements Agent, Conversational, HasTools, HasStructure
      */
     public function instructions(): Stringable|string
     {
-        $goals = Goals::where('user_id',auth()->id())->first();
-        $fears = Fear::where('goal_id',$goals->id)->first();
-        $desiredTraits = implode(", ",DesiredTraits::where('goal_id',$goals->id)->pluck('trait')->toArray());
-        $roleModels = implode(", ",RoleModel::where('goal_id',$goals->id)->pluck('names')->toArray());
-        $tone = CommunicationTone::where('goal_id',$goals->id)->first();
+        $goals = Goals::where('user_id', auth()->id())->latest()->first();
+        $goalId = $goals?->id;
 
-        return "
-            You are an expert psychologist, life coach, and behavioral analyst.
+        $fears = $goalId ? Fear::where('goal_id', $goalId)->first() : null;
+        $desiredTraits = $goalId ? implode(", ", DesiredTraits::where('goal_id', $goalId)->pluck('trait')->toArray()) : '';
+        $roleModels = $goalId ? implode(", ", RoleModel::where('goal_id', $goalId)->pluck('names')->toArray()) : '';
+        $tone = $goalId ? CommunicationTone::where('goal_id', $goalId)->first() : null;
 
-            Your task is to create a personalized onboarding summary based ONLY on the information provided by the user.
+        return "You are an expert behavioral analyst.
+            Create a compact, insightful onboarding summary (100-120 words) for the user's Future Self AI mentor.
 
-            The summary will later be used by an AI that acts as the user's future self, so it should help the AI deeply understand the user's motivations, personality, aspirations, and communication preferences.
-
-            Input:
-
-            Goals:
-            Title - {{$goals->title}}
-            Description - {{$goals->description}}
-            Category - {{$goals->category}}
-            Timeframe - {{$goals->timeframe}}
-            Priority - {{$goals->priority}}
-
-            Biggest Fears:
-            Fear - {{$fears->fear}}
-            Category - {{$fears->category}}
-            Priority - {{$fears->priority}}
-
-            Desired Traits:
-            {{$desiredTraits}}
-
-            Role Models:
-            {{$roleModels}}
-
-            Preferred Tone:
-            {{$tone->tone}}
+            Input Data:
+            - Goals: {$goals?->title} - {$goals?->description} (Category: {$goals?->category}, Timeframe: {$goals?->timeframe}, Priority: {$goals?->priority})
+            - Fears: {$fears?->fear} (Category: {$fears?->category}, Priority: {$fears?->priority})
+            - Desired Traits: {$desiredTraits}
+            - Role Models: {$roleModels}
+            - Preferred Tone: {$tone?->tone}
 
             Instructions:
-
-            - Analyze all of the user's answers together rather than summarizing each section separately.
-            - Infer motivations and personality only when they are strongly supported by the provided information.
-            - Do not invent facts or make unsupported assumptions.
-            - Focus on who this person wants to become.
-            - Explain what appears to motivate them.
-            - Identify the internal obstacles suggested by their fears.
-            - Describe how their desired traits complement their goals.
-            - Explain what can be learned from the role models they admire.
-            - Mention the preferred communication style naturally.
-            - Keep the summary warm, insightful, and objective.
-            - Write in third person ('The user...'), not first person.
-            - Do not address the user directly.
-            - Avoid bullet points.
-            - Keep the response between 200 and 350 words.
-
-            The summary should help another AI instantly understand:
-            - What drives this person.
-            - What they are trying to achieve.
-            - What holds them back.
-            - How they like to be supported.
-            - What kind of guidance will be most effective.
-
-            Output only the summary.
-        ";
+            - Synthesize the user's aspirations, internal obstacles, admired values, and preferred tone into a unified third-person narrative ('The user...').
+            - Keep it warm, objective, actionable, and under 120 words.
+            - Output only the final summary in the feedback field.";
     }
 
     /**
