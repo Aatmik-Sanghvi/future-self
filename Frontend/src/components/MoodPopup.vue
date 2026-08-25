@@ -20,11 +20,15 @@ const selectMood = async (moodType) => {
       mood_type: moodType,
     }
     await GeneralService.postMood(payload);
+    auth.toastMessage('Mood recorded! Today\'s daily mission is tailored to your energy. ✨', 'success');
+    if (auth.user) {
+      auth.user.is_daily_mood_check_in = true;
+    }
     emit('close')
   } catch (err) {
     console.log(err);
     const message = err?.response?.data?.message || err?.message || 'Failed to record mood';
-    auth.toastMessage(message, { type: 'error' });
+    auth.toastMessage(message, 'error');
   }
 }
 </script>

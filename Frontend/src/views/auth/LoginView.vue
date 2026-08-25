@@ -1,9 +1,10 @@
 <script setup>
 import { ref, computed } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import AuthService from '@/services/authService'
 
+const route = useRoute()
 const router = useRouter()
 
 const auth = useAuthStore()
@@ -23,6 +24,9 @@ const togglePassword = () => {
 
 const handleGoogleLogin = async () => {
   try {
+    if (route.query.redirect) {
+      localStorage.setItem('auth_redirect', route.query.redirect)
+    }
     await AuthService.redirectToGoogle()
   } catch (err) {
     console.error(err)
@@ -34,16 +38,20 @@ const handleGoogleLogin = async () => {
 const handleLogin = async () => {
   if (!isFormValid.value) return
 
-  // TODO: Wire up to your auth API
   try {
     const response = await auth.login({
       email: email.value,
       password: password.value,
     })
     
-    await router.push({
-      name: response.data?.is_onboarded ? 'Dashboard' : 'Onboarding',
-    })
+    const redirectTarget = route.query.redirect
+    if (redirectTarget) {
+      await router.push(redirectTarget)
+    } else {
+      await router.push({
+        name: response.data?.is_onboarded ? 'Dashboard' : 'Onboarding',
+      })
+    }
     
     auth.toastMessage(response?.message, { type: 'success' })
   } catch (err) {

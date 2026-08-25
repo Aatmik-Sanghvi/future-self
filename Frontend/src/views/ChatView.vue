@@ -525,6 +525,9 @@ onMounted(async () => {
           </div>
         </div>
         <div class="profile-nav-actions" v-if="auth.isOnboarded">
+          <router-link to="/missions" class="profile-nav-btn" id="btn-missions-header" style="text-decoration: none;">
+            🎯 Missions
+          </router-link>
           <button class="profile-nav-btn" @click="goBack()" id="btn-back">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <line x1="19" y1="12" x2="5" y2="12" /><polyline points="12 19 5 12 12 5" />

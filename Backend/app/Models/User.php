@@ -42,7 +42,10 @@ class User extends Authenticatable
         'bonus_chats',
         'feedback_reward_claimed',
         'daily_streak',
-        'last_login'
+        'last_login',
+        'mission_email_enabled',
+        'mission_reminder_time',
+        'mission_reminder_enabled',
     ];
 
     /**
@@ -75,6 +78,8 @@ class User extends Authenticatable
             'two_factor_recovery_codes' => 'array',
             'last_login' => 'datetime',
             'daily_streak' => 'integer',
+            'mission_email_enabled' => 'boolean',
+            'mission_reminder_enabled' => 'boolean',
         ];
     }
 
@@ -100,6 +105,11 @@ class User extends Authenticatable
     public function goals()
     {
         return $this->hasOne(Goals::class);
+    }
+
+    public function dailyMissions()
+    {
+        return $this->hasMany(DailyMission::class);
     }
 
     /**

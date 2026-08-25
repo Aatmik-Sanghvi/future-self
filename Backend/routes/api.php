@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\V1\Auth\SocialAuthController;
 use App\Http\Controllers\Api\V1\GeneralController;
 use App\Http\Controllers\Api\V1\OnboardingController;
 use App\Http\Controllers\Api\V1\FeedbackController;
+use App\Http\Controllers\Api\V1\DailyMissionController;
 use App\Http\Controllers\Api\V1\MoodController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -60,5 +61,15 @@ Route::prefix('V1')->group(function () {
 
         // Daily moods checkin
         Route::post('daily-mood-checkin', [MoodController::class, 'mood']);
+
+        // Daily missions
+        Route::prefix('daily-mission')->group(function () {
+            Route::get('today', [DailyMissionController::class, 'today']);
+            Route::post('generate', [DailyMissionController::class, 'generate']);
+            Route::post('{id}/complete', [DailyMissionController::class, 'complete']);
+            Route::get('history', [DailyMissionController::class, 'history']);
+            Route::get('reminder-settings', [DailyMissionController::class, 'getReminderSettings']);
+            Route::post('reminder-settings', [DailyMissionController::class, 'updateReminderSettings']);
+        });
     });
 });

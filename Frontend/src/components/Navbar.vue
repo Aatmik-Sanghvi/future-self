@@ -80,7 +80,10 @@ onBeforeUnmount(() => {
       <a href="#testimonials">Testimonials</a>
       <a href="#pricing">Pricing</a>
       <a href="#faq">FAQ</a>
-      <router-link v-if="auth.isAuthenticated" to="/chat" class="nav-chat-btn">Chat</router-link>
+      <div v-if="auth.isAuthenticated" class="nav-auth-links-group">
+        <router-link to="/missions" class="nav-mission-btn" id="nav-missions-link">🎯 Missions</router-link>
+        <router-link to="/chat" class="nav-chat-btn" id="nav-chat-link">Chat</router-link>
+      </div>
     </div>
 
     <!-- Unauthenticated actions -->
@@ -148,6 +151,13 @@ onBeforeUnmount(() => {
 
             <div class="nav-dropdown-divider"></div>
 
+            <button class="nav-dropdown-item" @click="navigateTo('/missions')" id="dropdown-missions">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>
+              </svg>
+              Daily Missions
+            </button>
+
             <button class="nav-dropdown-item" @click="navigateTo('/edit-profile')" id="dropdown-profile">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
@@ -200,8 +210,14 @@ onBeforeUnmount(() => {
           <span class="streak-flame-icon">🔥</span>
           <span>Daily Streak: <strong>{{ auth.dailyStreak }} day{{ auth.dailyStreak === 1 ? '' : 's' }}</strong></span>
         </div>
-        <router-link to="/chat" class="nav-mobile-link" @click="closeMobileMenu">Chat</router-link>
+        <router-link to="/missions" class="nav-mobile-link" @click="closeMobileMenu">🎯 Daily Missions</router-link>
+        <router-link to="/chat" class="nav-mobile-link" @click="closeMobileMenu">💬 Chat</router-link>
+        <router-link to="/edit-profile" class="nav-mobile-link" @click="closeMobileMenu">👤 Profile</router-link>
+        <router-link to="/onboarding" class="nav-mobile-link" @click="closeMobileMenu">📋 Onboarding Steps</router-link>
         <div class="nav-mobile-divider"></div>
+        <button class="nav-mobile-link nav-mobile-logout-btn" @click="handleLogout">
+          🚪 Logout
+        </button>
       </template>
 
       <template v-else>
@@ -350,11 +366,74 @@ onBeforeUnmount(() => {
 }
 
 @media (max-width: 640px) {
+  nav {
+    padding: 10px 14px !important;
+    width: 100% !important;
+    max-width: 100vw !important;
+    box-sizing: border-box !important;
+    overflow-x: clip !important;
+  }
+  .nav-actions {
+    gap: 6px !important;
+  }
+  .nav-logo-icon {
+    width: 28px !important;
+    height: 28px !important;
+    font-size: 13px !important;
+  }
+  .nav-logo-name {
+    font-size: 15px !important;
+  }
+  .nav-user-dropdown {
+    display: none !important;
+  }
+  .nav-mobile-toggle {
+    width: 32px !important;
+    height: 32px !important;
+    padding: 4px !important;
+    display: flex !important;
+  }
   .nav-streak-badge {
-    padding: 4px 10px;
+    padding: 3px 8px !important;
+    gap: 4px !important;
+  }
+  .streak-flame-icon {
+    font-size: 0.95rem !important;
+  }
+  .streak-number {
+    font-size: 0.85rem !important;
   }
   .streak-unit {
-    display: none;
+    display: none !important;
+  }
+}
+
+.nav-mobile-logout-btn {
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: none;
+  font-family: inherit;
+  cursor: pointer;
+  color: #f87171;
+  font-weight: 600;
+}
+
+@media (max-width: 360px) {
+  nav {
+    padding: 8px 10px !important;
+  }
+  .nav-actions {
+    gap: 4px !important;
+  }
+  .nav-logo-name {
+    font-size: 14px !important;
+  }
+  .nav-logo {
+    gap: 6px !important;
+  }
+  .nav-streak-badge {
+    padding: 2px 6px !important;
   }
 }
 </style>

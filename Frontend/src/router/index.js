@@ -130,6 +130,17 @@ const routes = [
     }
   },
   {
+    path: '/missions',
+    name: 'Missions',
+    component: () => import('@/views/MissionsView.vue'),
+    meta: {
+      title: 'Daily Missions & Growth Log — FutureSelf',
+      description: 'Daily action missions assigned by your future self.',
+      requiresAuth: true,
+      noIndex: true,
+    }
+  },
+  {
     path: '/edit-profile',
     name: 'EditProfile',
     component: () => import('@/views/EditProfileView.vue'),
@@ -194,7 +205,8 @@ router.beforeEach(async (to) => {
   // protected pages - redirect to login if not authenticated
   if (to.meta.requiresAuth && !auth.isAuthenticated) {
     return { 
-      name: 'Login' 
+      name: 'Login',
+      query: { redirect: to.fullPath }
     }
   }
 

@@ -32,8 +32,14 @@ onMounted(async () => {
       
       auth.toastMessage('Signed in with Google successfully!', {type:'success'})
 
-      const isOnboarded = user?.is_onboarded || route.query.is_onboarded === '1'
-      router.push({ name: isOnboarded ? 'Dashboard' : 'Onboarding' })
+      const redirectTarget = localStorage.getItem('auth_redirect')
+      if (redirectTarget) {
+        localStorage.removeItem('auth_redirect')
+        await router.push(redirectTarget)
+      } else {
+        const isOnboarded = user?.is_onboarded || route.query.is_onboarded === '1'
+        await router.push({ name: isOnboarded ? 'Dashboard' : 'Onboarding' })
+      }
     } catch (err) {
       console.error('Callback auth error:', err)
       isError.value = true
