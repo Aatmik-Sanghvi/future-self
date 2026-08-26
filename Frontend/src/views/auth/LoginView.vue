@@ -31,7 +31,7 @@ const handleGoogleLogin = async () => {
   } catch (err) {
     console.error(err)
     const message = err?.response?.data?.message || err?.message || 'Failed to initiate Google sign in.'
-    auth.toastMessage(message, { type: 'error' })
+    auth.toastMessage(message, 'error')
   }
 }
 
@@ -53,11 +53,11 @@ const handleLogin = async () => {
       })
     }
     
-    auth.toastMessage(response?.message, { type: 'success' })
+    auth.toastMessage(response?.message, 'success')
   } catch (err) {
     console.error(err)
     const message = err?.response?.data?.message || 'Something went wrong.'
-    auth.toastMessage(message, { type: 'error' })
+    auth.toastMessage(message, 'error')
   }
 }
 </script>

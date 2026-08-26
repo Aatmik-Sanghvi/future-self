@@ -85,7 +85,7 @@ function onFeedbackSubmitted(savedData) {
   if (savedData) {
     existingFeedback.value = savedData
   }
-  auth.toastMessage('Feedback saved successfully. Thank you! ❤️', { type: 'success' })
+  auth.toastMessage('Feedback saved successfully. Thank you! ❤️', 'success')
 }
 
 function onFeedbackSkipped() {

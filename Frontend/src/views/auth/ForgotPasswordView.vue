@@ -22,7 +22,7 @@ const handleSendEmail = async () => {
 
   try {
     await auth.forgotPassword({ email: email.value })
-    auth.toastMessage('Password reset OTP sent to your email.', { type: 'success' })
+    auth.toastMessage('Password reset OTP sent to your email.', 'success')
     startCountdown()
     currentStep.value = 'otp'
     await nextTick()
@@ -132,7 +132,7 @@ const handleResendOtp = async () => {
 
   try {
     await auth.forgotPassword({ email: email.value })
-    auth.toastMessage('A new OTP has been sent to your email.', { type: 'success' })
+    auth.toastMessage('A new OTP has been sent to your email.', 'success')
     startCountdown()
     focusOtpInput(0)
   } catch (err) {
@@ -155,7 +155,7 @@ const handleVerifyOtp = async () => {
     })
     
     resetToken.value = response.data.reset_token
-    auth.toastMessage('OTP verified successfully.', { type: 'success' })
+    auth.toastMessage('OTP verified successfully.', 'success')
     currentStep.value = 'reset'
   } catch (err) {
     errorMessage.value = err?.response?.data?.message || 'Invalid OTP. Please try again.'
@@ -203,7 +203,7 @@ const handleResetPassword = async () => {
       reset_token: resetToken.value
     })
 
-    auth.toastMessage('Password reset successfully! Please sign in with your new password.', { type: 'success' })
+    auth.toastMessage('Password reset successfully! Please sign in with your new password.', 'success')
     router.push({ name: 'Login' })
   } catch (err) {
     console.log(err);

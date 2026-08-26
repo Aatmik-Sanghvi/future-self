@@ -494,11 +494,11 @@ const isStep5 = computed(() => currentStep.value == 5)
 // ── Validation helpers ──
 const validateGoal = () => {
   if (!newGoal.title.trim()) {
-    auth.toastMessage('Goal title is required.', { type: 'error' })
+    auth.toastMessage('Goal title is required.', 'error')
     return false
   }
   if (newGoal.title.trim().length > 255) {
-    auth.toastMessage('Goal title must be under 255 characters.', { type: 'error' })
+    auth.toastMessage('Goal title must be under 255 characters.', 'error')
     return false
   }
   return true
@@ -506,7 +506,7 @@ const validateGoal = () => {
 
 const validateFear = () => {
   if (!newFear.text.trim()) {
-    auth.toastMessage('Please describe your fear.', { type: 'error' })
+    auth.toastMessage('Please describe your fear.', 'error')
     return false
   }
   return true
@@ -514,7 +514,7 @@ const validateFear = () => {
 
 const validateTraits = () => {
   if (selectedTraits.value.size === 0) {
-    auth.toastMessage('Select at least one trait.', { type: 'error' })
+    auth.toastMessage('Select at least one trait.', 'error')
     return false
   }
   return true
@@ -522,7 +522,7 @@ const validateTraits = () => {
 
 const validateRoleModels = () => {
   if (roleModels.value.length === 0) {
-    auth.toastMessage('Add at least one role model.', { type: 'error' })
+    auth.toastMessage('Add at least one role model.', 'error')
     return false
   }
   return true
@@ -530,7 +530,7 @@ const validateRoleModels = () => {
 
 const validateTone = () => {
   if (!selectedTone.value) {
-    auth.toastMessage('Please choose a tone.', { type: 'error' })
+    auth.toastMessage('Please choose a tone.', 'error')
     return false
   }
   return true
@@ -540,9 +540,9 @@ const validateTone = () => {
 const handleApiError = (err, fallbackMsg) => {
   if (err.response?.status === 422 && err.response?.data?.errors) {
     const firstField = Object.keys(err.response.data.errors)[0]
-    auth.toastMessage(err.response.data.errors[firstField][0], { type: 'error' })
+    auth.toastMessage(err.response.data.errors[firstField][0], 'error')
   } else {
-    auth.toastMessage(err.response?.data?.message || fallbackMsg, { type: 'error' })
+    auth.toastMessage(err.response?.data?.message || fallbackMsg, 'error')
   }
 }
 
@@ -617,7 +617,7 @@ const removeDetail = async (id, type) => {
   try {
     await OnboardingService.removeDetail({ id, type })
 
-    auth.toastMessage('Removed successfully!', { type: 'success' })
+    auth.toastMessage('Removed successfully!', 'success')
 
     if (type === 'goals') {
       const idx = goals.value.findIndex(item => item.id === id)
@@ -814,7 +814,7 @@ const goNext = async () => {
   // Step 0 → 1 : Goals (already saved individually, just validate at least one exists)
   if (currentStep.value === 0) {
     if (!goals.value.length) {
-      auth.toastMessage('Add at least one goal to continue.', { type: 'error' })
+      auth.toastMessage('Add at least one goal to continue.', 'error')
       return
     }
   }
@@ -822,7 +822,7 @@ const goNext = async () => {
   // Step 1 → 2 : Fears (already saved individually, just validate at least one exists)
   if (currentStep.value === 1) {
     if (!fears.value.length) {
-      auth.toastMessage('Add at least one fear to continue.', { type: 'error' })
+      auth.toastMessage('Add at least one fear to continue.', 'error')
       return
     }
   }
@@ -863,10 +863,10 @@ const handleLogout = async () => {
     const response = await auth.logout()
     await router.push({ name: 'Login' })
 
-    auth.toastMessage(response?.message || 'You have been logged out.', { type: 'success' })
+    auth.toastMessage(response?.message || 'You have been logged out.', 'success')
   } catch (err) {
     console.error(err)
-    auth.toastMessage('Unable to log out right now.', { type: 'error' })
+    auth.toastMessage('Unable to log out right now.', 'error')
   }
 }
 
@@ -880,7 +880,7 @@ const startLoading = async () => {
       goal_id: goals.value[0]?.id,
       tone: selectedTone.value,
     })
-    auth.toastMessage('Tone saved!', { type: 'success' })
+    auth.toastMessage('Tone saved!', 'success')
   } catch (err) {
     console.error(err)
     handleApiError(err, 'Failed to save tone. Please try again.')

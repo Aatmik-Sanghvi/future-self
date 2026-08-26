@@ -27,7 +27,7 @@ const handleGoogleLogin = async () => {
   } catch (err) {
     console.error(err)
     const message = err?.response?.data?.message || err?.message || 'Failed to initiate Google sign in.'
-    auth.toastMessage(message, { type: 'error' })
+    auth.toastMessage(message, 'error')
   }
 }
 
@@ -205,7 +205,7 @@ const handleRegister = async () => {
       password: password.value,
     })
 
-    auth.toastMessage(response?.message || 'OTP sent to your email.', { type: 'success' })
+    auth.toastMessage(response?.message || 'OTP sent to your email.', 'success')
     startCountdown()
     currentStep.value = 'otp'
     await nextTick()
@@ -308,7 +308,7 @@ const handleResendOtp = async () => {
 
   try {
     await auth.registerResendOtp({ email: email.value })
-    auth.toastMessage('A new OTP has been sent to your email.', { type: 'success' })
+    auth.toastMessage('A new OTP has been sent to your email.', 'success')
     startCountdown()
     focusOtpInput(0)
   } catch (err) {
@@ -330,7 +330,7 @@ const handleVerifyOtp = async () => {
       otp: otpString,
     })
 
-    auth.toastMessage(response?.message || 'Account created successfully!', { type: 'success' })
+    auth.toastMessage(response?.message || 'Account created successfully!', 'success')
     await router.push({ name: auth.user?.is_onboarded ? 'Dashboard' : 'Onboarding' })
   } catch (err) {
     errorMessage.value = err?.response?.data?.message || 'Invalid OTP. Please try again.'
