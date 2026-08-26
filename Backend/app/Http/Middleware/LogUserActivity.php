@@ -58,7 +58,7 @@ class LogUserActivity
         $userId = $request->user()->id;
 
         $record = DailyActiveUser::where('user_id', $userId)
-            ->where('active_date', $today)
+            ->whereDate('active_date', $today)
             ->first();
 
         if ($record) {
@@ -67,15 +67,20 @@ class LogUserActivity
                 'request_count' => $record->request_count + 1,
             ]);
         } else {
-            DailyActiveUser::create([
-                'user_id' => $userId,
-                'active_date' => $today,
-                'first_seen_at' => now(),
-                'last_seen_at' => now(),
-                'request_count' => 1,
-            ]);
+            DailyActiveUser::firstOrCreate(
+                [
+                    'user_id' => $userId,
+                    'active_date' => $today,
+                ],
+                [
+                    'first_seen_at' => now(),
+                    'last_seen_at' => now(),
+                    'request_count' => 1,
+                ]
+            );
         }
     }
+
 
     /**
      * Resolve a human-readable action name from the request.

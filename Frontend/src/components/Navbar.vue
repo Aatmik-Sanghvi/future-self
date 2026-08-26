@@ -82,7 +82,8 @@ onBeforeUnmount(() => {
       <a href="#faq">FAQ</a>
       <div v-if="auth.isAuthenticated" class="nav-auth-links-group">
         <router-link to="/chat" class="nav-chat-btn" id="nav-chat-link">Chat</router-link>
-        <router-link to="/missions" class="nav-mission-btn" id="nav-missions-link">🎯 Missions</router-link>
+        <router-link to="/missions" class="nav-mission-btn" id="nav-missions-link">⚡ Missions</router-link>
+        <router-link to="/goals" class="nav-goal-btn" id="nav-goals-link">🎯 Goal Tracking</router-link>
       </div>
     </div>
 
@@ -151,6 +152,13 @@ onBeforeUnmount(() => {
 
             <div class="nav-dropdown-divider"></div>
 
+            <button class="nav-dropdown-item" @click="navigateTo('/goals')" id="dropdown-goals">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/><path d="m4.93 4.93 4.24 4.24"/><path d="m14.83 9.17 4.24-4.24"/><path d="m14.83 14.83 4.24 4.24"/><path d="m9.17 14.83-4.24 4.24"/>
+              </svg>
+              Goal Tracking
+            </button>
+
             <button class="nav-dropdown-item" @click="navigateTo('/missions')" id="dropdown-missions">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>
@@ -210,7 +218,8 @@ onBeforeUnmount(() => {
           <span class="streak-flame-icon">🔥</span>
           <span>Daily Streak: <strong>{{ auth.dailyStreak }} day{{ auth.dailyStreak === 1 ? '' : 's' }}</strong></span>
         </div>
-        <router-link to="/missions" class="nav-mobile-link" @click="closeMobileMenu">🎯 Daily Missions</router-link>
+        <router-link to="/goals" class="nav-mobile-link" @click="closeMobileMenu">🎯 Goal Tracking</router-link>
+        <router-link to="/missions" class="nav-mobile-link" @click="closeMobileMenu">⚡ Daily Missions</router-link>
         <router-link to="/chat" class="nav-mobile-link" @click="closeMobileMenu">💬 Chat</router-link>
         <router-link to="/edit-profile" class="nav-mobile-link" @click="closeMobileMenu">👤 Profile</router-link>
         <router-link to="/onboarding" class="nav-mobile-link" @click="closeMobileMenu">📋 Onboarding Steps</router-link>
@@ -219,6 +228,7 @@ onBeforeUnmount(() => {
           🚪 Logout
         </button>
       </template>
+
 
       <template v-else>
         <div class="nav-mobile-divider"></div>

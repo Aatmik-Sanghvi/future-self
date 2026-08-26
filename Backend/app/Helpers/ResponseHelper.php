@@ -27,8 +27,8 @@ class ResponseHelper
         }
 
         // Determine the appropriate header status
-        $validStatus = [200, 401, 412]; // Define valid statuses
-        $headerStatus = in_array($status, $validStatus) ? $status : 412;
+        $validStatus = [200, 201, 204, 400, 401, 403, 404, 409, 412, 422, 429, 500];
+        $headerStatus = in_array($status, $validStatus) ? $status : (is_int($status) && $status >= 100 && $status < 600 ? $status : 412);
 
         // Return the JSON response through the middleware pipeline
         return response()->json($data, $headerStatus);

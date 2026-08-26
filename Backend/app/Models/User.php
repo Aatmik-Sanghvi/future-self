@@ -104,7 +104,12 @@ class User extends Authenticatable
 
     public function goals()
     {
-        return $this->hasOne(Goals::class);
+        return $this->hasMany(Goals::class);
+    }
+
+    public function activeGoal()
+    {
+        return $this->hasOne(Goals::class)->where('status', 'active')->latestOfMany();
     }
 
     public function dailyMissions()

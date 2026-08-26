@@ -141,6 +141,17 @@ const routes = [
     }
   },
   {
+    path: '/goals',
+    name: 'GoalTracking',
+    component: () => import('@/views/GoalsView.vue'),
+    meta: {
+      title: 'Goal Momentum & Tracking — FutureSelf',
+      description: 'Track your goal momentum, action consistency, and weekly progress with your AI Future Self.',
+      requiresAuth: true,
+      noIndex: true,
+    }
+  },
+  {
     path: '/edit-profile',
     name: 'EditProfile',
     component: () => import('@/views/EditProfileView.vue'),

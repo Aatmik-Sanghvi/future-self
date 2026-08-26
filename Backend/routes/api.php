@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\V1\GeneralController;
 use App\Http\Controllers\Api\V1\OnboardingController;
 use App\Http\Controllers\Api\V1\FeedbackController;
 use App\Http\Controllers\Api\V1\DailyMissionController;
+use App\Http\Controllers\Api\V1\GoalController;
 use App\Http\Controllers\Api\V1\MoodController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -71,5 +72,17 @@ Route::prefix('V1')->group(function () {
             Route::get('reminder-settings', [DailyMissionController::class, 'getReminderSettings']);
             Route::post('reminder-settings', [DailyMissionController::class, 'updateReminderSettings']);
         });
+
+        // Goal Tracking & Management
+        Route::prefix('goals')->group(function () {
+            Route::get('tracking', [GoalController::class, 'tracking']);
+            Route::get('/', [GoalController::class, 'index']);
+            Route::post('/', [GoalController::class, 'store']);
+            Route::get('{id}', [GoalController::class, 'show']);
+            Route::put('{id}', [GoalController::class, 'update']);
+            Route::delete('{id}', [GoalController::class, 'destroy']);
+            Route::post('{id}/progress', [GoalController::class, 'updateProgress']);
+        });
     });
 });
+
