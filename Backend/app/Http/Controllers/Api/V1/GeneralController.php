@@ -11,6 +11,7 @@ use App\Services\ValidationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 
 class GeneralController extends ResponseController
 {
@@ -28,24 +29,32 @@ class GeneralController extends ResponseController
     }
 
     public function updateProfile(Request $request){
-        $request->validate([
+        $userId = auth()->id();
+        $rules = [
             'name' => $this->validationService->loginInputRules(),
-            'email' => $this->validationService->emailValidationRules(),
+            'email' => $this->validationService->emailUniqueRules($userId),
             'mobile' => $this->validationService->mobileOnlyRules(),
-            'profile_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
-        ]);
-
-        $user = auth()->user();
-        $data = $request->except('profile_image');
+            'country_code' => 'nullable|string|max:10',
+        ];
 
         if ($request->hasFile('profile_image')) {
-            if ($user->profile_image && file_exists(public_path($user->profile_image))) {
-                unlink(public_path($user->profile_image));
+            $rules['profile_image'] = 'image|mimes:jpeg,png,jpg,gif,webp|max:2048';
+        }
+
+        $request->validate($rules);
+
+        $user = auth()->user();
+        $data = $request->only(['name', 'email', 'country_code', 'mobile']);
+
+        if ($request->hasFile('profile_image')) {
+            $rawProfileImage = $user->getRawOriginal('profile_image');
+            if ($rawProfileImage && Storage::disk(config('constants.upload_type', 'public'))->exists($rawProfileImage)) {
+                Storage::disk(config('constants.upload_type', 'public'))->delete($rawProfileImage);
             }
             $data['profile_image'] = upload_file('profile_image', 'profile_images');
         }
 
-        $this->user->whereId($user->id)->update($data);
+        $user->update($data);
         return ResponseHelper::send(200, 'Profile has been updated successfully.', $this->get_user_data());
     }
 

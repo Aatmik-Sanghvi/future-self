@@ -18,8 +18,26 @@ const handleOutsideClick = (event) => {
   }
 }
 
-onMounted(() => {
+onMounted(async () => {
   document.addEventListener('click', handleOutsideClick)
+  if (!auth.user) {
+    await auth.fetchUser().catch(() => {})
+  }
+  if (auth.user) {
+    form.value.name = auth.user.name || ''
+    form.value.email = auth.user.email || ''
+    form.value.country_code = auth.user.country_code || '+91'
+    form.value.mobile = auth.user.mobile || ''
+    avatarUrl.value = auth.user.profile_image || null
+    joiningDate.value = auth.user.created_at || new Date()
+
+    if (auth.user.country_code) {
+      const match = countryOptions.find(c => c.dialCode === auth.user.country_code)
+      if (match) {
+        selectedCountryIso2.value = match.iso2
+      }
+    }
+  }
 })
 
 onBeforeUnmount(() => {
@@ -61,27 +79,18 @@ const selectedCountry = computed(() =>
 )
 
 const countryCode = computed(() => selectedCountry.value?.dialCode || '+1')
-const mobileNumber = computed(() => mobile.value.trim())
+const mobileNumber = computed(() => (form.value.mobile || '').trim())
 const fullMobile = computed(() => `${countryCode.value}${mobileNumber.value.replace(/^\+/, '')}`)
 
-
-// console.log(auth.user.created_at)
-
-// Form state — pre-filled with static placeholder data for design purposes.
-// Replace these with reactive bindings to auth.user when making it dynamic.
 const form = ref({
-  name: auth.user.name,
-  email: auth.user.email,
-  country_code: auth.user.country_code,
-  mobile: auth.user.mobile,
-  profile_image: auth.user.profile_image || null,
-  // bio: 'Aspiring creator who believes in building things that matter. Passionate about AI, design, and self-improvement.',
-  // location: 'Mumbai, India',
-  // dateOfBirth: '2003-06-15',
-  // gender: 'male',
+  name: auth.user?.name || '',
+  email: auth.user?.email || '',
+  country_code: auth.user?.country_code || '+91',
+  mobile: auth.user?.mobile || '',
+  profile_image: null,
 })
 
-const joiningDate = ref(auth.user.created_at)
+const joiningDate = ref(auth.user?.created_at || new Date())
 
 const passwords = ref({
   old_password: '',
@@ -97,7 +106,7 @@ const showSaved = ref(false)
 const showDeleteModal = ref(false)
 const isDeleting = ref(false)
 const deleteConfirmText = ref('')
-const avatarUrl = ref(auth.user.profile_image || null)
+const avatarUrl = ref(auth.user?.profile_image || null)
 
 // Computed
 const userInitials = computed(() => {
@@ -135,53 +144,65 @@ const handleAvatarChange = (event) => {
 // Methods
 async function handleSaveProfile() {
   isSaving.value = true
-  // TODO: Call your API to save profile
-  try{
+  try {
     form.value.country_code = countryCode.value;
 
     const formData = new FormData()
-    Object.keys(form.value).forEach(key => {
-      if (form.value[key] !== null && form.value[key] !== undefined) {
-        formData.append(key, form.value[key])
-      }
-    })
+    formData.append('name', form.value.name || '')
+    formData.append('email', form.value.email || '')
+    formData.append('country_code', form.value.country_code || '')
+    formData.append('mobile', form.value.mobile || '')
 
-    await authService.updateProfile(formData)
-    setTimeout(() => {
-      isSaving.value = false
-      showSaved.value = true
-      auth.toastMessage('Profile updated successfully', { type: 'success' })
-      setTimeout(() => { showSaved.value = false }, 2500)
-    }, 800)
-  }catch(err){
-    if(err.response?.status === 422) {
-      auth.toastMessage(err.response.data.errors, { type: 'error' })
-    }else{
-      auth.toastMessage(err.response?.data?.message || 'Something went wrong', { type: 'error' })
+    if (form.value.profile_image instanceof File) {
+      formData.append('profile_image', form.value.profile_image)
+    }
+
+    const response = await authService.updateProfile(formData)
+    if (response.data?.data) {
+      auth.user = response.data.data
+      avatarUrl.value = response.data.data.profile_image || null
+    }
+
+    isSaving.value = false
+    showSaved.value = true
+    auth.toastMessage('Profile updated successfully', 'success')
+    setTimeout(() => { showSaved.value = false }, 2500)
+  } catch (err) {
+    isSaving.value = false
+    if (err.response?.status === 422) {
+      const errs = err.response.data?.errors
+      if (typeof errs === 'object' && errs !== null) {
+        const firstErr = Object.values(errs).flat()[0]
+        auth.toastMessage(firstErr || 'Validation error', 'error')
+      } else {
+        auth.toastMessage(err.response.data.message || 'Validation error', 'error')
+      }
+    } else {
+      auth.toastMessage(err.response?.data?.message || 'Something went wrong', 'error')
     }
   }
 }
 
 async function handleChangePassword() {
   if (!passwordsMatch.value) {
-    auth.toastMessage('Passwords do not match', { type: 'error' })
+    auth.toastMessage('Passwords do not match', 'error')
     return
   }
   // TODO: Call your API to change password
   // e.g. await ProfileService.changePassword(passwords.value)
   try{
     await authService.updatePassword(passwords.value)
-    auth.toastMessage('Password changed successfully', { type: 'success' })
+    auth.toastMessage('Password changed successfully', 'success')
     passwords.value = { old_password: '', new_password: '', confirm_password: '' }
   }catch(err){
     console.log(err);
     
     if(err.response?.status === 422) {
-      auth.toastMessage(err.response.data.errors, { type: 'error' })
+      auth.toastMessage(err.response.data.errors, 'error')
     }else if(!passwords.value.old_password || !passwords.value.new_password || !passwords.value.confirm_password){
-      auth.toastMessage('All password fields are required', { type: 'error' })
+      auth.toastMessage('All password fields are required', 'error')
     }else{
-      auth.toastMessage(err.response?.data?.message || 'Something went wrong', { type: 'error' })
+      auth.toastMessage(err.response?.data?.message || 'Something went wrong', 'error')
     }
   }
 }
@@ -201,11 +222,11 @@ async function confirmDeleteAccount() {
   isDeleting.value = true
   try {
     await authService.deleteAccount()
-    auth.toastMessage('Your account has been deleted.', { type: 'success' })
+    auth.toastMessage('Your account has been deleted.', 'success')
     auth.clearAuth();
     router.push({ name: 'Login' })
   } catch (err) {
-    auth.toastMessage(err.response?.data?.message || 'Failed to delete account', { type: 'error' })
+    auth.toastMessage(err.response?.data?.message || 'Failed to delete account', 'error')
   } finally {
     isDeleting.value = false
     showDeleteModal.value = false
