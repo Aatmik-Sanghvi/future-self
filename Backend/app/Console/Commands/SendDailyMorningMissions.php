@@ -54,11 +54,12 @@ class SendDailyMorningMissions extends Command
                 if (!$mission) {
                     // Check if today's mood was already recorded
                     $todayMood = Mood::where('user_id', $user->id)
-                        ->whereDate('mood_date', today())
+                        ->whereDate('created_at', today())
+                        ->latest()
                         ->first();
 
                     $agent = new DailyMissionAgent($user, $todayMood?->mood_type);
-                    $result = $agent->ask('Generate today daily mission');
+                    $result = $agent->prompt('Generate today daily mission');
                     $taskData = is_array($result) ? $result : json_decode((string) $result, true);
 
                     $activeGoal = $user->goals()->where('status', 'active')->first();

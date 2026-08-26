@@ -108,19 +108,13 @@ class DailyMissionController extends Controller
             'reflection' => $request->input('reflection'),
         ]);
 
-        // If today's mission was completed, ensure streak is active
-        if ($mission->mission_date->isToday()) {
-            if ($user->daily_streak == 0) {
-                $user->update(['daily_streak' => 1]);
-            }
-        }
-
+        $streak = $user->syncDailyStreak();
         $stats = $this->getUserMissionStats($user->id);
 
         return ResponseHelper::send(200, 'Outstanding work! Mission marked as completed.', [
             'mission' => $mission,
             'stats' => $stats,
-            'daily_streak' => $user->fresh()->daily_streak,
+            'daily_streak' => $streak,
         ]);
     }
 
@@ -283,6 +277,7 @@ class DailyMissionController extends Controller
         $completionRate = $total > 0 ? round(($completed / $total) * 100) : 0;
 
         $user = User::find($userId);
+        $streak = $user ? $user->syncDailyStreak() : 0;
 
         return [
             'total_missions' => $total,
@@ -290,7 +285,7 @@ class DailyMissionController extends Controller
             'pending_missions' => $pending,
             'completion_rate' => $completionRate,
             'total_minutes_invested' => (int) $totalMinutes,
-            'daily_streak' => $user?->daily_streak ?? 0,
+            'daily_streak' => $streak,
         ];
     }
 }

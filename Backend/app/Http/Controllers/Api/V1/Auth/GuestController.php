@@ -132,31 +132,11 @@ class GuestController extends ResponseController
         $token = $checkUser->createToken('api-token')->plainTextToken;
 
         $user = auth()->user();
-
-        if ($user->last_login) {
-            $lastLogin = Carbon::parse($user->last_login);
-
-            if ($lastLogin->isToday()) {
-                // Already logged in today — do nothing to streak
-                if($user->daily_streak == 0){
-                    $user->increment('daily_streak');
-                }
-            } elseif ($lastLogin->isYesterday()) {
-                // Consecutive day — increment streak
-                $user->increment('daily_streak');
-            } else {
-                // Missed a day — reset streak
-                $user->daily_streak = 0;
-            }
-        } else {
-            // First ever login
-            $user->daily_streak = 1;
-        }
-
         $user->last_login = Carbon::now();
         $user->save();
+        $user->syncDailyStreak();
 
-        return ResponseHelper::send(200, 'User logged in successfully.',$this->get_user_data($token));
+        return ResponseHelper::send(200, 'User logged in successfully.', $this->get_user_data($token));
     }
 
     public function forgotPassword(Request $request){

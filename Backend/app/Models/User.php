@@ -144,4 +144,59 @@ class User extends Authenticatable
                 ->exists()
         );
     }
+
+    /**
+     * Calculate consecutive days of completed daily missions.
+     */
+    public function calculateDailyStreak(): int
+    {
+        $completedDates = $this->dailyMissions()
+            ->where('status', 'completed')
+            ->orderByDesc('mission_date')
+            ->pluck('mission_date')
+            ->map(function ($date) {
+                return $date instanceof \Carbon\CarbonInterface
+                    ? $date->toDateString()
+                    : \Carbon\Carbon::parse($date)->toDateString();
+            })
+            ->unique()
+            ->values();
+
+        if ($completedDates->isEmpty()) {
+            return 0;
+        }
+
+        $todayStr = today()->toDateString();
+        $yesterdayStr = today()->subDay()->toDateString();
+
+        $streak = 0;
+        $checkDate = today();
+
+        if ($completedDates->contains($todayStr)) {
+            $checkDate = today();
+        } elseif ($completedDates->contains($yesterdayStr)) {
+            $checkDate = today()->subDay();
+        } else {
+            return 0;
+        }
+
+        while ($completedDates->contains($checkDate->toDateString())) {
+            $streak++;
+            $checkDate = $checkDate->subDay();
+        }
+
+        return $streak;
+    }
+
+    /**
+     * Sync and persist the calculated daily streak for the user.
+     */
+    public function syncDailyStreak(): int
+    {
+        $streak = $this->calculateDailyStreak();
+        if ($this->daily_streak !== $streak) {
+            $this->update(['daily_streak' => $streak]);
+        }
+        return $streak;
+    }
 }

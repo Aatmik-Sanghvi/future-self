@@ -81,8 +81,8 @@ onBeforeUnmount(() => {
       <a href="#pricing">Pricing</a>
       <a href="#faq">FAQ</a>
       <div v-if="auth.isAuthenticated" class="nav-auth-links-group">
-        <router-link to="/missions" class="nav-mission-btn" id="nav-missions-link">🎯 Missions</router-link>
         <router-link to="/chat" class="nav-chat-btn" id="nav-chat-link">Chat</router-link>
+        <router-link to="/missions" class="nav-mission-btn" id="nav-missions-link">🎯 Missions</router-link>
       </div>
     </div>
 
