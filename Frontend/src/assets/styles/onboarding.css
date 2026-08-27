@@ -14,14 +14,20 @@
   --amber:  #fbbf24;
 }
 
-html { scroll-behavior: smooth; }
+html {
+  scroll-behavior: smooth;
+  background-color: var(--bg);
+  color-scheme: dark;
+  min-height: 100%;
+}
 
 body {
   font-family: 'Inter', sans-serif;
+  background-color: var(--bg);
   background: linear-gradient(160deg, var(--bg) 0%, var(--bg2) 40%, var(--bg3) 100%);
-  background-attachment: fixed;
   color: #fff;
   min-height: 100vh;
+  min-height: 100dvh;
   -webkit-font-smoothing: antialiased;
   display: flex;
   flex-direction: column;
