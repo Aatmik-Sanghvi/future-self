@@ -24,7 +24,14 @@ const showPastGoalsDrawer = ref(false)
 const showEditModal = ref(false)
 const showProgressModal = ref(false)
 const showAchieveConfirmModal = ref(false)
+const showMomentumInfoModal = ref(false)
+const activeMomentumPillar = ref('all') // 'all', 'completion', 'consistency', 'recent_activity', 'reflection'
 const isSubmitting = ref(false)
+
+function openMomentumModal(pillar = 'all') {
+  activeMomentumPillar.value = pillar
+  showMomentumInfoModal.value = true
+}
 
 // Goal Form
 const goalForm = ref({
@@ -513,19 +520,33 @@ watch(() => route.query.goal_id, (newId) => {
               <h2 class="momentum-headline">{{ statusConfig.headline }}</h2>
               <p class="momentum-description">{{ statusConfig.description }}</p>
 
-              <!-- Educational Subtext -->
-              <div class="momentum-disclaimer">
-                <span class="info-icon">ℹ️</span>
-                <span>
-                  <strong>Goal Momentum</strong> measures action consistency, recency, and reflections over time—answering <em>"Am I moving toward this goal?"</em>
-                </span>
+              <!-- Educational Subtext & Interactive Info Trigger -->
+              <div
+                class="momentum-disclaimer clickable"
+                @click="openMomentumModal('all')"
+                role="button"
+                tabindex="0"
+                title="Click to see exact point-wise calculation breakdown"
+                id="btn-momentum-info-disclaimer"
+              >
+                <div class="disclaimer-left">
+                  <span class="info-icon">ℹ️</span>
+                  <span>
+                    <strong>Goal Momentum</strong> tracks your daily consistency, recency, and reflections.
+                  </span>
+                </div>
+                <span class="disclaimer-cta">How is this calculated? →</span>
               </div>
 
-              <!-- 4 Modular Sub-Score Progress Bars -->
+              <!-- 4 Modular Sub-Score Progress Bars with Interactive Info Click -->
               <div class="subscores-grid">
-                <div class="subscore-item">
+                <div
+                  class="subscore-item clickable-subscore"
+                  @click="openMomentumModal('completion')"
+                  title="Click to see how Mission Completion is calculated"
+                >
                   <div class="subscore-header">
-                    <span class="subscore-title">Mission Completion (40%)</span>
+                    <span class="subscore-title">🎯 Mission Completion (40%)</span>
                     <span class="subscore-val">{{ momentum?.mission_completion_rate ?? 0 }}%</span>
                   </div>
                   <div class="subscore-bar">
@@ -533,9 +554,13 @@ watch(() => route.query.goal_id, (newId) => {
                   </div>
                 </div>
 
-                <div class="subscore-item">
+                <div
+                  class="subscore-item clickable-subscore"
+                  @click="openMomentumModal('consistency')"
+                  title="Click to see how Consistency is calculated"
+                >
                   <div class="subscore-header">
-                    <span class="subscore-title">Consistency (30%)</span>
+                    <span class="subscore-title">🔥 Consistency (30%)</span>
                     <span class="subscore-val">{{ momentum?.sub_scores?.consistency ?? 0 }}%</span>
                   </div>
                   <div class="subscore-bar">
@@ -543,9 +568,13 @@ watch(() => route.query.goal_id, (newId) => {
                   </div>
                 </div>
 
-                <div class="subscore-item">
+                <div
+                  class="subscore-item clickable-subscore"
+                  @click="openMomentumModal('recent_activity')"
+                  title="Click to see how Recent Activity is calculated"
+                >
                   <div class="subscore-header">
-                    <span class="subscore-title">Recent Activity (20%)</span>
+                    <span class="subscore-title">⏳ Recent Activity (20%)</span>
                     <span class="subscore-val">{{ momentum?.sub_scores?.recent_activity ?? 0 }}%</span>
                   </div>
                   <div class="subscore-bar">
@@ -553,9 +582,13 @@ watch(() => route.query.goal_id, (newId) => {
                   </div>
                 </div>
 
-                <div class="subscore-item">
+                <div
+                  class="subscore-item clickable-subscore"
+                  @click="openMomentumModal('reflection')"
+                  title="Click to see how Mindful Reflection is calculated"
+                >
                   <div class="subscore-header">
-                    <span class="subscore-title">Reflections (10%)</span>
+                    <span class="subscore-title">📝 Reflections (10%)</span>
                     <span class="subscore-val">{{ momentum?.sub_scores?.check_in_reflection ?? 0 }}%</span>
                   </div>
                   <div class="subscore-bar">
@@ -1064,6 +1097,413 @@ watch(() => route.query.goal_id, (newId) => {
               </button>
             </div>
           </form>
+        </div>
+      </div>
+    </Transition>
+
+    <!-- ── MODAL: HOW MOMENTUM IS CALCULATED ── -->
+    <Transition name="modal-fade">
+      <div v-if="showMomentumInfoModal" class="modal-overlay" @click.self="showMomentumInfoModal = false">
+        <div class="modal-card modal-card-momentum-info">
+          <div class="modal-header">
+            <div class="modal-title-wrap">
+              <span class="modal-title-badge">
+                {{ activeMomentumPillar === 'all' ? 'SCORING BREAKDOWN' : 'METRIC DEEP-DIVE' }}
+              </span>
+              <h3 class="modal-title">
+                <span v-if="activeMomentumPillar === 'all'">⚡ How Goal Momentum is Calculated</span>
+                <span v-else-if="activeMomentumPillar === 'completion'">🎯 Mission Follow-Through Calculation</span>
+                <span v-else-if="activeMomentumPillar === 'consistency'">🔥 Consistency & Streak Calculation</span>
+                <span v-else-if="activeMomentumPillar === 'recent_activity'">⏳ Recent Action & Recency Calculation</span>
+                <span v-else-if="activeMomentumPillar === 'reflection'">📝 Mindful Reflection Calculation</span>
+              </h3>
+            </div>
+            <button class="btn-close" @click="showMomentumInfoModal = false" aria-label="Close modal">✕</button>
+          </div>
+
+          <!-- Pillar Switcher Tabs -->
+          <div class="pillar-tabs-row">
+            <button
+              type="button"
+              class="pillar-tab-btn"
+              :class="{ active: activeMomentumPillar === 'all' }"
+              @click="activeMomentumPillar = 'all'"
+            >
+              📊 All Pillars
+            </button>
+            <button
+              type="button"
+              class="pillar-tab-btn"
+              :class="{ active: activeMomentumPillar === 'completion' }"
+              @click="activeMomentumPillar = 'completion'"
+            >
+              🎯 Completion (40%)
+            </button>
+            <button
+              type="button"
+              class="pillar-tab-btn"
+              :class="{ active: activeMomentumPillar === 'consistency' }"
+              @click="activeMomentumPillar = 'consistency'"
+            >
+              🔥 Consistency (30%)
+            </button>
+            <button
+              type="button"
+              class="pillar-tab-btn"
+              :class="{ active: activeMomentumPillar === 'recent_activity' }"
+              @click="activeMomentumPillar = 'recent_activity'"
+            >
+              ⏳ Recency (20%)
+            </button>
+            <button
+              type="button"
+              class="pillar-tab-btn"
+              :class="{ active: activeMomentumPillar === 'reflection' }"
+              @click="activeMomentumPillar = 'reflection'"
+            >
+              📝 Reflection (10%)
+            </button>
+          </div>
+
+          <!-- ── VIEW 1: COMPLETE 4-PILLAR OVERVIEW ── -->
+          <div v-if="activeMomentumPillar === 'all'" class="momentum-info-body">
+            <p class="info-intro">
+              Your Momentum Score (<strong>{{ momentum?.score ?? 0 }} / 100</strong>) is a live pulse of your daily execution toward this goal. Click any pillar below for its specific calculation:
+            </p>
+
+            <div class="pillar-cards-grid">
+              <!-- Pillar 1: Follow-through -->
+              <div class="pillar-card clickable-pillar" @click="activeMomentumPillar = 'completion'">
+                <div class="pillar-top">
+                  <div class="pillar-icon-wrap bg-emerald">🎯</div>
+                  <div class="pillar-meta">
+                    <span class="pillar-name">1. Mission Follow-Through</span>
+                    <span class="pillar-weight">40% of Score (Max 40 pts)</span>
+                  </div>
+                  <div class="pillar-score-badge">
+                    {{ Math.round(((momentum?.sub_scores?.mission_completion ?? 0) * 0.40) * 10) / 10 }} / 40 pts
+                  </div>
+                </div>
+                <p class="pillar-desc">
+                  Based on completed vs skipped daily missions. Completing assigned actions directly builds this foundation.
+                </p>
+                <div class="pillar-stat-pill">
+                  Completion Rate: <strong>{{ momentum?.mission_completion_rate ?? 0 }}%</strong> · Tap to inspect →
+                </div>
+              </div>
+
+              <!-- Pillar 2: Consistency -->
+              <div class="pillar-card clickable-pillar" @click="activeMomentumPillar = 'consistency'">
+                <div class="pillar-top">
+                  <div class="pillar-icon-wrap bg-amber">🔥</div>
+                  <div class="pillar-meta">
+                    <span class="pillar-name">2. Consistency & Streak</span>
+                    <span class="pillar-weight">30% of Score (Max 30 pts)</span>
+                  </div>
+                  <div class="pillar-score-badge">
+                    {{ Math.round(((momentum?.sub_scores?.consistency ?? 0) * 0.30) * 10) / 10 }} / 30 pts
+                  </div>
+                </div>
+                <p class="pillar-desc">
+                  Rewards regular daily cadence. An active streak (up to 7 days) and showing up on 8+ days of the last 14 days unlocks full points.
+                </p>
+                <div class="pillar-stat-pill">
+                  Current Streak: <strong>{{ momentum?.current_streak ?? 0 }} day{{ (momentum?.current_streak ?? 0) === 1 ? '' : 's' }}</strong> · Tap to inspect →
+                </div>
+              </div>
+
+              <!-- Pillar 3: Recent Activity -->
+              <div class="pillar-card clickable-pillar" @click="activeMomentumPillar = 'recent_activity'">
+                <div class="pillar-top">
+                  <div class="pillar-icon-wrap bg-indigo">⏳</div>
+                  <div class="pillar-meta">
+                    <span class="pillar-name">3. Recent Action & Recency</span>
+                    <span class="pillar-weight">20% of Score (Max 20 pts)</span>
+                  </div>
+                  <div class="pillar-score-badge">
+                    {{ Math.round(((momentum?.sub_scores?.recent_activity ?? 0) * 0.20) * 10) / 10 }} / 20 pts
+                  </div>
+                </div>
+                <p class="pillar-desc">
+                  Keeps goals from going stale. Taking action today (100%) or yesterday (85%) maintains maximum forward velocity.
+                </p>
+                <div class="pillar-stat-pill">
+                  Velocity Trend: <strong>{{ trendConfig.title }} ({{ trendConfig.icon }})</strong> · Tap to inspect →
+                </div>
+              </div>
+
+              <!-- Pillar 4: Mindful Reflection -->
+              <div class="pillar-card clickable-pillar" @click="activeMomentumPillar = 'reflection'">
+                <div class="pillar-top">
+                  <div class="pillar-icon-wrap bg-purple">📝</div>
+                  <div class="pillar-meta">
+                    <span class="pillar-name">4. Mindful Reflection</span>
+                    <span class="pillar-weight">10% of Score (Max 10 pts)</span>
+                  </div>
+                  <div class="pillar-score-badge">
+                    {{ Math.round(((momentum?.sub_scores?.check_in_reflection ?? 0) * 0.10) * 10) / 10 }} / 10 pts
+                  </div>
+                </div>
+                <p class="pillar-desc">
+                  Reflection makes growth stick. Writing a quick 1-sentence reflection when finishing a mission awards bonus points.
+                </p>
+                <div class="pillar-stat-pill">
+                  Reflection Score: <strong>{{ momentum?.sub_scores?.check_in_reflection ?? 0 }}%</strong> · Tap to inspect →
+                </div>
+              </div>
+            </div>
+
+            <!-- Status Tiers Guide -->
+            <div class="tiers-guide-box">
+              <h4 class="tiers-title">Momentum Status Levels:</h4>
+              <div class="tiers-row">
+                <div class="tier-chip tier-emerald">
+                  <span class="tier-dot"></span>
+                  <div>
+                    <strong>70 – 100: Strong Momentum ⚡</strong>
+                    <p>Daily compounding habits in full motion.</p>
+                  </div>
+                </div>
+                <div class="tier-chip tier-amber">
+                  <span class="tier-dot"></span>
+                  <div>
+                    <strong>40 – 69: Building Momentum 🌱</strong>
+                    <p>Solid baseline; 1 or 2 small actions ignite peak flow.</p>
+                  </div>
+                </div>
+                <div class="tier-chip tier-rose">
+                  <span class="tier-dot"></span>
+                  <div>
+                    <strong>0 – 39: Needs Ignition 🔥</strong>
+                    <p>One gentle 10-minute micro-mission restarts the fire.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Pro Tip Box -->
+            <div class="pro-tip-card">
+              <span class="pro-tip-icon">💡</span>
+              <div class="pro-tip-content">
+                <strong>How to raise your score right now:</strong>
+                <p>Complete today's assigned micro-mission and write a 1-sentence reflection note upon completion!</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── VIEW 2: SPECIFIC PILLAR - MISSION COMPLETION ── -->
+          <div v-else-if="activeMomentumPillar === 'completion'" class="momentum-info-body single-pillar-view">
+            <div class="single-pillar-hero bg-emerald">
+              <div class="single-pillar-hero-left">
+                <span class="single-pillar-tag">PILLAR 1 · WEIGHT: 40%</span>
+                <h4 class="single-pillar-title">Mission Follow-Through</h4>
+                <p class="single-pillar-subtitle">Evaluates how reliably you complete the daily actions assigned to this goal.</p>
+              </div>
+              <div class="single-pillar-score-box">
+                <span class="single-score-num">{{ Math.round(((momentum?.sub_scores?.mission_completion ?? 0) * 0.40) * 10) / 10 }}</span>
+                <span class="single-score-denom">/ 40 pts</span>
+              </div>
+            </div>
+
+            <!-- Live Breakdown Details -->
+            <div class="calc-metrics-grid">
+              <div class="calc-metric-box">
+                <span class="calc-metric-label">Completed Missions</span>
+                <strong class="calc-metric-val color-emerald">{{ momentum?.missions_completed ?? 0 }}</strong>
+              </div>
+              <div class="calc-metric-box">
+                <span class="calc-metric-label">Total Assigned</span>
+                <strong class="calc-metric-val">{{ momentum?.missions_assigned ?? 0 }}</strong>
+              </div>
+              <div class="calc-metric-box">
+                <span class="calc-metric-label">Skipped Missions</span>
+                <strong class="calc-metric-val color-rose">{{ momentum?.missions_skipped ?? 0 }}</strong>
+              </div>
+              <div class="calc-metric-box">
+                <span class="calc-metric-label">Completion Rate</span>
+                <strong class="calc-metric-val color-purple">{{ momentum?.mission_completion_rate ?? 0 }}%</strong>
+              </div>
+            </div>
+
+            <div class="calc-rules-list">
+              <h5 class="rules-heading">How It Works:</h5>
+              <div class="rule-item">
+                <span class="rule-bullet">✓</span>
+                <p>Every completed mission increases your completion rate toward 100%.</p>
+              </div>
+              <div class="rule-item">
+                <span class="rule-bullet">✕</span>
+                <p>Skipping a mission lowers this score proportionally.</p>
+              </div>
+              <div class="rule-item">
+                <span class="rule-bullet">⏳</span>
+                <p>Pending missions for today do not penalize you until skipped.</p>
+              </div>
+            </div>
+
+            <div class="pro-tip-card">
+              <span class="pro-tip-icon">💡</span>
+              <div class="pro-tip-content">
+                <strong>How to raise this score:</strong>
+                <p>Complete today's pending daily mission in the Missions tab.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── VIEW 3: SPECIFIC PILLAR - CONSISTENCY & STREAK ── -->
+          <div v-else-if="activeMomentumPillar === 'consistency'" class="momentum-info-body single-pillar-view">
+            <div class="single-pillar-hero bg-amber">
+              <div class="single-pillar-hero-left">
+                <span class="single-pillar-tag">PILLAR 2 · WEIGHT: 30%</span>
+                <h4 class="single-pillar-title">Consistency & Daily Streak</h4>
+                <p class="single-pillar-subtitle">Measures your daily rhythm and frequency over the last 14 days.</p>
+              </div>
+              <div class="single-pillar-score-box">
+                <span class="single-score-num">{{ Math.round(((momentum?.sub_scores?.consistency ?? 0) * 0.30) * 10) / 10 }}</span>
+                <span class="single-score-denom">/ 30 pts</span>
+              </div>
+            </div>
+
+            <div class="consistency-factors-grid">
+              <div class="factor-card">
+                <div class="factor-header">
+                  <span>🔥 Factor A: Daily Streak (50%)</span>
+                  <strong>Max 15 pts</strong>
+                </div>
+                <p class="factor-desc">Consecutive calendar days with at least 1 completed mission. <strong>7+ days streak = Full 15 pts.</strong></p>
+                <div class="factor-stat">Your Current Streak: <strong>{{ momentum?.current_streak ?? 0 }} Day{{ (momentum?.current_streak ?? 0) === 1 ? '' : 's' }}</strong></div>
+              </div>
+
+              <div class="factor-card">
+                <div class="factor-header">
+                  <span>📅 Factor B: 14-Day Frequency (50%)</span>
+                  <strong>Max 15 pts</strong>
+                </div>
+                <p class="factor-desc">Active unique days over the past 14 days. <strong>8+ active days = Full 15 pts.</strong></p>
+                <div class="factor-stat">Active Days in Last 14: <strong>{{ momentum?.active_days ?? 0 }} Day{{ (momentum?.active_days ?? 0) === 1 ? '' : 's' }}</strong></div>
+              </div>
+            </div>
+
+            <div class="pro-tip-card">
+              <span class="pro-tip-icon">💡</span>
+              <div class="pro-tip-content">
+                <strong>How to raise this score:</strong>
+                <p>Keep your daily chain unbroken! Showing up even for a small 10-minute action prevents streak resets.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── VIEW 4: SPECIFIC PILLAR - RECENT ACTIVITY & RECENCY ── -->
+          <div v-else-if="activeMomentumPillar === 'recent_activity'" class="momentum-info-body single-pillar-view">
+            <div class="single-pillar-hero bg-indigo">
+              <div class="single-pillar-hero-left">
+                <span class="single-pillar-tag">PILLAR 3 · WEIGHT: 20%</span>
+                <h4 class="single-pillar-title">Recent Action & Recency</h4>
+                <p class="single-pillar-subtitle">Ensures your goal remains alive and moving right now, preventing dormancy.</p>
+              </div>
+              <div class="single-pillar-score-box">
+                <span class="single-score-num">{{ Math.round(((momentum?.sub_scores?.recent_activity ?? 0) * 0.20) * 10) / 10 }}</span>
+                <span class="single-score-denom">/ 20 pts</span>
+              </div>
+            </div>
+
+            <div class="consistency-factors-grid">
+              <div class="factor-card">
+                <div class="factor-header">
+                  <span>⚡ 7-Day Action Volume (60%)</span>
+                  <strong>Max 12 pts</strong>
+                </div>
+                <p class="factor-desc">Counts completed actions in the last 7 days. <strong>4+ completed missions = Full 12 pts.</strong></p>
+                <div class="factor-stat">Last 7 Days Actions: <strong>{{ momentum?.trend_details?.current_period_completions ?? 0 }} completed</strong></div>
+              </div>
+
+              <div class="factor-card">
+                <div class="factor-header">
+                  <span>⏳ Recency Decay Curve (40%)</span>
+                  <strong>Max 8 pts</strong>
+                </div>
+                <p class="factor-desc">
+                  Today: <strong>100%</strong> (8 pts) · Yesterday: <strong>85%</strong> (6.8 pts) · 2 Days ago: <strong>70%</strong> · 7+ Days ago: <strong>0 pts</strong>.
+                </p>
+                <div class="factor-stat">Velocity Trend: <strong>{{ trendConfig.title }} ({{ trendConfig.icon }})</strong></div>
+              </div>
+            </div>
+
+            <div class="pro-tip-card">
+              <span class="pro-tip-icon">💡</span>
+              <div class="pro-tip-content">
+                <strong>How to raise this score:</strong>
+                <p>Complete a mission today! It immediately sets your Recency factor to 100% and adds to your 7-day volume.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── VIEW 5: SPECIFIC PILLAR - MINDFUL REFLECTION ── -->
+          <div v-else-if="activeMomentumPillar === 'reflection'" class="momentum-info-body single-pillar-view">
+            <div class="single-pillar-hero bg-purple">
+              <div class="single-pillar-hero-left">
+                <span class="single-pillar-tag">PILLAR 4 · WEIGHT: 10%</span>
+                <h4 class="single-pillar-title">Mindful Reflection</h4>
+                <p class="single-pillar-subtitle">Rewards internal reflection and self-awareness to make behavioral progress stick.</p>
+              </div>
+              <div class="single-pillar-score-box">
+                <span class="single-score-num">{{ Math.round(((momentum?.sub_scores?.check_in_reflection ?? 0) * 0.10) * 10) / 10 }}</span>
+                <span class="single-score-denom">/ 10 pts</span>
+              </div>
+            </div>
+
+            <div class="calc-rules-list">
+              <h5 class="rules-heading">Why Reflection Matters:</h5>
+              <div class="rule-item">
+                <span class="rule-bullet">✨</span>
+                <p>Action without reflection is just checking boxes; reflection transforms behavior into identity.</p>
+              </div>
+              <div class="rule-item">
+                <span class="rule-bullet">📝</span>
+                <p>Writing even a single sentence takeaway when completing any daily mission awards full reflection points.</p>
+              </div>
+              <div class="rule-item">
+                <span class="rule-bullet">📊</span>
+                <p>Your current reflection score is <strong>{{ momentum?.sub_scores?.check_in_reflection ?? 0 }}%</strong>.</p>
+              </div>
+            </div>
+
+            <div class="pro-tip-card">
+              <span class="pro-tip-icon">💡</span>
+              <div class="pro-tip-content">
+                <strong>How to raise this score:</strong>
+                <p>Whenever you finish a mission, take 30 seconds to type what you felt or learned in the reflection box!</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Modal Footer Actions -->
+          <div class="modal-actions justify-between align-center">
+            <button
+              v-if="activeMomentumPillar !== 'all'"
+              type="button"
+              class="btn-modal-cancel"
+              @click="activeMomentumPillar = 'all'"
+            >
+              ← View All 4 Pillars
+            </button>
+            <button
+              v-else
+              type="button"
+              class="btn-secondary-glow"
+              @click="goToMissions"
+            >
+              ⚡ Open Daily Missions
+            </button>
+
+            <button
+              type="button"
+              class="btn-modal-submit"
+              @click="showMomentumInfoModal = false"
+            >
+              Close Breakdown
+            </button>
+          </div>
         </div>
       </div>
     </Transition>
@@ -1698,16 +2138,52 @@ watch(() => route.query.goal_id, (newId) => {
 
 .momentum-disclaimer {
   display: flex;
-  align-items: flex-start;
-  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
   padding: 10px 14px;
-  border-radius: 10px;
-  background: rgba(15, 12, 26, 0.5);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  background: rgba(15, 12, 26, 0.6);
+  border: 1px solid rgba(139, 92, 246, 0.2);
   font-size: 12px;
   line-height: 1.5;
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(255, 255, 255, 0.7);
   margin-bottom: 22px;
+  transition: all 0.2s ease;
+}
+
+.momentum-disclaimer.clickable {
+  cursor: pointer;
+}
+
+.momentum-disclaimer.clickable:hover {
+  background: rgba(139, 92, 246, 0.12);
+  border-color: rgba(167, 139, 250, 0.45);
+  box-shadow: 0 4px 15px rgba(124, 58, 237, 0.15);
+}
+
+.disclaimer-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.disclaimer-cta {
+  font-weight: 700;
+  color: #a78bfa;
+  white-space: nowrap;
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: rgba(139, 92, 246, 0.15);
+  border: 1px solid rgba(167, 139, 250, 0.3);
+  transition: all 0.2s ease;
+}
+
+.momentum-disclaimer.clickable:hover .disclaimer-cta {
+  background: rgba(139, 92, 246, 0.3);
+  color: #ffffff;
+  border-color: #a78bfa;
 }
 
 /* Sub-scores Grid */
@@ -1721,13 +2197,24 @@ watch(() => route.query.goal_id, (newId) => {
   display: flex;
   flex-direction: column;
   gap: 5px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.clickable-subscore {
+  cursor: pointer;
+}
+
+.clickable-subscore:hover {
+  background: rgba(255, 255, 255, 0.04);
 }
 
 .subscore-header {
   display: flex;
   justify-content: space-between;
   font-size: 12px;
-  color: rgba(255, 255, 255, 0.7);
+  color: rgba(255, 255, 255, 0.75);
 }
 
 .subscore-val {
@@ -2354,6 +2841,503 @@ watch(() => route.query.goal_id, (newId) => {
   text-align: center;
 }
 
+/* Momentum Info Modal Styles */
+.modal-card-momentum-info {
+  max-width: 680px;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 28px;
+}
+
+.modal-title-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.modal-title-badge {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  color: #a78bfa;
+  text-transform: uppercase;
+}
+
+/* Pillar Tabs */
+.pillar-tabs-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  padding: 4px;
+  background: rgba(10, 8, 22, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  margin-bottom: 8px;
+}
+
+.pillar-tab-btn {
+  padding: 7px 12px;
+  border-radius: 8px;
+  background: transparent;
+  border: 1px solid transparent;
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 11.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pillar-tab-btn:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.pillar-tab-btn.active {
+  background: rgba(139, 92, 246, 0.25);
+  border-color: rgba(167, 139, 250, 0.5);
+  color: #ffffff;
+  box-shadow: 0 2px 10px rgba(124, 58, 237, 0.2);
+}
+
+.momentum-info-body {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.clickable-pillar {
+  cursor: pointer;
+}
+
+.clickable-pillar:hover {
+  transform: translateY(-2px);
+  border-color: rgba(167, 139, 250, 0.5);
+  box-shadow: 0 6px 20px rgba(124, 58, 237, 0.15);
+}
+
+/* Single Pillar View Elements */
+.single-pillar-view {
+  gap: 16px;
+}
+
+.single-pillar-hero {
+  border-radius: 16px;
+  padding: 18px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.single-pillar-hero-left {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.single-pillar-tag {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  color: rgba(255, 255, 255, 0.6);
+  text-transform: uppercase;
+}
+
+.single-pillar-title {
+  font-size: 18px;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0;
+}
+
+.single-pillar-subtitle {
+  font-size: 12px;
+  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.75);
+  margin: 0;
+}
+
+.single-pillar-score-box {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+  background: rgba(10, 8, 24, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 10px 16px;
+  border-radius: 12px;
+  flex-shrink: 0;
+}
+
+.single-score-num {
+  font-size: 26px;
+  font-weight: 900;
+  line-height: 1;
+  color: #ffffff;
+}
+
+.single-score-denom {
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.5);
+  margin-top: 2px;
+}
+
+/* Formula Card */
+.calc-formula-card {
+  background: rgba(15, 12, 30, 0.8);
+  border: 1px solid rgba(139, 92, 246, 0.25);
+  border-radius: 12px;
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.formula-label {
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: #a78bfa;
+}
+
+.formula-code {
+  font-family: 'Fira Code', ui-monospace, SFMono-Regular, monospace;
+  font-size: 12px;
+  color: #38bdf8;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 6px 10px;
+  border-radius: 6px;
+  word-break: break-word;
+}
+
+/* Calculation Metrics Grid */
+.calc-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+.calc-metric-box {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.calc-metric-label {
+  font-size: 10.5px;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.calc-metric-val {
+  font-size: 16px;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+/* Rules List */
+.calc-rules-list {
+  background: rgba(15, 12, 28, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.rules-heading {
+  font-size: 11.5px;
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.6);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin: 0 0 2px;
+}
+
+.rule-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 12px;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.rule-item p {
+  margin: 0;
+}
+
+.rule-bullet {
+  color: #a78bfa;
+  font-weight: 800;
+}
+
+/* Consistency & Recency Factors Grid */
+.consistency-factors-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.factor-card {
+  background: rgba(10, 8, 22, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.factor-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.factor-header strong {
+  font-size: 11px;
+  color: #c4b5fd;
+}
+
+.factor-desc {
+  font-size: 11.5px;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0;
+}
+
+.factor-stat {
+  font-size: 11px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.6);
+  margin-top: 4px;
+}
+
+.factor-stat strong {
+  color: #ffffff;
+}
+
+.info-intro {
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.pillar-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+}
+
+.pillar-card {
+  background: rgba(10, 8, 24, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+.pillar-card:hover {
+  border-color: rgba(167, 139, 250, 0.35);
+  background: rgba(18, 14, 38, 0.7);
+}
+
+.pillar-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.pillar-icon-wrap {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.bg-emerald {
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(52, 211, 153, 0.35);
+}
+
+.bg-amber {
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(251, 191, 36, 0.35);
+}
+
+.bg-indigo {
+  background: rgba(99, 102, 241, 0.15);
+  border: 1px solid rgba(129, 140, 248, 0.35);
+}
+
+.bg-purple {
+  background: rgba(168, 85, 247, 0.15);
+  border: 1px solid rgba(192, 132, 252, 0.35);
+}
+
+.pillar-meta {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.pillar-name {
+  font-size: 12.5px;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.pillar-weight {
+  font-size: 10.5px;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.pillar-score-badge {
+  font-size: 11px;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: rgba(139, 92, 246, 0.2);
+  color: #c4b5fd;
+  border: 1px solid rgba(167, 139, 250, 0.3);
+  white-space: nowrap;
+}
+
+.pillar-desc {
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0;
+}
+
+.pillar-stat-pill {
+  font-size: 11px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.pillar-stat-pill strong {
+  color: #ffffff;
+}
+
+/* Status Tiers Guide */
+.tiers-guide-box {
+  background: rgba(15, 12, 30, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 14px 16px;
+}
+
+.tiers-title {
+  font-size: 12px;
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.6);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 10px;
+}
+
+.tiers-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.tier-chip {
+  padding: 10px;
+  border-radius: 10px;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.tier-chip strong {
+  display: block;
+  font-size: 11.5px;
+  margin-bottom: 2px;
+}
+
+.tier-chip p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 10.5px;
+}
+
+.tier-emerald {
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(52, 211, 153, 0.25);
+  color: #34d399;
+}
+
+.tier-amber {
+  background: rgba(245, 158, 11, 0.08);
+  border: 1px solid rgba(251, 191, 36, 0.25);
+  color: #fbbf24;
+}
+
+.tier-rose {
+  background: rgba(244, 63, 94, 0.08);
+  border: 1px solid rgba(251, 113, 133, 0.25);
+  color: #fb7185;
+}
+
+/* Pro Tip Card */
+.pro-tip-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.15), rgba(99, 102, 241, 0.1));
+  border: 1px solid rgba(167, 139, 250, 0.3);
+  border-radius: 12px;
+  padding: 12px 16px;
+}
+
+.pro-tip-icon {
+  font-size: 20px;
+}
+
+.pro-tip-content strong {
+  font-size: 12px;
+  color: #c4b5fd;
+  display: block;
+  margin-bottom: 2px;
+}
+
+.pro-tip-content p {
+  font-size: 11.5px;
+  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0;
+}
+
+.align-center {
+  align-items: center;
+}
+
 .achievement-modal-icon {
   width: 64px;
   height: 64px;
@@ -2629,6 +3613,31 @@ watch(() => route.query.goal_id, (newId) => {
 
   .form-row {
     flex-direction: column;
+  }
+
+  .pillar-cards-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .tiers-row {
+    grid-template-columns: 1fr;
+  }
+
+  .calc-metrics-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .consistency-factors-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .single-pillar-hero {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .single-pillar-score-box {
+    align-self: flex-start;
   }
 }
 </style>
