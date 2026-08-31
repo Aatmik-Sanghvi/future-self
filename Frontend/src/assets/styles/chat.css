@@ -986,7 +986,7 @@
 }
 
 /* ── RESPONSIVE ──────────────────────────── */
-@media (max-width: 768px) {
+@media (max-width: 900px) {
   .chat-sidebar {
     position: fixed;
     left: 0;

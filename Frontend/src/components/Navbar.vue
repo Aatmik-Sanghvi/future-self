@@ -1,10 +1,11 @@
 <script setup>
 import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue'
 import { useAuthStore } from '@/stores/auth'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 
 const auth = useAuthStore()
 const router = useRouter()
+const route = useRoute()
 const dropdownOpen = ref(false)
 const dropdownRef = ref(null)
 const menuOpen = ref(false)
@@ -75,15 +76,17 @@ onBeforeUnmount(() => {
     </div>
 
     <div class="nav-links">
-      <a href="/#features">Features</a>
-      <a href="/#how">How It Works</a>
-      <a href="/#testimonials">Testimonials</a>
-      <a href="/#pricing">Pricing</a>
-      <a href="/#faq">FAQ</a>
+      <template v-if="!auth.isAuthenticated || route.path === '/'">
+        <a href="/#features">Features</a>
+        <a href="/#how">How It Works</a>
+        <a href="/#testimonials">Testimonials</a>
+        <a href="/#pricing">Pricing</a>
+        <a href="/#faq">FAQ</a>
+      </template>
       <div v-if="auth.isAuthenticated" class="nav-auth-links-group">
-        <router-link to="/chat" class="nav-chat-btn" id="nav-chat-link">Chat</router-link>
         <router-link to="/missions" class="nav-mission-btn" id="nav-missions-link">⚡ Missions</router-link>
         <router-link to="/goals" class="nav-goal-btn" id="nav-goals-link">🎯 Goal Tracking</router-link>
+        <router-link to="/chat" class="nav-chat-btn" id="nav-chat-link">💬 Chat</router-link>
       </div>
     </div>
 
@@ -152,25 +155,11 @@ onBeforeUnmount(() => {
 
             <div class="nav-dropdown-divider"></div>
 
-            <button class="nav-dropdown-item" @click="navigateTo('/goals')" id="dropdown-goals">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10"/><path d="m4.93 4.93 4.24 4.24"/><path d="m14.83 9.17 4.24-4.24"/><path d="m14.83 14.83 4.24 4.24"/><path d="m9.17 14.83-4.24 4.24"/>
-              </svg>
-              Goal Tracking
-            </button>
-
-            <button class="nav-dropdown-item" @click="navigateTo('/missions')" id="dropdown-missions">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>
-              </svg>
-              Daily Missions
-            </button>
-
             <button class="nav-dropdown-item" @click="navigateTo('/edit-profile')" id="dropdown-profile">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
               </svg>
-              Profile
+              Profile & Settings
             </button>
 
             <button class="nav-dropdown-item" @click="navigateTo('/onboarding')" id="dropdown-onboarding">
@@ -208,29 +197,41 @@ onBeforeUnmount(() => {
         </svg>
       </button>
 
-      <a href="#features" class="nav-mobile-link" @click="closeMobileMenu">Features</a>
-      <a href="#how" class="nav-mobile-link" @click="closeMobileMenu">How It Works</a>
-      <a href="#testimonials" class="nav-mobile-link" @click="closeMobileMenu">Testimonials</a>
-      <a href="#pricing" class="nav-mobile-link" @click="closeMobileMenu">Pricing</a>
-
       <template v-if="auth.isAuthenticated">
+        <div class="nav-mobile-user-profile">
+          <img v-if="auth.user?.profile_image" :src="auth.user.profile_image" class="profile-image"> 
+          <div class="nav-dropdown-user-avatar" v-else>{{ userInitials }}</div>
+          <div class="nav-dropdown-user-info">
+            <div class="nav-dropdown-user-name">{{ auth.user?.name || 'User' }}</div>
+            <div class="nav-dropdown-user-email">{{ auth.user?.email || '' }}</div>
+          </div>
+        </div>
         <div class="nav-mobile-streak-row" v-if="auth.dailyStreak > 0">
           <span class="streak-flame-icon">🔥</span>
           <span>Daily Streak: <strong>{{ auth.dailyStreak }} day{{ auth.dailyStreak === 1 ? '' : 's' }}</strong></span>
         </div>
-        <router-link to="/goals" class="nav-mobile-link" @click="closeMobileMenu">🎯 Goal Tracking</router-link>
+        <div class="nav-mobile-divider"></div>
         <router-link to="/missions" class="nav-mobile-link" @click="closeMobileMenu">⚡ Daily Missions</router-link>
-        <router-link to="/chat" class="nav-mobile-link" @click="closeMobileMenu">💬 Chat</router-link>
-        <router-link to="/edit-profile" class="nav-mobile-link" @click="closeMobileMenu">👤 Profile</router-link>
+        <router-link to="/goals" class="nav-mobile-link" @click="closeMobileMenu">🎯 Goal Tracking</router-link>
+        <router-link to="/chat" class="nav-mobile-link" @click="closeMobileMenu">💬 Chat with Future Self</router-link>
+        <router-link to="/edit-profile" class="nav-mobile-link" @click="closeMobileMenu">👤 Profile & Settings</router-link>
         <router-link to="/onboarding" class="nav-mobile-link" @click="closeMobileMenu">📋 Onboarding Steps</router-link>
+        <div class="nav-mobile-divider"></div>
+        <a href="/#features" class="nav-mobile-link" @click="closeMobileMenu">Features</a>
+        <a href="/#how" class="nav-mobile-link" @click="closeMobileMenu">How It Works</a>
+        <a href="/#pricing" class="nav-mobile-link" @click="closeMobileMenu">Pricing</a>
         <div class="nav-mobile-divider"></div>
         <button class="nav-mobile-link nav-mobile-logout-btn" @click="handleLogout">
           🚪 Logout
         </button>
       </template>
 
-
       <template v-else>
+        <a href="/#features" class="nav-mobile-link" @click="closeMobileMenu">Features</a>
+        <a href="/#how" class="nav-mobile-link" @click="closeMobileMenu">How It Works</a>
+        <a href="/#testimonials" class="nav-mobile-link" @click="closeMobileMenu">Testimonials</a>
+        <a href="/#pricing" class="nav-mobile-link" @click="closeMobileMenu">Pricing</a>
+        <a href="/#faq" class="nav-mobile-link" @click="closeMobileMenu">FAQ</a>
         <div class="nav-mobile-divider"></div>
         <div class="nav-mobile-actions">
           <router-link to="/login" class="btn-mobile-login" @click="closeMobileMenu">Login</router-link>
@@ -335,17 +336,55 @@ onBeforeUnmount(() => {
 }
 
 /* ── Mobile Streak Row ───────────────────────────── */
+.nav-mobile-user-profile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: rgba(124, 58, 237, 0.08);
+  border: 1px solid rgba(167, 139, 250, 0.15);
+  border-radius: 14px;
+  margin-bottom: 6px;
+}
+
+.nav-mobile-user-profile .profile-image,
+.nav-mobile-user-profile .nav-dropdown-user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 14px;
+  background: linear-gradient(135deg, var(--violet), var(--violet-mid));
+  color: #fff;
+}
+
 .nav-mobile-streak-row {
   display: flex;
   align-items: center;
   gap: 8px;
   padding: 10px 14px;
-  margin: 6px 12px;
+  margin: 6px 0;
   border-radius: 10px;
   background: rgba(255, 107, 0, 0.1);
   border: 1px solid rgba(255, 140, 0, 0.2);
   color: #ff9f43;
-  font-size: 0.9rem;
+  font-size: 0.88rem;
+}
+
+.nav-mobile-link-sub {
+  display: block;
+  padding: 8px 14px;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.4);
+  transition: all 0.15s ease;
+}
+
+.nav-mobile-link-sub:hover {
+  color: rgba(255, 255, 255, 0.8);
 }
 
 /* ── Keyframes ───────────────────────────────────── */
@@ -375,6 +414,40 @@ onBeforeUnmount(() => {
   }
 }
 
+@media (max-width: 1024px) {
+  nav {
+    padding: 12px 20px !important;
+  }
+  .nav-links {
+    display: none !important;
+  }
+  .nav-user-dropdown {
+    display: none !important;
+  }
+  .nav-mobile-toggle {
+    display: flex !important;
+  }
+}
+
+@media (max-width: 768px) {
+  nav {
+    padding: 10px 16px !important;
+  }
+  .nav-streak-badge {
+    padding: 4px 10px !important;
+    gap: 5px !important;
+  }
+  .streak-flame-icon {
+    font-size: 1rem !important;
+  }
+  .streak-number {
+    font-size: 0.9rem !important;
+  }
+  .streak-unit {
+    display: none !important;
+  }
+}
+
 @media (max-width: 640px) {
   nav {
     padding: 10px 14px !important;
@@ -398,9 +471,9 @@ onBeforeUnmount(() => {
     display: none !important;
   }
   .nav-mobile-toggle {
-    width: 32px !important;
-    height: 32px !important;
-    padding: 4px !important;
+    width: 34px !important;
+    height: 34px !important;
+    padding: 5px !important;
     display: flex !important;
   }
   .nav-streak-badge {

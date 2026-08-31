@@ -1611,13 +1611,23 @@ input:checked + .slider:before {
   to { transform: rotate(360deg); }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
   .missions-main-container {
-    padding: 80px 16px 50px;
+    padding: 85px 20px 50px;
   }
   .stats-cards-grid {
     grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
+    gap: 14px;
+  }
+}
+
+@media (max-width: 768px) {
+  .missions-main-container {
+    padding: 75px 16px 45px;
+  }
+  .stats-cards-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
   }
   .history-card {
     flex-direction: column;
@@ -1631,7 +1641,7 @@ input:checked + .slider:before {
     padding-top: 10px;
   }
   .missions-hero-title {
-    font-size: 1.8rem;
+    font-size: 1.75rem;
   }
 }
 

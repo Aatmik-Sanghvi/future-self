@@ -3547,6 +3547,20 @@ watch(() => route.query.goal_id, (newId) => {
 }
 
 /* ── RESPONSIVE MEDIA QUERIES ─────────────────────── */
+@media (max-width: 1024px) {
+  .main-container {
+    padding: 24px 20px 60px;
+    max-width: 100vw;
+  }
+  .pillar-cards-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+  }
+  .weekly-calendar-strip {
+    gap: 8px;
+  }
+}
+
 @media (max-width: 900px) {
   .momentum-grid {
     grid-template-columns: 1fr;
