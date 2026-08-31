@@ -49,45 +49,46 @@ class SendDailyMissionReminders extends Command
             });
         }
 
-        $users = $query->get();
         $sentCount = 0;
         $skippedCount = 0;
         $failedCount = 0;
 
-        foreach ($users as $user) {
-            try {
-                // Find today's pending mission
-                $mission = DailyMission::today()
-                    ->where('user_id', $user->id)
-                    ->where('status', 'pending')
-                    ->first();
+        $query->chunkById(100, function ($users) use (&$sentCount, &$skippedCount, &$failedCount) {
+            foreach ($users as $user) {
+                try {
+                    // Find today's pending mission
+                    $mission = DailyMission::today()
+                        ->where('user_id', $user->id)
+                        ->where('status', 'pending')
+                        ->first();
 
-                // If already completed or not found, skip
-                if (!$mission) {
-                    $skippedCount++;
-                    continue;
+                    // If already completed or not found, skip
+                    if (!$mission) {
+                        $skippedCount++;
+                        continue;
+                    }
+
+                    // If reminder already sent today, skip unless force flag is passed
+                    if (!empty($mission->reminder_mail_sent_at) && !$this->option('force')) {
+                        $skippedCount++;
+                        continue;
+                    }
+
+                    Mail::to($user->email)->queue(new DailyMissionReminderMail($user, $mission));
+                    $mission->update(['reminder_mail_sent_at' => now()]);
+                    $sentCount++;
+                    $this->line("Queued mission reminder for: {$user->email} (mission: '{$mission->title}')");
+                } catch (\Throwable $e) {
+                    $failedCount++;
+                    Log::error("Failed to process mission reminder for user {$user->id}: {$e->getMessage()}", [
+                        'trace' => $e->getTraceAsString(),
+                    ]);
+                    $this->error("Error processing reminder for {$user->email}: {$e->getMessage()}");
                 }
-
-                // If reminder already sent today, skip unless force flag is passed
-                if (!empty($mission->reminder_mail_sent_at) && !$this->option('force')) {
-                    $skippedCount++;
-                    continue;
-                }
-
-                Mail::to($user->email)->send(new DailyMissionReminderMail($user, $mission));
-                $mission->update(['reminder_mail_sent_at' => now()]);
-                $sentCount++;
-                $this->line("Sent mission reminder to: {$user->email} for mission '{$mission->title}'");
-            } catch (\Throwable $e) {
-                $failedCount++;
-                Log::error("Failed to send mission reminder to user {$user->id}: {$e->getMessage()}", [
-                    'trace' => $e->getTraceAsString(),
-                ]);
-                $this->error("Error sending reminder to {$user->email}: {$e->getMessage()}");
             }
-        }
+        });
 
-        $this->info("Reminder check completed. Sent: {$sentCount}, Skipped (Completed/Sent): {$skippedCount}, Failed: {$failedCount}");
+        $this->info("Reminder check completed. Queued/Dispatched: {$sentCount}, Skipped (Completed/Sent): {$skippedCount}, Failed: {$failedCount}");
         return Command::SUCCESS;
     }
 }

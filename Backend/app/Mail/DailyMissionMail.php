@@ -5,12 +5,14 @@ namespace App\Mail;
 use App\Models\DailyMission;
 use App\Models\User;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
+use Illuminate\Mail\Mailables\Headers;
 use Illuminate\Queue\SerializesModels;
 
-class DailyMissionMail extends Mailable
+class DailyMissionMail extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
 
@@ -35,7 +37,7 @@ class DailyMissionMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: "✨ Today's Mission from Future You: {$this->mission->title}",
+            subject: "Your Daily Mission: {$this->mission->title} — FutureSelf",
         );
     }
 
@@ -46,12 +48,27 @@ class DailyMissionMail extends Mailable
     {
         return new Content(
             view: 'emails.daily_mission',
+            text: 'emails.daily_mission_plain',
             with: [
                 'user' => $this->user,
                 'mission' => $this->mission,
                 'missionUrl' => $this->missionUrl,
                 'reminderTime' => $this->user->mission_reminder_time ?? '19:00',
             ]
+        );
+    }
+
+    /**
+     * Get the headers for the message.
+     */
+    public function headers(): Headers
+    {
+        $unsubscribeUrl = rtrim(env('FRONTEND_URL', 'https://futureself.in'), '/') . '/missions?settings=1';
+
+        return new Headers(
+            text: [
+                'List-Unsubscribe' => "<{$unsubscribeUrl}>",
+            ],
         );
     }
 

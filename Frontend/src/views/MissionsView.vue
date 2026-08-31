@@ -1,5 +1,6 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import Navbar from '@/components/Navbar.vue'
 import FooterSection from '@/components/FooterSection.vue'
 import DailyMissionCard from '@/components/DailyMissionCard.vue'
@@ -9,6 +10,7 @@ import missionService from '@/services/missionService'
 import { useAuthStore } from '@/stores/auth'
 
 const auth = useAuthStore()
+const route = useRoute()
 
 // State
 const loadingToday = ref(true)
@@ -273,10 +275,28 @@ function formatDate(dateStr) {
   })
 }
 
+function checkOpenSettings() {
+  if (
+    route.query.settings === '1' ||
+    route.query.settings === 'true' ||
+    route.query.reminders === '1' ||
+    route.query.reminders === 'true' ||
+    route.query.email_settings === '1' ||
+    route.query.email_settings === 'true'
+  ) {
+    showReminderModal.value = true
+  }
+}
+
+watch(() => route.query, () => {
+  checkOpenSettings()
+})
+
 onMounted(() => {
   fetchTodayMission()
   fetchHistory(1)
   fetchReminderSettings()
+  checkOpenSettings()
 })
 </script>
 

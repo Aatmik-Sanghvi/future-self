@@ -42,60 +42,61 @@ class SendDailyMorningMissions extends Command
             $query->where('id', $userId);
         }
 
-        $users = $query->get();
         $sentCount = 0;
         $failedCount = 0;
 
-        foreach ($users as $user) {
-            try {
-                // 1. Get or generate today's mission
-                $mission = DailyMission::today()->where('user_id', $user->id)->first();
+        $query->chunkById(100, function ($users) use (&$sentCount, &$failedCount) {
+            foreach ($users as $user) {
+                try {
+                    // 1. Get or generate today's mission
+                    $mission = DailyMission::today()->where('user_id', $user->id)->first();
 
-                if (!$mission) {
-                    // Check if today's mood was already recorded
-                    $todayMood = Mood::where('user_id', $user->id)
-                        ->whereDate('created_at', today())
-                        ->latest()
-                        ->first();
+                    if (!$mission) {
+                        // Check if today's mood was already recorded
+                        $todayMood = Mood::where('user_id', $user->id)
+                            ->whereDate('created_at', today())
+                            ->latest()
+                            ->first();
 
-                    $agent = new DailyMissionAgent($user, $todayMood?->mood_type);
-                    $result = $agent->prompt('Generate today daily mission');
-                    $taskData = is_array($result) ? $result : json_decode((string) $result, true);
+                        $agent = new DailyMissionAgent($user, $todayMood?->mood_type);
+                        $result = $agent->prompt('Generate today daily mission');
+                        $taskData = is_array($result) ? $result : json_decode((string) $result, true);
 
-                    $activeGoal = $user->goals()->where('status', 'active')->first();
+                        $activeGoal = $user->goals()->where('status', 'active')->first();
 
-                    $mission = DailyMission::create([
-                        'user_id' => $user->id,
-                        'goal_id' => $activeGoal?->id,
-                        'mission_date' => today(),
-                        'title' => $taskData['title'] ?? 'Daily Progress Action',
-                        'description' => $taskData['description'] ?? 'Take one meaningful step towards your future self.',
-                        'future_self_note' => $taskData['future_self_note'] ?? 'Every small action builds the foundation for tomorrow.',
-                        'category' => $taskData['category'] ?? 'Mindset',
-                        'mood_type' => $todayMood?->mood_type ?? 'neutral',
-                        'estimated_minutes' => $taskData['estimated_minutes'] ?? 15,
-                        'difficulty' => $taskData['difficulty'] ?? 'medium',
-                        'status' => 'pending',
+                        $mission = DailyMission::create([
+                            'user_id' => $user->id,
+                            'goal_id' => $activeGoal?->id,
+                            'mission_date' => today(),
+                            'title' => $taskData['title'] ?? 'Daily Progress Action',
+                            'description' => $taskData['description'] ?? 'Take one meaningful step towards your future self.',
+                            'future_self_note' => $taskData['future_self_note'] ?? 'Every small action builds the foundation for tomorrow.',
+                            'category' => $taskData['category'] ?? 'Mindset',
+                            'mood_type' => $todayMood?->mood_type ?? 'neutral',
+                            'estimated_minutes' => $taskData['estimated_minutes'] ?? 15,
+                            'difficulty' => $taskData['difficulty'] ?? 'medium',
+                            'status' => 'pending',
+                        ]);
+                    }
+
+                    // 2. Queue email if not already sent today
+                    if (empty($mission->morning_mail_sent_at)) {
+                        Mail::to($user->email)->queue(new DailyMissionMail($user, $mission));
+                        $mission->update(['morning_mail_sent_at' => now()]);
+                        $sentCount++;
+                        $this->line("Queued morning mission email for: {$user->email}");
+                    }
+                } catch (\Throwable $e) {
+                    $failedCount++;
+                    Log::error("Failed to process morning mission for user {$user->id}: {$e->getMessage()}", [
+                        'trace' => $e->getTraceAsString(),
                     ]);
+                    $this->error("Error processing user {$user->email}: {$e->getMessage()}");
                 }
-
-                // 2. Send email if not already sent today
-                if (empty($mission->morning_mail_sent_at)) {
-                    Mail::to($user->email)->send(new DailyMissionMail($user, $mission));
-                    $mission->update(['morning_mail_sent_at' => now()]);
-                    $sentCount++;
-                    $this->line("Sent morning mission to: {$user->email}");
-                }
-            } catch (\Throwable $e) {
-                $failedCount++;
-                Log::error("Failed to send morning mission to user {$user->id}: {$e->getMessage()}", [
-                    'trace' => $e->getTraceAsString(),
-                ]);
-                $this->error("Error sending to {$user->email}: {$e->getMessage()}");
             }
-        }
+        });
 
-        $this->info("Completed. Sent: {$sentCount}, Failed: {$failedCount}");
+        $this->info("Completed. Queued/Dispatched: {$sentCount}, Failed: {$failedCount}");
         return Command::SUCCESS;
     }
 }
