@@ -46,6 +46,13 @@ class DailyMissionMail extends Mailable implements ShouldQueue
      */
     public function content(): Content
     {
+        $rawTime = $this->user->mission_reminder_time ?? '19:00';
+        try {
+            $formattedReminderTime = \Carbon\Carbon::createFromFormat('H:i', substr($rawTime, 0, 5))->format('g:i A');
+        } catch (\Throwable $e) {
+            $formattedReminderTime = '7:00 PM';
+        }
+
         return new Content(
             view: 'emails.daily_mission',
             text: 'emails.daily_mission_plain',
@@ -53,7 +60,7 @@ class DailyMissionMail extends Mailable implements ShouldQueue
                 'user' => $this->user,
                 'mission' => $this->mission,
                 'missionUrl' => $this->missionUrl,
-                'reminderTime' => $this->user->mission_reminder_time ?? '19:00',
+                'reminderTime' => $formattedReminderTime,
             ]
         );
     }

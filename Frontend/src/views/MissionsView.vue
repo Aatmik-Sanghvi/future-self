@@ -209,13 +209,24 @@ const reminderSettings = ref({
   default_reminder_time: '19:00',
 })
 
+// Only allowed times at 4:00 PM or after with 30-min gap (4:00 PM to 11:30 PM)
 const reminderTimeOptions = [
+  { label: '4:00 PM', value: '16:00' },
+  { label: '4:30 PM', value: '16:30' },
   { label: '5:00 PM', value: '17:00' },
+  { label: '5:30 PM', value: '17:30' },
   { label: '6:00 PM', value: '18:00' },
+  { label: '6:30 PM', value: '18:30' },
   { label: '7:00 PM (Default)', value: '19:00' },
+  { label: '7:30 PM', value: '19:30' },
   { label: '8:00 PM', value: '20:00' },
+  { label: '8:30 PM', value: '20:30' },
   { label: '9:00 PM', value: '21:00' },
+  { label: '9:30 PM', value: '21:30' },
   { label: '10:00 PM', value: '22:00' },
+  { label: '10:30 PM', value: '22:30' },
+  { label: '11:00 PM', value: '23:00' },
+  { label: '11:30 PM', value: '23:30' },
 ]
 
 async function fetchReminderSettings() {
@@ -233,6 +244,16 @@ async function fetchReminderSettings() {
 }
 
 async function saveReminderSettings() {
+  // Validate selected time is at 4:00 PM or later in 30-min intervals
+  if (reminderSettings.value.mission_reminder_enabled && reminderSettings.value.mission_reminder_time) {
+    const timeVal = reminderSettings.value.mission_reminder_time
+    const isValid = /^(1[6-9]|2[0-3]):(00|30)$/.test(timeVal)
+    if (!isValid) {
+      auth.toastMessage('Reminder time must be at 4:00 PM or later in 30-minute intervals (e.g. 4:00 PM, 4:30 PM).', 'error')
+      return
+    }
+  }
+
   savingReminder.value = true
   try {
     const res = await missionService.updateReminderSettings({
@@ -369,7 +390,10 @@ onMounted(() => {
 
             <!-- Reminder Time Picker (when enabled) -->
             <div class="reminder-time-section" v-if="reminderSettings.mission_reminder_enabled">
-              <label class="time-section-title">Preferred Evening Reminder Time:</label>
+              <div class="time-section-header">
+                <label class="time-section-title">Preferred Evening Reminder Time:</label>
+                <span class="time-section-badge">4:00 PM onwards (30-min intervals)</span>
+              </div>
               <div class="time-pills-grid">
                 <button
                   v-for="opt in reminderTimeOptions"
@@ -383,17 +407,8 @@ onMounted(() => {
                 </button>
               </div>
 
-              <div class="custom-time-row">
-                <span class="custom-time-label">Custom time:</span>
-                <input
-                  type="time"
-                  v-model="reminderSettings.mission_reminder_time"
-                  class="time-input-field"
-                />
-              </div>
-
               <div class="default-time-hint">
-                💡 <strong>Default:</strong> If no custom time is selected, reminders automatically default to <strong>7:00 PM (19:00)</strong>. Reminders are automatically skipped if you've already completed today's mission.
+                💡 <strong>Schedule:</strong> Reminders can only be set at <strong>4:00 PM or later</strong> in <strong>30-minute intervals</strong> (Default: 7:00 PM). Reminders are automatically skipped if you've already completed today's mission.
               </div>
             </div>
           </div>
@@ -1128,6 +1143,23 @@ input:checked + .slider:before {
   gap: 12px;
 }
 
+.time-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.time-section-badge {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #c084fc;
+  background: rgba(192, 132, 252, 0.12);
+  border: 1px solid rgba(192, 132, 252, 0.25);
+  padding: 2px 8px;
+  border-radius: 20px;
+}
+
 .time-section-title {
   font-size: 0.85rem;
   font-weight: 700;
@@ -1136,17 +1168,20 @@ input:checked + .slider:before {
 
 .time-pills-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 8px;
+  max-height: 180px;
+  overflow-y: auto;
+  padding-right: 2px;
 }
 
 .time-pill-btn {
-  padding: 8px 10px;
+  padding: 8px 6px;
   border-radius: 10px;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
   color: rgba(255, 255, 255, 0.75);
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -1164,29 +1199,6 @@ input:checked + .slider:before {
   color: #ffffff;
   font-weight: 700;
   box-shadow: 0 4px 12px rgba(168, 85, 247, 0.35);
-}
-
-.custom-time-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-top: 4px;
-}
-
-.custom-time-label {
-  font-size: 0.8rem;
-  color: rgba(255, 255, 255, 0.6);
-}
-
-.time-input-field {
-  padding: 6px 12px;
-  border-radius: 8px;
-  background: rgba(0, 0, 0, 0.35);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  color: #ffffff;
-  font-size: 0.85rem;
-  font-family: inherit;
-  color-scheme: dark;
 }
 
 .default-time-hint {

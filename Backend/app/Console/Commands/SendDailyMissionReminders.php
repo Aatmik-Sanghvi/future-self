@@ -30,9 +30,8 @@ class SendDailyMissionReminders extends Command
      */
     public function handle(): int
     {
-        $currentHour = now()->format('H:00');
-        $currentShortHour = now()->format('H');
-        $this->info("Checking pending mission reminders for time slot: {$currentHour}...");
+        $currentTime = now()->format('H:i');
+        $this->info("Checking pending mission reminders for time slot: {$currentTime}...");
 
         $query = User::query()
             ->where('is_onboarded', true)
@@ -41,11 +40,15 @@ class SendDailyMissionReminders extends Command
         if ($userId = $this->option('user')) {
             $query->where('id', $userId);
         } elseif (!$this->option('force')) {
-            // Match reminder times like "19:00", "19:00:00", "19:30" or "7 PM"
-            $query->where(function ($q) use ($currentHour, $currentShortHour) {
-                $q->where('mission_reminder_time', 'like', "{$currentShortHour}:%")
-                  ->orWhere('mission_reminder_time', $currentHour)
-                  ->orWhereNull('mission_reminder_time'); // defaults to 19:00 if 19:00 slot
+            // Match reminder times for the current 30-min slot (e.g. "16:30" or "16:30:00")
+            $query->where(function ($q) use ($currentTime) {
+                $q->where('mission_reminder_time', $currentTime)
+                  ->orWhere('mission_reminder_time', $currentTime . ':00');
+
+                // Default reminder time is 19:00 (7:00 PM) for users without a custom time set
+                if ($currentTime === '19:00') {
+                    $q->orWhereNull('mission_reminder_time');
+                }
             });
         }
 

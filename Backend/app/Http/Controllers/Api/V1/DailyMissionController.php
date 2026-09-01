@@ -233,8 +233,14 @@ class DailyMissionController extends Controller
 
         $validated = $request->validate([
             'mission_email_enabled' => 'nullable|boolean',
-            'mission_reminder_time' => ['nullable', 'string', 'regex:/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/'],
+            'mission_reminder_time' => [
+                'nullable',
+                'string',
+                'regex:/^(1[6-9]|2[0-3]):(00|30)$/',
+            ],
             'mission_reminder_enabled' => 'nullable|boolean',
+        ], [
+            'mission_reminder_time.regex' => 'Reminder time must be at 4:00 PM or later in 30-minute intervals (e.g. 4:00 PM, 4:30 PM).',
         ]);
 
         $updateData = [];

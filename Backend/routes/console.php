@@ -12,4 +12,4 @@ Artisan::command('inspire', function () {
 Schedule::command('missions:send-morning')->dailyAt('08:00')->timezone(config('app.timezone'));
 
 // Hourly Mission Reminder Check for pending missions at user-selected reminder times
-Schedule::command('missions:send-reminders')->hourly()->timezone(config('app.timezone'));
+Schedule::command('missions:send-reminders')->everyMinute()->timezone(config('app.timezone'));
