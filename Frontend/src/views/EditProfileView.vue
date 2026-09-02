@@ -106,17 +106,18 @@ const showSaved = ref(false)
 const showDeleteModal = ref(false)
 const isDeleting = ref(false)
 const deleteConfirmText = ref('')
+const imageLoadError = ref(false)
 const avatarUrl = ref(auth.user?.profile_image || null)
 
 // Computed
 const userInitials = computed(() => {
-  if (!form.value.name) return '?'
-  return form.value.name
-    .split(' ')
-    .map(w => w[0])
-    .join('')
-    .toUpperCase()
-    .slice(0, 2)
+  const name = (form.value.name || auth.user?.name || '').trim()
+  if (!name) return '?'
+  const parts = name.split(/\s+/).filter(Boolean)
+  if (parts.length === 1) {
+    return parts[0].slice(0, 2).toUpperCase()
+  }
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
 })
 
 const joinedDate = computed(() => {
@@ -133,11 +134,11 @@ const passwordsMatch = computed(() => {
 })
 
 const handleAvatarChange = (event) => {
-  const file = event.target.files[0];
-
-  if(file){
-    avatarUrl.value = URL.createObjectURL(file);
-    form.value.profile_image = file;
+  const file = event.target.files[0]
+  if (file) {
+    imageLoadError.value = false
+    avatarUrl.value = URL.createObjectURL(file)
+    form.value.profile_image = file
   }
 }
 
@@ -268,11 +269,26 @@ function goBack() {
         <!-- ── AVATAR / HEADER CARD ──────────── -->
         <div class="profile-header-card">
           <div class="profile-avatar-wrapper">
-            <img v-if="avatarUrl" :src="avatarUrl" alt="User Avatar" class="profile-avatar"/>
-            <span v-else class="profile-avatar">{{ userInitials }}</span>
-            <!-- <div class="profile-avatar">{{ userInitials }}</div> -->
+            <img
+              v-if="avatarUrl && !imageLoadError"
+              :src="avatarUrl"
+              alt="User Avatar"
+              class="profile-avatar"
+              @error="imageLoadError = true"
+            />
+            <div v-else class="profile-avatar" aria-label="User Initials">
+              {{ userInitials }}
+            </div>
             <div class="profile-avatar-ring"></div>
-            <input type="file" name="profile_image" id="uploadAvatar" ref="avatarInput" accept="image/*" style="display: none;" @change="handleAvatarChange">
+            <input
+              type="file"
+              name="profile_image"
+              id="uploadAvatar"
+              ref="avatarInput"
+              accept="image/*"
+              style="display: none;"
+              @change="handleAvatarChange"
+            />
             <div class="profile-avatar-badge" title="Change photo" id="btn-change-avatar" @click="$refs.avatarInput.click()">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z" />

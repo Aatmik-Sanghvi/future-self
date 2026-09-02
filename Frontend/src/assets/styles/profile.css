@@ -197,7 +197,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 36px;
+  font-size: 34px;
   font-weight: 800;
   color: #fff;
   background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 50%, #818cf8 100%);
@@ -205,6 +205,9 @@
   position: relative;
   z-index: 1;
   letter-spacing: -0.02em;
+  object-fit: cover;
+  user-select: none;
+  text-transform: uppercase;
 }
 
 /* Animated ring around avatar */
