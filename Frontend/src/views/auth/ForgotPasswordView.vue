@@ -38,6 +38,7 @@ const handleSendEmail = async () => {
 const otp = ref(['', '', '', ''])
 const otpInputs = ref([])
 const resendCooldown = ref(300)
+const showSpamNote = ref(true)
 let timerInterval = null
 const resetToken = ref('')
 
@@ -300,6 +301,34 @@ onUnmounted(() => {
                 <span class="otp-email-badge">{{ maskedEmail }}</span>
               </p>
             </div>
+
+            <!-- Spam Folder Note -->
+            <Transition name="otp-note-fade">
+              <div v-if="showSpamNote" class="otp-note" role="status">
+                <div class="otp-note__icon">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="16" x2="12" y2="12"></line>
+                    <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                  </svg>
+                </div>
+                <div class="otp-note__text">
+                  <span><strong>Note:</strong> If you don't receive the email in your inbox, please check your <strong>Spam</strong> or <strong>Junk</strong> folder.</span>
+                </div>
+                <button
+                  type="button"
+                  class="otp-note__close"
+                  @click="showSpamNote = false"
+                  aria-label="Dismiss note"
+                  title="Dismiss note"
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                  </svg>
+                </button>
+              </div>
+            </Transition>
 
             <form @submit.prevent="handleVerifyOtp" id="otp-form">
               <div class="otp-container">
