@@ -9,9 +9,16 @@ import './assets/styles/chat.css'
 import './assets/styles/profile.css'
 import 'vue3-toastify/dist/index.css'
 
+import { useThemeStore } from './stores/theme'
+
+const pinia = createPinia()
 const app = createApp(App)
-app.use(createPinia())
+app.use(pinia)
 app.use(router)
+
+const themeStore = useThemeStore()
+themeStore.initTheme()
+
 app.use(Vue3Toastify, {
   autoClose: 1000,
   theme: 'dark',

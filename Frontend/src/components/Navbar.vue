@@ -1,9 +1,11 @@
 <script setup>
 import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue'
 import { useAuthStore } from '@/stores/auth'
+import { useThemeStore } from '@/stores/theme'
 import { useRouter, useRoute } from 'vue-router'
 
 const auth = useAuthStore()
+const themeStore = useThemeStore()
 const router = useRouter()
 const route = useRoute()
 const dropdownOpen = ref(false)
@@ -92,6 +94,31 @@ onBeforeUnmount(() => {
 
     <!-- Unauthenticated actions -->
     <div class="nav-actions" v-if="!auth.isAuthenticated">
+      <!-- Theme Toggle Button -->
+      <button
+        type="button"
+        class="nav-theme-toggle"
+        @click="themeStore.setTheme(themeStore.activeTheme === 'light' ? 'dark' : 'light')"
+        :title="themeStore.activeTheme === 'light' ? 'Switch to Dark Mode' : 'Switch to Light Mode'"
+        aria-label="Toggle theme"
+        id="nav-theme-toggle-guest"
+      >
+        <svg v-if="themeStore.activeTheme === 'dark'" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="5"></circle>
+          <line x1="12" y1="1" x2="12" y2="3"></line>
+          <line x1="12" y1="21" x2="12" y2="23"></line>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+          <line x1="1" y1="12" x2="3" y2="12"></line>
+          <line x1="21" y1="12" x2="23" y2="12"></line>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+        </svg>
+        <svg v-else xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        </svg>
+      </button>
+
       <router-link to="/login" class="btn-secondary">Login</router-link>
       <router-link to="/register" class="btn-primary">Start Free</router-link>
 
@@ -105,6 +132,31 @@ onBeforeUnmount(() => {
 
     <!-- Authenticated: user dropdown -->
     <div class="nav-actions" v-else>
+      <!-- Theme Toggle Button -->
+      <button
+        type="button"
+        class="nav-theme-toggle"
+        @click="themeStore.setTheme(themeStore.activeTheme === 'light' ? 'dark' : 'light')"
+        :title="themeStore.activeTheme === 'light' ? 'Switch to Dark Mode' : 'Switch to Light Mode'"
+        aria-label="Toggle theme"
+        id="nav-theme-toggle-auth"
+      >
+        <svg v-if="themeStore.activeTheme === 'dark'" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="5"></circle>
+          <line x1="12" y1="1" x2="12" y2="3"></line>
+          <line x1="12" y1="21" x2="12" y2="23"></line>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+          <line x1="1" y1="12" x2="3" y2="12"></line>
+          <line x1="21" y1="12" x2="23" y2="12"></line>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+        </svg>
+        <svg v-else xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        </svg>
+      </button>
+
       <!-- Streak Badge -->
       <div
         class="nav-streak-badge"
@@ -196,6 +248,17 @@ onBeforeUnmount(() => {
           <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
         </svg>
       </button>
+
+      <!-- Mobile theme toggle -->
+      <button
+        type="button"
+        class="nav-mobile-link"
+        @click="themeStore.setTheme(themeStore.activeTheme === 'light' ? 'dark' : 'light')"
+      >
+        <span v-if="themeStore.activeTheme === 'dark'">☀️ Switch to Light Mode</span>
+        <span v-else>🌙 Switch to Dark Mode</span>
+      </button>
+      <div class="nav-mobile-divider"></div>
 
       <template v-if="auth.isAuthenticated">
         <div class="nav-mobile-user-profile">

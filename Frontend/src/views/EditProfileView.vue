@@ -2,12 +2,14 @@
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { useThemeStore } from '@/stores/theme'
 import CountryFlag from 'vue-country-flag-next'
 import countryTelephoneData from 'country-telephone-data'
 import authService from '@/services/authService'
 
 const router = useRouter()
 const auth = useAuthStore()
+const themeStore = useThemeStore()
 const selectedCountryIso2 = ref('in')
 const countryMenuOpen = ref(false)
 const countryMenuRef = ref(null)
@@ -498,6 +500,107 @@ function goBack() {
           </div>
         </div>
 
+        <!-- ── APPEARANCE & THEME SECTION ────── -->
+        <div class="profile-section">
+          <div class="profile-section-header">
+            <div class="profile-section-icon amber">🎨</div>
+            <div>
+              <div class="profile-section-title">Appearance & Theme</div>
+              <div class="profile-section-desc">Choose your preferred viewing mode</div>
+            </div>
+          </div>
+
+          <div class="profile-theme-grid">
+            <!-- Dark Theme -->
+            <button
+              type="button"
+              class="profile-theme-card"
+              :class="{ active: themeStore.currentPreference === 'dark' }"
+              @click="themeStore.setTheme('dark')"
+              id="theme-card-dark"
+            >
+              <div class="profile-theme-preview theme-preview-dark">
+                <div class="theme-preview-header">
+                  <div class="theme-preview-dots">
+                    <span></span><span></span><span></span>
+                  </div>
+                </div>
+                <div class="theme-preview-body">
+                  <div class="theme-preview-sidebar"></div>
+                  <div class="theme-preview-content">
+                    <div class="theme-preview-line accent"></div>
+                    <div class="theme-preview-line"></div>
+                    <div class="theme-preview-line short"></div>
+                  </div>
+                </div>
+              </div>
+              <div class="profile-theme-meta">
+                <div class="profile-theme-title">
+                  <span class="profile-theme-icon">🌙</span> Dark Cosmic
+                </div>
+                <span class="profile-theme-tag" v-if="themeStore.currentPreference === 'dark'">Active</span>
+              </div>
+            </button>
+
+            <!-- Light Theme -->
+            <button
+              type="button"
+              class="profile-theme-card"
+              :class="{ active: themeStore.currentPreference === 'light' }"
+              @click="themeStore.setTheme('light')"
+              id="theme-card-light"
+            >
+              <div class="profile-theme-preview theme-preview-light">
+                <div class="theme-preview-header">
+                  <div class="theme-preview-dots">
+                    <span></span><span></span><span></span>
+                  </div>
+                </div>
+                <div class="theme-preview-body">
+                  <div class="theme-preview-sidebar"></div>
+                  <div class="theme-preview-content">
+                    <div class="theme-preview-line accent"></div>
+                    <div class="theme-preview-line"></div>
+                    <div class="theme-preview-line short"></div>
+                  </div>
+                </div>
+              </div>
+              <div class="profile-theme-meta">
+                <div class="profile-theme-title">
+                  <span class="profile-theme-icon">☀️</span> Light Ethereal
+                </div>
+                <span class="profile-theme-tag" v-if="themeStore.currentPreference === 'light'">Active</span>
+              </div>
+            </button>
+
+            <!-- System Sync -->
+            <button
+              type="button"
+              class="profile-theme-card"
+              :class="{ active: themeStore.currentPreference === 'system' }"
+              @click="themeStore.setTheme('system')"
+              id="theme-card-system"
+            >
+              <div class="profile-theme-preview theme-preview-system">
+                <div class="theme-preview-half theme-preview-dark-half">
+                  <div class="theme-preview-line accent"></div>
+                  <div class="theme-preview-line"></div>
+                </div>
+                <div class="theme-preview-half theme-preview-light-half">
+                  <div class="theme-preview-line accent"></div>
+                  <div class="theme-preview-line"></div>
+                </div>
+              </div>
+              <div class="profile-theme-meta">
+                <div class="profile-theme-title">
+                  <span class="profile-theme-icon">💻</span> System Sync
+                </div>
+                <span class="profile-theme-tag" v-if="themeStore.currentPreference === 'system'">Active</span>
+              </div>
+            </button>
+          </div>
+        </div>
+
         <!-- ── CHANGE PASSWORD SECTION ───────── -->
         <div class="profile-section">
           <div class="profile-section-header">
@@ -575,7 +678,7 @@ function goBack() {
             <div class="profile-field">
               <label class="profile-field-label" for="profile-confirm-pw">
                 Confirm Password
-                <span v-if="!passwordsMatch" style="color: #f87171; font-weight: 500; text-transform: none; letter-spacing: 0;">
+                <span v-if="!passwordsMatch" class="profile-pw-mismatch-text">
                   — doesn't match
                 </span>
               </label>
@@ -584,7 +687,7 @@ function goBack() {
                   v-model="passwords.confirm_password"
                   :type="showConfirmPw ? 'text' : 'password'"
                   class="profile-input"
-                  :style="!passwordsMatch ? 'border-color: rgba(248, 113, 113, 0.4)' : ''"
+                  :class="{ 'profile-input-error': !passwordsMatch }"
                   id="profile-confirm-pw"
                   placeholder="Re-enter new password"
                 />

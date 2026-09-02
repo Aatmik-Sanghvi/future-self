@@ -43,6 +43,33 @@
   --shadow-btn: 0 4px 24px rgba(139, 92, 246, 0.35), 0 1px 4px rgba(0,0,0,0.2);
 }
 
+html[data-theme="light"] {
+  /* Core palette */
+  --bg-primary: #f8f9fe;
+  --bg-secondary: #ffffff;
+  --bg-card: rgba(255, 255, 255, 0.95);
+  --bg-input: #f8fafc;
+  --bg-input-focus: #ffffff;
+
+  /* Text */
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #64748b;
+  --text-label: #334155;
+
+  /* Accent */
+  --accent-start: #7c3aed;
+  --accent-mid: #6366f1;
+  --accent-end: #8b5cf6;
+  --accent-glow: rgba(124, 58, 237, 0.15);
+  --accent-glow-strong: rgba(124, 58, 237, 0.3);
+
+  /* Borders */
+  --border-subtle: rgba(0, 0, 0, 0.08);
+  --border-input: #cbd5e1;
+  --border-input-focus: #7c3aed;
+}
+
 /* ---------- Base resets ---------- */
 *, *::before, *::after {
   margin: 0;
