@@ -68,6 +68,8 @@ class DailyMissionReminderMail extends Mailable implements ShouldQueue
         return new Headers(
             text: [
                 'List-Unsubscribe' => "<{$unsubscribeUrl}>",
+                'List-Unsubscribe-Post' => 'List-Unsubscribe=One-Click',
+                'Precedence' => 'bulk',
             ],
         );
     }
