@@ -27,7 +27,7 @@ class DailyMissionMail extends Mailable implements ShouldQueue
     {
         $this->user = $user;
         $this->mission = $mission;
-        $frontendUrl = rtrim(env('FRONTEND_URL', 'https://futureself.in'), '/');
+        $frontendUrl = rtrim(config('app.frontend_url', env('FRONTEND_URL', 'https://futureself.in')), '/');
         $this->missionUrl = "{$frontendUrl}/missions";
     }
 
@@ -37,7 +37,7 @@ class DailyMissionMail extends Mailable implements ShouldQueue
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: "Your Daily Mission: {$this->mission->title} — FutureSelf",
+            subject: "Your Daily Mission: {$this->mission->title} - FutureSelf",
         );
     }
 
@@ -53,6 +53,9 @@ class DailyMissionMail extends Mailable implements ShouldQueue
             $formattedReminderTime = '7:00 PM';
         }
 
+        $frontendUrl = rtrim(config('app.frontend_url', env('FRONTEND_URL', 'https://futureself.in')), '/');
+        $preferencesUrl = "{$frontendUrl}/missions?settings=1";
+
         return new Content(
             view: 'emails.daily_mission',
             text: 'emails.daily_mission_plain',
@@ -60,6 +63,7 @@ class DailyMissionMail extends Mailable implements ShouldQueue
                 'user' => $this->user,
                 'mission' => $this->mission,
                 'missionUrl' => $this->missionUrl,
+                'preferencesUrl' => $preferencesUrl,
                 'reminderTime' => $formattedReminderTime,
             ]
         );
@@ -70,13 +74,12 @@ class DailyMissionMail extends Mailable implements ShouldQueue
      */
     public function headers(): Headers
     {
-        $unsubscribeUrl = rtrim(env('FRONTEND_URL', 'https://futureself.in'), '/') . '/missions?settings=1';
+        $frontendUrl = rtrim(config('app.frontend_url', env('FRONTEND_URL', 'https://futureself.in')), '/');
+        $unsubscribeUrl = "{$frontendUrl}/missions?settings=1";
 
         return new Headers(
             text: [
-                'List-Unsubscribe' => "<{$unsubscribeUrl}>",
-                'List-Unsubscribe-Post' => 'List-Unsubscribe=One-Click',
-                'Precedence' => 'bulk',
+                'List-Unsubscribe' => "<mailto:hello@futureself.in?subject=unsubscribe>, <{$unsubscribeUrl}>",
             ],
         );
     }

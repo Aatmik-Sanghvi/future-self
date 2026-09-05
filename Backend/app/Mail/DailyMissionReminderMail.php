@@ -27,7 +27,7 @@ class DailyMissionReminderMail extends Mailable implements ShouldQueue
     {
         $this->user = $user;
         $this->mission = $mission;
-        $frontendUrl = rtrim(env('FRONTEND_URL', 'https://futureself.in'), '/');
+        $frontendUrl = rtrim(config('app.frontend_url', env('FRONTEND_URL', 'https://futureself.in')), '/');
         $this->missionUrl = "{$frontendUrl}/missions";
     }
 
@@ -37,7 +37,7 @@ class DailyMissionReminderMail extends Mailable implements ShouldQueue
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: "Reminder: Your mission \"{$this->mission->title}\" is still pending — FutureSelf",
+            subject: "Mission Check-in: {$this->mission->title} - FutureSelf",
         );
     }
 
@@ -46,6 +46,9 @@ class DailyMissionReminderMail extends Mailable implements ShouldQueue
      */
     public function content(): Content
     {
+        $frontendUrl = rtrim(config('app.frontend_url', env('FRONTEND_URL', 'https://futureself.in')), '/');
+        $preferencesUrl = "{$frontendUrl}/missions?settings=1";
+
         return new Content(
             view: 'emails.daily_mission_reminder',
             text: 'emails.daily_mission_reminder_plain',
@@ -53,6 +56,7 @@ class DailyMissionReminderMail extends Mailable implements ShouldQueue
                 'user' => $this->user,
                 'mission' => $this->mission,
                 'missionUrl' => $this->missionUrl,
+                'preferencesUrl' => $preferencesUrl,
                 'streak' => $this->user->daily_streak ?? 0,
             ]
         );
@@ -63,13 +67,12 @@ class DailyMissionReminderMail extends Mailable implements ShouldQueue
      */
     public function headers(): Headers
     {
-        $unsubscribeUrl = rtrim(env('FRONTEND_URL', 'https://futureself.in'), '/') . '/missions?settings=1';
+        $frontendUrl = rtrim(config('app.frontend_url', env('FRONTEND_URL', 'https://futureself.in')), '/');
+        $unsubscribeUrl = "{$frontendUrl}/missions?settings=1";
 
         return new Headers(
             text: [
-                'List-Unsubscribe' => "<{$unsubscribeUrl}>",
-                'List-Unsubscribe-Post' => 'List-Unsubscribe=One-Click',
-                'Precedence' => 'bulk',
+                'List-Unsubscribe' => "<mailto:hello@futureself.in?subject=unsubscribe>, <{$unsubscribeUrl}>",
             ],
         );
     }

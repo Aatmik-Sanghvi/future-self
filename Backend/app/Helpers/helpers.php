@@ -441,7 +441,7 @@ if (! function_exists('register_user_email')) {
             } elseif (in_array(strtolower($subjectTomail), ['forgot password', 'reset password'])) {
                 $emailSubject = "{$otp} is your FutureSelf password reset code";
             } else {
-                $emailSubject = "{$otp} — {$subjectTomail} (FutureSelf)";
+                $emailSubject = "{$otp} - {$subjectTomail} (FutureSelf)";
             }
 
             // Send OTP email

@@ -1,10 +1,10 @@
 Good morning, {{ $user->name }}!
 
-Your future self has prepared today's mission to keep you on track.
+Here is your daily mission to help you take another step toward your goals.
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+----------------------------------------
 TODAY'S MISSION
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+----------------------------------------
 
 {{ $mission->title }}
 
@@ -25,17 +25,17 @@ Note from Future You:
 "{{ $mission->future_self_note }}"
 @endif
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+----------------------------------------
 
-Complete your mission here:
+Open your mission here:
 {{ $missionUrl }}
 
-If this task remains pending, a reminder will be sent at {{ $reminderTime }}.
+A gentle check-in is scheduled for {{ $reminderTime }} if you would like to revisit this today.
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+----------------------------------------
 
 FutureSelf · India
 © {{ date('Y') }} FutureSelf. All rights reserved.
 
-Manage your email preferences: {{ rtrim(env('FRONTEND_URL', 'https://futureself.in'), '/') }}/missions?settings=1
+Manage your email preferences: {{ $preferencesUrl }}
 
