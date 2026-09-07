@@ -445,9 +445,15 @@ if (! function_exists('register_user_email')) {
             }
 
             // Send OTP email
-            Mail::to($user->email)->send(new User_Password_Send_OTP_Mail($name, $otp, $emailSubject));
-
-            return true;
+            try {
+                Mail::to($user->email)->send(new User_Password_Send_OTP_Mail($name, $otp, $emailSubject));
+                return true;
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::error("Failed to send OTP email to {$email}: " . $e->getMessage(), [
+                    'trace' => $e->getTraceAsString(),
+                ]);
+                return false;
+            }
         }
 
         return false;

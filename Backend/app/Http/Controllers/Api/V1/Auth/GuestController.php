@@ -33,17 +33,21 @@ class GuestController extends ResponseController
             'password' => $this->validationService->passwordRules(),
         ], $this->validationService->passwordMessages());
 
-        // Store registration data in cache (5 min TTL) — no user created yet
+        // Store registration data in cache (15 min TTL) — no user created yet
         Cache::put('register_data_' . $request->email, [
             'name' => $request->name,
             'email' => $request->email,
             'mobile' => $request->mobile,
             'country_code' => $request->country_code,
             'password' => $request->password,
-        ], now()->addMinutes(5));
+        ], now()->addMinutes(15));
 
         // Send OTP email using existing helper
-        register_user_email($request->email, 'Email Verification');
+        $sent = register_user_email($request->email, 'Email Verification');
+
+        if (!$sent) {
+            return ResponseHelper::send(500, 'Unable to send verification email. Please check your email configuration.');
+        }
 
         return ResponseHelper::send(200, 'OTP sent to your email for verification.');
     }
@@ -74,8 +78,19 @@ class GuestController extends ResponseController
         // Retrieve cached registration data
         $registerData = Cache::get('register_data_' . $request->email);
 
+        // Fallback: If cache was lost, check if frontend sent fallback registration payload
+        if (!$registerData && $request->filled('password') && $request->filled('name')) {
+            $registerData = [
+                'name' => $request->name,
+                'email' => $request->email,
+                'mobile' => $request->mobile,
+                'country_code' => $request->country_code,
+                'password' => $request->password,
+            ];
+        }
+
         if (!$registerData) {
-            return ResponseHelper::send(412, 'Registration session expired. Please start again.');
+            return ResponseHelper::send(412, 'Registration session expired. Please start again from the registration form.');
         }
 
         // Create the user now that email is verified
@@ -104,12 +119,30 @@ class GuestController extends ResponseController
         // Check if registration data exists in cache
         $registerData = Cache::get('register_data_' . $request->email);
 
-        if (!$registerData) {
-            return ResponseHelper::send(412, 'No pending registration found. Please start again.');
+        // Fallback: If cache expired on server, check if frontend sent registration details
+        if (!$registerData && $request->filled('password') && $request->filled('name')) {
+            $registerData = [
+                'name' => $request->name,
+                'email' => $request->email,
+                'mobile' => $request->mobile,
+                'country_code' => $request->country_code,
+                'password' => $request->password,
+            ];
         }
 
+        if (!$registerData) {
+            return ResponseHelper::send(412, 'No pending registration found. Please go back and try registering again.');
+        }
+
+        // Refresh/extend cache TTL for 15 minutes
+        Cache::put('register_data_' . $request->email, $registerData, now()->addMinutes(15));
+
         // Resend OTP
-        register_user_email($request->email, 'Email Verification');
+        $sent = register_user_email($request->email, 'Email Verification');
+
+        if (!$sent) {
+            return ResponseHelper::send(500, 'Unable to send verification email. Please check your email or try again.');
+        }
 
         return ResponseHelper::send(200, 'A new OTP has been sent to your email.');
     }
@@ -146,7 +179,11 @@ class GuestController extends ResponseController
 
         $user = $this->user->where('email', $request->email)->first();
 
-        register_user_email($user->email, 'Forgot password');
+        $sent = register_user_email($user->email, 'Forgot password');
+
+        if (!$sent) {
+            return ResponseHelper::send(500, 'Unable to send password reset email. Please try again.');
+        }
 
         return ResponseHelper::send(200, 'Password reset link sent successfully.');
     }

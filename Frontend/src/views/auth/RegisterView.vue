@@ -223,7 +223,7 @@ const handleRegister = async () => {
 // ── Step 2: OTP Verification ──
 const otp = ref(['', '', '', ''])
 const otpInputs = ref([])
-const resendCooldown = ref(300)
+const resendCooldown = ref(60)
 const showSpamNote = ref(true)
 let timerInterval = null
 
@@ -290,7 +290,7 @@ const focusOtpInput = (index) => {
 }
 
 const startCountdown = () => {
-  resendCooldown.value = 300
+  resendCooldown.value = 60
   clearInterval(timerInterval)
   timerInterval = setInterval(() => {
     if (resendCooldown.value > 0) {
@@ -302,14 +302,20 @@ const startCountdown = () => {
 }
 
 const handleResendOtp = async () => {
-  if (resendCooldown.value > 0) return
+  if (resendCooldown.value > 0 || isLoading.value) return
   isLoading.value = true
   errorMessage.value = ''
   otp.value = ['', '', '', '']
 
   try {
-    await auth.registerResendOtp({ email: email.value })
-    auth.toastMessage('A new OTP has been sent to your email.', 'success')
+    await auth.registerResendOtp({
+      name: name.value,
+      email: email.value.trim(),
+      country_code: countryCode.value,
+      mobile: mobileNumber.value,
+      password: password.value,
+    })
+    auth.toastMessage('A new verification code has been sent to your email.', 'success')
     startCountdown()
     focusOtpInput(0)
   } catch (err) {
@@ -320,15 +326,19 @@ const handleResendOtp = async () => {
 }
 
 const handleVerifyOtp = async () => {
-  if (!isOtpValid.value) return
+  if (!isOtpValid.value || isLoading.value) return
   isLoading.value = true
   errorMessage.value = ''
 
   try {
     const otpString = otp.value.join('')
     const response = await auth.registerVerifyOtp({
-      email: email.value,
+      email: email.value.trim(),
       otp: otpString,
+      name: name.value,
+      country_code: countryCode.value,
+      mobile: mobileNumber.value,
+      password: password.value,
     })
 
     auth.toastMessage(response?.message || 'Account created successfully!', 'success')
@@ -656,8 +666,8 @@ const goBackToForm = () => {
                 </div>
                 
                 <div class="otp-meta">
-                  <span class="otp-timer" :class="{'otp-timer--warning': resendCooldown <= 30}">
-                    {{ resendCooldown > 0 ? formattedTimer : 'Code expired' }}
+                  <span class="otp-timer" :class="{'otp-timer--warning': resendCooldown <= 15}">
+                    {{ resendCooldown > 0 ? `Resend in ${formattedTimer}` : 'Resend available' }}
                   </span>
                   <button 
                     type="button" 
