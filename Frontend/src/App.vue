@@ -2,6 +2,7 @@
   import { onMounted } from 'vue'
   import ToastContainer from 'vue3-toastify'
   import { useAuthStore } from '@/stores/auth'
+  import ScrollToTop from '@/components/ScrollToTop.vue'
 
   const auth = useAuthStore()
 
@@ -17,6 +18,7 @@
     </transition>
   </router-view>
   <ToastContainer />
+  <ScrollToTop />
 </template>
 
 <style scoped>
