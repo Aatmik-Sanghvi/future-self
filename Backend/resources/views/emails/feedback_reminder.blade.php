@@ -6,12 +6,12 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="x-apple-disable-message-reformatting">
   <meta name="format-detection" content="telephone=no,address=no,email=no,date=no,url=no">
-  <title>Your Daily Mission — FutureSelf</title>
+  <title>Your feedback matters — FutureSelf</title>
 </head>
 <body style="margin:0;padding:0;background-color:#f4f4f7;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;">
   {{-- Preheader --}}
   <div style="display:none;font-size:1px;line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;mso-hide:all;">
-    Today's mission is ready — your future self prepared it for you &#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;
+    Help shape the future of FutureSelf — takes only 2 minutes &#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;
   </div>
 
   <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#f4f4f7;">
@@ -28,7 +28,7 @@
           <tr>
             <td style="padding:28px 36px 0;text-align:center;">
               <p style="margin:0;font-size:22px;font-weight:700;color:#1a1a2e;letter-spacing:-0.5px;">Future<span style="color:#6c3ce0;">Self</span></p>
-              <p style="margin:6px 0 0;font-size:11px;color:#8b8b9e;text-transform:uppercase;letter-spacing:1.5px;font-weight:500;">Daily Mission</p>
+              <p style="margin:6px 0 0;font-size:11px;color:#8b8b9e;text-transform:uppercase;letter-spacing:1.5px;font-weight:500;">Your Voice Matters</p>
             </td>
           </tr>
 
@@ -40,28 +40,34 @@
           {{-- Content --}}
           <tr>
             <td style="padding:24px 36px 32px;">
-              <p style="margin:0 0 6px;font-size:16px;color:#1a1a2e;font-weight:600;">Good morning, {{ $user->name }}!</p>
-              <p style="margin:0 0 24px;font-size:14px;color:#555568;line-height:1.6;">Your future self has prepared today's mission to keep you on track towards your goals.</p>
+              <p style="margin:0 0 6px;font-size:16px;color:#1a1a2e;font-weight:600;">Hey {{ $user->name }},</p>
+              <p style="margin:0 0 20px;font-size:14px;color:#555568;line-height:1.6;">We'd love to hear your honest thoughts about FutureSelf. It only takes about 2 minutes.</p>
 
-              {{-- Mission Card --}}
-              <div style="background-color:#f8f8fc;border:1px solid #e1e1e8;border-radius:10px;padding:22px;margin-bottom:24px;">
-                @if($mission->category || $mission->estimated_minutes || $mission->difficulty)
-                <p style="margin:0 0 12px;font-size:12px;color:#8b8b9e;">
-                  @if($mission->category)<span style="display:inline-block;background-color:#f0edff;color:#6c3ce0;padding:2px 10px;border-radius:12px;font-size:11px;font-weight:500;margin-right:8px;">{{ $mission->category }}</span>@endif
-                  @if($mission->estimated_minutes)<span style="margin-right:10px;">{{ $mission->estimated_minutes }} mins</span>@endif
-                  @if($mission->difficulty)<span>{{ ucfirst($mission->difficulty) }}</span>@endif
-                </p>
-                @endif
-                <h2 style="margin:0 0 10px;font-size:17px;font-weight:600;color:#1a1a2e;line-height:1.4;">{{ $mission->title }}</h2>
-                <p style="margin:0;font-size:14px;color:#555568;line-height:1.6;">{{ $mission->description }}</p>
+              <h2 style="margin:0 0 10px;font-size:16px;font-weight:600;color:#1a1a2e;">Why does this matter?</h2>
+              <p style="margin:0 0 12px;font-size:14px;color:#555568;line-height:1.6;">
+                We built FutureSelf to help people become who they dream of being. But we can only make it truly meaningful with your honest feedback.
+              </p>
+              <p style="margin:0 0 20px;font-size:14px;color:#555568;line-height:1.6;">
+                When you share your experience, you're not just helping us — you're helping every other user who will use FutureSelf after you. Your voice shapes what we build next.
+              </p>
 
-                @if($mission->future_self_note)
-                <div style="margin-top:16px;padding:14px 16px;background-color:#ffffff;border-left:3px solid #7c3aed;border-radius:0 6px 6px 0;">
-                  <p style="margin:0 0 4px;font-size:10px;font-weight:600;color:#7c3aed;text-transform:uppercase;letter-spacing:0.5px;">Note from Future You</p>
-                  <p style="margin:0;font-size:13px;font-style:italic;color:#555568;line-height:1.5;">"{{ $mission->future_self_note }}"</p>
-                </div>
-                @endif
+              {{-- Impact Note --}}
+              <div style="background-color:#f0faf6;border-left:3px solid #059669;border-radius:0 8px 8px 0;padding:16px 18px;margin-bottom:24px;">
+                <p style="margin:0;font-size:13px;color:#065f46;line-height:1.5;">Every piece of feedback helps us understand what's working and what's not. You're co-creating FutureSelf with us.</p>
               </div>
+
+              {{-- Quick Info --}}
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin-bottom:24px;">
+                <tr>
+                  <td style="padding:6px 0;font-size:13px;color:#555568;">Takes only <strong style="color:#1a1a2e;">~2 minutes</strong></td>
+                </tr>
+                <tr>
+                  <td style="padding:6px 0;font-size:13px;color:#555568;">Earn <strong style="color:#1a1a2e;">5 bonus chats</strong> as a thank you</td>
+                </tr>
+                <tr>
+                  <td style="padding:6px 0;font-size:13px;color:#555568;">100% used only to improve FutureSelf</td>
+                </tr>
+              </table>
 
               {{-- CTA Button --}}
               <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin-bottom:20px;">
@@ -69,8 +75,8 @@
                   <td align="center">
                     <table role="presentation" cellspacing="0" cellpadding="0" border="0">
                       <tr>
-                        <td style="background-color:#7c3aed;border-radius:8px;">
-                          <a href="{{ $missionUrl }}" target="_blank" style="display:inline-block;padding:14px 32px;color:#ffffff;font-size:14px;font-weight:600;text-decoration:none;letter-spacing:0.3px;">Complete Mission</a>
+                        <td style="background-color:#059669;border-radius:8px;">
+                          <a href="{{ $feedbackUrl }}" target="_blank" style="display:inline-block;padding:14px 32px;color:#ffffff;font-size:14px;font-weight:600;text-decoration:none;letter-spacing:0.3px;">Share Your Feedback</a>
                         </td>
                       </tr>
                     </table>
@@ -79,7 +85,7 @@
               </table>
 
               <p style="margin:0;font-size:12px;color:#8b8b9e;line-height:1.6;text-align:center;">
-                If this task remains pending, a reminder will be sent at <strong style="color:#555568;">{{ $reminderTime }}</strong>.
+                We read every single response. Your honesty helps us grow.
               </p>
             </td>
           </tr>

@@ -108,6 +108,9 @@ class DailyMissionController extends Controller
             'reflection' => $request->input('reflection'),
         ]);
 
+        // Track when user last completed a mission (used by motivational email system)
+        $user->update(['last_mission_completed_at' => now()]);
+
         $streak = $user->syncDailyStreak();
         $stats = $this->getUserMissionStats($user->id);
 

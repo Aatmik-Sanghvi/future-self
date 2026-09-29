@@ -1,92 +1,93 @@
 <!DOCTYPE html>
-<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <title>Your Mission Reminder — FutureSelf</title>
-  <!--[if mso]>
-  <noscript>
-    <xml>
-      <o:OfficeDocumentSettings>
-        <o:PixelsPerInch>96</o:PixelsPerInch>
-      </o:OfficeDocumentSettings>
-    </xml>
-  </noscript>
-  <![endif]-->
-  <style>
-    body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
-    table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
-    img { -ms-interpolation-mode: bicubic; border: 0; outline: none; text-decoration: none; }
-    body { margin: 0 !important; padding: 0 !important; width: 100% !important; }
-  </style>
+  <meta name="x-apple-disable-message-reformatting">
+  <meta name="format-detection" content="telephone=no,address=no,email=no,date=no,url=no">
+  <title>Mission Reminder — FutureSelf</title>
 </head>
-<body style="margin: 0; padding: 0; width: 100% !important; background-color: #0b0b14; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #f1f5f9;">
-  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" align="center" style="background-color: #0b0b14; table-layout: fixed;">
+<body style="margin:0;padding:0;background-color:#f4f4f7;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;">
+  {{-- Preheader --}}
+  <div style="display:none;font-size:1px;line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;mso-hide:all;">
+    Your mission is still waiting for you &#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;&#847;
+  </div>
+
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#f4f4f7;">
     <tr>
-      <td align="center" style="padding: 32px 16px 40px;">
-        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color: #121220; max-width: 580px; width: 100%; border-radius: 16px; border: 1px solid #3b2a5a; overflow: hidden; border-spacing: 0;">
-          <!-- Header -->
+      <td align="center" style="padding:32px 16px;">
+        <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="max-width:560px;width:100%;background-color:#ffffff;border-radius:12px;border:1px solid #e1e1e8;">
+
+          {{-- Brand Accent Bar --}}
           <tr>
-            <td align="center" style="padding: 36px 32px 24px; background-color: #1e132c; border-bottom: 1px solid #3b2a5a;">
-              <table role="presentation" cellspacing="0" cellpadding="0" border="0">
-                <tr>
-                  <td align="center" style="background-color: rgba(249, 115, 22, 0.18); border: 1px solid rgba(249, 115, 22, 0.45); border-radius: 999px; padding: 6px 16px; color: #fed7aa; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">
-                    @if($streak > 0)
-                      🔥 {{ $streak }} Day Streak Active
-                    @else
-                      ⏳ Evening Check-in
-                    @endif
-                  </td>
-                </tr>
-              </table>
-              <h1 style="font-size: 24px; font-weight: 800; color: #ffffff; margin: 16px 0 8px; line-height: 1.3;">Your mission is waiting, {{ $user->name }}!</h1>
-              <p style="font-size: 14px; color: #cbd5e1; margin: 0; line-height: 1.5;">Your future self is checking in. A few minutes of genuine effort today keeps your growth alive.</p>
+            <td style="height:4px;background-color:#6c3ce0;border-radius:12px 12px 0 0;font-size:0;line-height:0;">&nbsp;</td>
+          </tr>
+
+          {{-- Header --}}
+          <tr>
+            <td style="padding:28px 36px 0;text-align:center;">
+              <p style="margin:0;font-size:22px;font-weight:700;color:#1a1a2e;letter-spacing:-0.5px;">Future<span style="color:#6c3ce0;">Self</span></p>
+              <p style="margin:6px 0 0;font-size:11px;color:#8b8b9e;text-transform:uppercase;letter-spacing:1.5px;font-weight:500;">
+                @if($streak > 0) {{ $streak }} Day Streak @else Evening Check-in @endif
+              </p>
             </td>
           </tr>
 
-          <!-- Mission Content Card -->
+          {{-- Divider --}}
           <tr>
-            <td style="padding: 28px 32px 24px;">
-              <div style="background-color: #1a1a2e; border: 1px solid #4a3366; border-radius: 14px; padding: 24px; margin-bottom: 24px;">
-                <div style="margin-bottom: 14px;">
-                  <span style="display: inline-block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; padding: 4px 10px; border-radius: 6px; margin-right: 6px; background-color: rgba(249, 115, 22, 0.15); color: #fdba74; border: 1px solid rgba(249, 115, 22, 0.3);">PENDING MISSION</span>
-                  @if($mission->estimated_minutes)
-                    <span style="display: inline-block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; padding: 4px 10px; border-radius: 6px; background-color: rgba(255, 255, 255, 0.08); color: #e2e8f0;">⏱️ {{ $mission->estimated_minutes }} mins</span>
-                  @endif
-                </div>
+            <td style="padding:16px 36px 0;"><div style="border-top:1px solid #eeeef2;"></div></td>
+          </tr>
 
-                <h2 style="font-size: 18px; font-weight: 700; color: #ffffff; margin: 0 0 10px; line-height: 1.4;">{{ $mission->title }}</h2>
-                <p style="font-size: 14px; line-height: 1.6; color: #cbd5e1; margin: 0 0 16px;">{{ $mission->description }}</p>
+          {{-- Content --}}
+          <tr>
+            <td style="padding:24px 36px 32px;">
+              <p style="margin:0 0 6px;font-size:16px;color:#1a1a2e;font-weight:600;">Your mission is waiting, {{ $user->name }}!</p>
+              <p style="margin:0 0 24px;font-size:14px;color:#555568;line-height:1.6;">A few minutes of genuine effort today keeps your growth alive.</p>
 
-                <div style="background-color: rgba(239, 68, 68, 0.08); border-left: 3px solid #f87171; padding: 12px 16px; border-radius: 0 8px 8px 0; margin-top: 12px;">
-                  <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: #fca5a5; letter-spacing: 0.5px; margin-bottom: 4px;">Growth Reminder:</div>
-                  <p style="font-size: 13px; font-style: italic; color: #fecdd3; line-height: 1.5; margin: 0;">"Real growth happens in genuine effort, not just checking off a box. Your future self believes in you."</p>
+              {{-- Mission Card --}}
+              <div style="background-color:#fff8f3;border:1px solid #fde5c0;border-radius:10px;padding:22px;margin-bottom:24px;">
+                <p style="margin:0 0 10px;font-size:11px;font-weight:600;color:#ea580c;text-transform:uppercase;letter-spacing:0.5px;">
+                  Pending Mission @if($mission->estimated_minutes)&middot; {{ $mission->estimated_minutes }} mins @endif
+                </p>
+                <h2 style="margin:0 0 10px;font-size:17px;font-weight:600;color:#1a1a2e;line-height:1.4;">{{ $mission->title }}</h2>
+                <p style="margin:0 0 16px;font-size:14px;color:#555568;line-height:1.6;">{{ $mission->description }}</p>
+
+                <div style="padding:12px 16px;background-color:#ffffff;border-left:3px solid #ea580c;border-radius:0 6px 6px 0;">
+                  <p style="margin:0;font-size:13px;font-style:italic;color:#666678;line-height:1.5;">"Real growth happens in genuine effort, not just checking off a box. Your future self believes in you."</p>
                 </div>
               </div>
 
-              <!-- Call to Action Button -->
-              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin-bottom: 24px;">
+              {{-- CTA Button --}}
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
                 <tr>
                   <td align="center">
-                    <a href="{{ $missionUrl }}" target="_blank" style="display: inline-block; padding: 14px 32px; background-color: #ea580c; color: #ffffff !important; font-size: 15px; font-weight: 700; text-decoration: none; border-radius: 12px; text-align: center;">
-                      Complete &amp; Reflect on FutureSelf &rarr;
-                    </a>
+                    <table role="presentation" cellspacing="0" cellpadding="0" border="0">
+                      <tr>
+                        <td style="background-color:#ea580c;border-radius:8px;">
+                          <a href="{{ $missionUrl }}" target="_blank" style="display:inline-block;padding:14px 32px;color:#ffffff;font-size:14px;font-weight:600;text-decoration:none;letter-spacing:0.3px;">Complete Mission</a>
+                        </td>
+                      </tr>
+                    </table>
                   </td>
                 </tr>
               </table>
             </td>
           </tr>
 
-          <!-- Footer -->
+          {{-- Footer --}}
           <tr>
-            <td align="center" style="padding: 24px 32px 32px; font-size: 12px; color: #64748b; border-top: 1px solid #1e1b38; background-color: #0e0e1a;">
-              <p style="margin: 0 0 6px;">Connect with who you want to become &bull; <a href="{{ $missionUrl }}" target="_blank" style="color: #94a3b8; text-decoration: underline;">FutureSelf Missions</a></p>
-              <p style="margin: 0 0 6px;">&copy; {{ date('Y') }} FutureSelf. All rights reserved.</p>
-              <p style="margin: 0 0 6px; color: #64748b;">FutureSelf &middot; India</p>
-              <p style="margin: 0;"><a href="{{ rtrim(env('FRONTEND_URL', 'https://futureself.in'), '/') }}/missions?settings=1" target="_blank" style="color: #94a3b8; text-decoration: underline;">Manage email preferences</a></p>
+            <td style="padding:24px 36px;background-color:#fafafc;border-top:1px solid #eeeef2;border-radius:0 0 12px 12px;text-align:center;">
+              <p style="margin:0 0 6px;font-size:12px;color:#8b8b9e;">&copy; {{ date('Y') }} FutureSelf &middot; India</p>
+              <p style="margin:0 0 8px;font-size:11px;">
+                <a href="{{ rtrim(config('app.frontend_url', env('FRONTEND_URL', 'https://futureself.in')), '/') }}/missions?settings=1" target="_blank" style="color:#6c3ce0;text-decoration:underline;">Manage email preferences</a>
+              </p>
+              <p style="margin:0;font-size:10px;color:#c0c0ce;line-height:1.5;">
+                You received this because you have a FutureSelf account.
+              </p>
             </td>
           </tr>
+
         </table>
       </td>
     </tr>

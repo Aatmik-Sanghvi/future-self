@@ -1,4 +1,4 @@
-Hello {{ $name }},
+Hello{{ isset($name) ? ', ' . $name : '' }}!
 
 Your FutureSelf verification code is: {{ $otp }}
 
@@ -8,4 +8,6 @@ If you did not request this code, you can safely ignore this email. Never share 
 
 ---
 FutureSelf
-Your future self is waiting.
+This is an automated security message. Please do not reply.
+
+(c) {{ date('Y') }} FutureSelf, India

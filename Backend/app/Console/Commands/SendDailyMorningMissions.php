@@ -48,6 +48,27 @@ class SendDailyMorningMissions extends Command
         $query->chunkById(100, function ($users) use (&$sentCount, &$failedCount) {
             foreach ($users as $user) {
                 try {
+                    // 0. Skip users inactive for 3+ consecutive days — they receive motivational emails instead
+                    $lastCompleted = $user->last_mission_completed_at
+                        ?? DailyMission::where('user_id', $user->id)
+                            ->where('status', 'completed')
+                            ->max('mission_date');
+
+                    if ($lastCompleted) {
+                        $lastDate = $lastCompleted instanceof \Carbon\CarbonInterface
+                            ? $lastCompleted
+                            : \Carbon\Carbon::parse($lastCompleted);
+                        $inactiveDays = (int) $lastDate->diffInDays(today());
+                    } else {
+                        // Never completed — check account age
+                        $inactiveDays = (int) $user->created_at->diffInDays(today());
+                    }
+
+                    if ($inactiveDays >= 3) {
+                        $this->line("Skipping {$user->email} (inactive {$inactiveDays} days — receives motivational email instead)");
+                        continue;
+                    }
+
                     // 1. Get or generate today's mission
                     $mission = DailyMission::today()->where('user_id', $user->id)->first();
 

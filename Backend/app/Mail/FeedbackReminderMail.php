@@ -2,7 +2,6 @@
 
 namespace App\Mail;
 
-use App\Models\DailyMission;
 use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -12,23 +11,21 @@ use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Mail\Mailables\Headers;
 use Illuminate\Queue\SerializesModels;
 
-class DailyMissionMail extends Mailable implements ShouldQueue
+class FeedbackReminderMail extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
 
     public User $user;
-    public DailyMission $mission;
-    public string $missionUrl;
+    public string $feedbackUrl;
 
     /**
      * Create a new message instance.
      */
-    public function __construct(User $user, DailyMission $mission)
+    public function __construct(User $user)
     {
         $this->user = $user;
-        $this->mission = $mission;
         $frontendUrl = rtrim(config('app.frontend_url', env('FRONTEND_URL', 'https://futureself.in')), '/');
-        $this->missionUrl = "{$frontendUrl}/missions";
+        $this->feedbackUrl = "{$frontendUrl}/feedback";
     }
 
     /**
@@ -37,7 +34,7 @@ class DailyMissionMail extends Mailable implements ShouldQueue
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: "Your Daily Mission: {$this->mission->title} — FutureSelf",
+            subject: "A quick favor, {$this->user->name}? Your feedback shapes FutureSelf",
         );
     }
 
@@ -46,21 +43,12 @@ class DailyMissionMail extends Mailable implements ShouldQueue
      */
     public function content(): Content
     {
-        $rawTime = $this->user->mission_reminder_time ?? '19:00';
-        try {
-            $formattedReminderTime = \Carbon\Carbon::createFromFormat('H:i', substr($rawTime, 0, 5))->format('g:i A');
-        } catch (\Throwable $e) {
-            $formattedReminderTime = '7:00 PM';
-        }
-
         return new Content(
-            view: 'emails.daily_mission',
-            text: 'emails.daily_mission_plain',
+            view: 'emails.feedback_reminder',
+            text: 'emails.feedback_reminder_plain',
             with: [
                 'user' => $this->user,
-                'mission' => $this->mission,
-                'missionUrl' => $this->missionUrl,
-                'reminderTime' => $formattedReminderTime,
+                'feedbackUrl' => $this->feedbackUrl,
             ]
         );
     }
@@ -70,15 +58,11 @@ class DailyMissionMail extends Mailable implements ShouldQueue
      *
      * Strict inbox delivery measures:
      * - List-Unsubscribe + List-Unsubscribe-Post: required by Gmail/Yahoo
-     *   for bulk senders (Feb 2024 policy). Without these, emails may be
-     *   rejected outright or sent to spam.
-     * - Feedback-ID: helps Gmail categorise mail streams separately so one
-     *   bad campaign doesn't tank the reputation of all your emails.
-     * - X-Entity-Ref-ID: unique per email; prevents Gmail from collapsing
-     *   different daily mission emails into one thread (grouped threads
-     *   with low engagement get spam-flagged).
-     * - No X-Priority, X-Mailer, or Precedence headers: these add no
-     *   deliverability benefit and can trigger heuristic spam filters.
+     *   for bulk senders (Feb 2024 policy).
+     * - Feedback-ID: separate stream ID so feedback request reputation
+     *   is isolated from other mail types.
+     * - X-Entity-Ref-ID: unique per email to prevent Gmail thread-collapsing.
+     * - No X-Priority, X-Mailer, or Precedence headers.
      */
     public function headers(): Headers
     {
@@ -88,7 +72,7 @@ class DailyMissionMail extends Mailable implements ShouldQueue
             text: [
                 'List-Unsubscribe' => "<{$unsubscribeUrl}>",
                 'List-Unsubscribe-Post' => 'List-Unsubscribe=One-Click',
-                'Feedback-ID' => 'daily_mission:futureself',
+                'Feedback-ID' => 'feedback_request:futureself',
                 'X-Entity-Ref-ID' => bin2hex(random_bytes(16)),
             ],
         );

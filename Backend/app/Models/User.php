@@ -46,6 +46,9 @@ class User extends Authenticatable
         'mission_email_enabled',
         'mission_reminder_time',
         'mission_reminder_enabled',
+        'last_mission_completed_at',
+        'last_feedback_reminder_sent_at',
+        'last_motivational_mail_sent_at',
     ];
 
     /**
@@ -80,6 +83,9 @@ class User extends Authenticatable
             'daily_streak' => 'integer',
             'mission_email_enabled' => 'boolean',
             'mission_reminder_enabled' => 'boolean',
+            'last_mission_completed_at' => 'datetime',
+            'last_feedback_reminder_sent_at' => 'datetime',
+            'last_motivational_mail_sent_at' => 'datetime',
         ];
     }
 
@@ -123,6 +129,14 @@ class User extends Authenticatable
     public function activityLogs()
     {
         return $this->hasMany(UserActivityLog::class);
+    }
+
+    /**
+     * Get all feedback submissions for this user.
+     */
+    public function feedbacks()
+    {
+        return $this->hasMany(Feedback::class);
     }
 
     /**

@@ -27,7 +27,7 @@ class DailyMissionReminderMail extends Mailable implements ShouldQueue
     {
         $this->user = $user;
         $this->mission = $mission;
-        $frontendUrl = rtrim(env('FRONTEND_URL', 'https://futureself.in'), '/');
+        $frontendUrl = rtrim(config('app.frontend_url', env('FRONTEND_URL', 'https://futureself.in')), '/');
         $this->missionUrl = "{$frontendUrl}/missions";
     }
 
@@ -60,14 +60,25 @@ class DailyMissionReminderMail extends Mailable implements ShouldQueue
 
     /**
      * Get the headers for the message.
+     *
+     * Strict inbox delivery measures:
+     * - List-Unsubscribe + List-Unsubscribe-Post: required by Gmail/Yahoo
+     *   for bulk senders (Feb 2024 policy).
+     * - Feedback-ID: separate stream ID so reminder reputation is isolated
+     *   from other mail types.
+     * - X-Entity-Ref-ID: unique per email to prevent Gmail thread-collapsing.
+     * - No X-Priority, X-Mailer, or Precedence headers.
      */
     public function headers(): Headers
     {
-        $unsubscribeUrl = rtrim(env('FRONTEND_URL', 'https://futureself.in'), '/') . '/missions?settings=1';
+        $unsubscribeUrl = rtrim(config('app.frontend_url', env('FRONTEND_URL', 'https://futureself.in')), '/') . '/missions?settings=1';
 
         return new Headers(
             text: [
                 'List-Unsubscribe' => "<{$unsubscribeUrl}>",
+                'List-Unsubscribe-Post' => 'List-Unsubscribe=One-Click',
+                'Feedback-ID' => 'mission_reminder:futureself',
+                'X-Entity-Ref-ID' => bin2hex(random_bytes(16)),
             ],
         );
     }
