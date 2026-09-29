@@ -409,7 +409,7 @@ if (! function_exists('get_badge_html')) {
 }
 
 if (! function_exists('register_user_email')) {
-    function register_user_email($email,$subjectTomail='Signup Process')
+    function register_user_email($email, $name, $subjectTomail='Signup Process')
     {
         // Check if environment is local
         if (app()->environment('local')) {

@@ -43,7 +43,7 @@ class GuestController extends ResponseController
         ], now()->addMinutes(5));
 
         // Send OTP email using existing helper
-        register_user_email($request->email, 'Email Verification');
+        register_user_email($request->email, $request->name, 'Email Verification');
 
         return ResponseHelper::send(200, 'OTP sent to your email for verification.');
     }
@@ -109,7 +109,7 @@ class GuestController extends ResponseController
         }
 
         // Resend OTP
-        register_user_email($request->email, 'Email Verification');
+        register_user_email($request->email, $request->name, 'Email Verification');
 
         return ResponseHelper::send(200, 'A new OTP has been sent to your email.');
     }
@@ -146,7 +146,7 @@ class GuestController extends ResponseController
 
         $user = $this->user->where('email', $request->email)->first();
 
-        register_user_email($user->email, 'Forgot password');
+        register_user_email($user->email, $user->name, 'Forgot password');
 
         return ResponseHelper::send(200, 'Password reset link sent successfully.');
     }
