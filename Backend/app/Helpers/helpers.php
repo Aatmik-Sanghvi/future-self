@@ -433,7 +433,7 @@ if (! function_exists('register_user_email')) {
                 'otp_expires_at' => now()->addMinutes(5),
             ]);
 
-            $name = !is_null($user->name) ? $user->name : 'User';
+            $name = !is_null($name) ? $name : 'User';
 
             // Construct dynamic subject to prevent static spam filter matching
             if (in_array(strtolower($subjectTomail), ['signup process', 'email verification'])) {
