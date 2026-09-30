@@ -223,7 +223,7 @@ const handleRegister = async () => {
 // ── Step 2: OTP Verification ──
 const otp = ref(['', '', '', ''])
 const otpInputs = ref([])
-const resendCooldown = ref(300)
+const resendCooldown = ref(60)
 const showSpamNote = ref(true)
 let timerInterval = null
 
@@ -290,7 +290,7 @@ const focusOtpInput = (index) => {
 }
 
 const startCountdown = () => {
-  resendCooldown.value = 300
+  resendCooldown.value = 60
   clearInterval(timerInterval)
   timerInterval = setInterval(() => {
     if (resendCooldown.value > 0) {
