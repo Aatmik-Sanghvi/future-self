@@ -8,6 +8,7 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\Middleware\RateLimited;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 
@@ -23,7 +24,22 @@ class GenerateOnboardingSummary implements ShouldQueue
     /**
      * The number of times the job may be attempted.
      */
-    public int $tries = 3;
+    public int $tries = 5;
+
+    /**
+     * The number of seconds to wait before retrying the job.
+     */
+    public int $backoff = 3;
+
+    /**
+     * Define middleware to space out jobs and prevent hitting 15 RPM.
+     *
+     * @return array<int, object>
+     */
+    public function middleware(): array
+    {
+        return [new RateLimited('gemini-jobs')];
+    }
 
     /**
      * Create a new job instance.
@@ -37,6 +53,8 @@ class GenerateOnboardingSummary implements ShouldQueue
      */
     public function handle(): void
     {
+        Log::info("🚀 [GenerateOnboardingSummary] Starting job for User #{$this->userId} (Attempt {$this->attempts()}/{$this->tries})");
+
         // Authenticate as the user so the agent can access their data
         auth()->loginUsingId($this->userId);
 
@@ -46,6 +64,6 @@ class GenerateOnboardingSummary implements ShouldQueue
             'future_self_summary' => $response['feedback'],
         ]);
 
-        Log::info("Onboarding summary generated for user {$this->userId}");
+        Log::info("✅ [GenerateOnboardingSummary] Successfully generated and saved summary for User #{$this->userId}");
     }
 }

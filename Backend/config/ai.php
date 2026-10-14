@@ -95,7 +95,75 @@ return [
             'driver' => 'gemini',
             'key' => env('GEMINI_API_KEY'),
             'url' => env('GEMINI_URL', 'https://generativelanguage.googleapis.com/v1beta/'),
-            'model' => env('GEMINI_MODEL', 'gemini-2.5-flash'),
+            'model' => env('GEMINI_MODEL', 'gemini-3.5-flash'),
+            'models' => [
+                'text' => [
+                    'default' => env('GEMINI_MODEL', 'gemini-3.5-flash'),
+                    'cheapest' => 'gemini-3.5-flash-lite',
+                    'smartest' => 'gemini-3.8-flash',
+                ],
+            ],
+        ],
+
+        // Gemini Fallback Models (all share the same GEMINI_API_KEY with independent RPM quotas)
+        'gemini_flash_lite' => [
+            'driver' => 'gemini',
+            'key' => env('GEMINI_API_KEY'),
+            'url' => env('GEMINI_URL', 'https://generativelanguage.googleapis.com/v1beta/'),
+            'model' => 'gemini-3.5-flash-lite',
+            'models' => [
+                'text' => [
+                    'default' => 'gemini-3.5-flash-lite',
+                ],
+            ],
+        ],
+
+        'gemini_flash_lite_latest' => [
+            'driver' => 'gemini',
+            'key' => env('GEMINI_API_KEY'),
+            'url' => env('GEMINI_URL', 'https://generativelanguage.googleapis.com/v1beta/'),
+            'model' => 'gemini-flash-lite-latest',
+            'models' => [
+                'text' => [
+                    'default' => 'gemini-flash-lite-latest',
+                ],
+            ],
+        ],
+
+        'gemini_3_1_flash_lite' => [
+            'driver' => 'gemini',
+            'key' => env('GEMINI_API_KEY'),
+            'url' => env('GEMINI_URL', 'https://generativelanguage.googleapis.com/v1beta/'),
+            'model' => 'gemini-3.1-flash-lite',
+            'models' => [
+                'text' => [
+                    'default' => 'gemini-3.1-flash-lite',
+                ],
+            ],
+        ],
+
+        'gemini_flash_latest' => [
+            'driver' => 'gemini',
+            'key' => env('GEMINI_API_KEY'),
+            'url' => env('GEMINI_URL', 'https://generativelanguage.googleapis.com/v1beta/'),
+            'model' => 'gemini-flash-latest',
+            'models' => [
+                'text' => [
+                    'default' => 'gemini-flash-latest',
+                ],
+            ],
+        ],
+
+        'gemini_pro_latest' => [
+            'driver' => 'gemini',
+            'key' => env('GEMINI_API_KEY'),
+            'url' => env('GEMINI_URL', 'https://generativelanguage.googleapis.com/v1beta/'),
+            'model' => 'gemini-pro-latest',
+            'models' => [
+                'text' => [
+                    'default' => 'gemini-pro-latest',
+                ],
+            ],
         ],
 
         'groq' => [
@@ -146,6 +214,32 @@ return [
             'key' => env('GITHUB_TOKEN'),
             'url' => env('GITHUB_OPENAI_URL', 'https://models.github.ai/inference'),
             'model' => env('GITHUB_MODEL', 'gpt-4o'),
+        ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Gemini Rate Limiting & Failover Configuration
+    |--------------------------------------------------------------------------
+    |
+    | Gemini Free Tier has a strict 15 Requests Per Minute (RPM) limit per model.
+    | - min_interval_seconds: Minimum pacing delay between consecutive requests (4.2s = max ~14 RPM).
+    | - max_per_minute: Maximum requests allowed in any rolling 60-second window.
+    | - cooldown_seconds: Duration a model is marked as cooling down when 429/503 occurs.
+    | - failover_chain: Ordered list of Gemini models to switch between.
+    |
+    */
+    'gemini_rate_limiting' => [
+        'min_interval_seconds' => (float) env('GEMINI_MIN_INTERVAL_SECONDS', 4.2),
+        'max_per_minute' => (int) env('GEMINI_MAX_PER_MINUTE', 14),
+        'cooldown_seconds' => (int) env('GEMINI_COOLDOWN_SECONDS', 60),
+        'failover_chain' => [
+            'gemini',
+            'gemini_flash_lite',
+            'gemini_flash_lite_latest',
+            'gemini_3_1_flash_lite',
+            'gemini_flash_latest',
+            'gemini_pro_latest',
         ],
     ],
 

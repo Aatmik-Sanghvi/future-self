@@ -2,6 +2,7 @@
 
 namespace App\Ai\Agents;
 
+use App\Ai\Concerns\HasGeminiFailover;
 use App\Models\DailyMission;
 use App\Models\Goals;
 use App\Models\User;
@@ -15,9 +16,9 @@ use Laravel\Ai\Messages\Message;
 use Laravel\Ai\Promptable;
 use Stringable;
 
-class MotivationalMailAgent implements Agent, Conversational, HasTools, HasStructuredOutput
+class MotivationalMailAgent implements Agent, Conversational, HasStructuredOutput, HasTools
 {
-    use Promptable;
+    use HasGeminiFailover, Promptable;
 
     public function __construct(
         public ?User $user = null,

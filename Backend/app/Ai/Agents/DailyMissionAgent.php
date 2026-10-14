@@ -2,6 +2,7 @@
 
 namespace App\Ai\Agents;
 
+use App\Ai\Concerns\HasGeminiFailover;
 use App\Models\DailyMission;
 use App\Models\Goals;
 use App\Models\Mood;
@@ -16,9 +17,9 @@ use Laravel\Ai\Messages\Message;
 use Laravel\Ai\Promptable;
 use Stringable;
 
-class DailyMissionAgent implements Agent, Conversational, HasTools, HasStructuredOutput
+class DailyMissionAgent implements Agent, Conversational, HasStructuredOutput, HasTools
 {
-    use Promptable;
+    use HasGeminiFailover, Promptable;
 
     public function __construct(
         public ?User $user = null,
@@ -51,7 +52,7 @@ class DailyMissionAgent implements Agent, Conversational, HasTools, HasStructure
             ->map(fn ($m) => "{$m->title} ({$m->status})")
             ->implode('; ');
 
-        $pastContext = $pastMissions ? "Recent Past Missions: {$pastMissions}" : "Recent Past Missions: None (First mission)";
+        $pastContext = $pastMissions ? "Recent Past Missions: {$pastMissions}" : 'Recent Past Missions: None (First mission)';
         $goalTitle = $goal?->title ?? 'General Self Improvement';
         $goalCategory = $goal?->category ?? 'Growth';
         $goalDesc = $goal?->description ?? '';

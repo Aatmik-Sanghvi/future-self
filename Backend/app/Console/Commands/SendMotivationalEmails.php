@@ -3,9 +3,12 @@
 namespace App\Console\Commands;
 
 use App\Ai\Agents\MotivationalMailAgent;
+use App\Ai\Services\GeminiRateLimiter;
 use App\Mail\MotivationalMail;
 use App\Models\DailyMission;
 use App\Models\User;
+use Carbon\Carbon;
+use Carbon\CarbonInterface;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -54,15 +57,22 @@ class SendMotivationalEmails extends Command
                     // Only send if inactive for 3+ days
                     if ($inactiveDays < 3) {
                         $skippedCount++;
+
                         continue;
                     }
 
                     // Don't send if already sent today (unless --force)
-                    if (!$this->option('force') && $user->last_motivational_mail_sent_at &&
+                    if (! $this->option('force') && $user->last_motivational_mail_sent_at &&
                         $user->last_motivational_mail_sent_at->isToday()) {
                         $skippedCount++;
+
                         continue;
                     }
+
+                    // Enforce pacing to strictly stay under 15 RPM
+                    GeminiRateLimiter::ensurePacing(function ($seconds, $reason) {
+                        $this->line('  [Pacing] Waiting '.round($seconds, 1)."s to respect 15 RPM limit ({$reason})...");
+                    });
 
                     // Generate AI motivational content
                     $agent = new MotivationalMailAgent($user, $inactiveDays);
@@ -94,6 +104,7 @@ class SendMotivationalEmails extends Command
         });
 
         $this->info("Motivational email dispatch completed. Sent: {$sentCount}, Skipped: {$skippedCount}, Failed: {$failedCount}");
+
         return Command::SUCCESS;
     }
 
@@ -114,9 +125,9 @@ class SendMotivationalEmails extends Command
             ->first();
 
         if ($lastCompleted) {
-            $lastDate = $lastCompleted->mission_date instanceof \Carbon\CarbonInterface
+            $lastDate = $lastCompleted->mission_date instanceof CarbonInterface
                 ? $lastCompleted->mission_date
-                : \Carbon\Carbon::parse($lastCompleted->mission_date);
+                : Carbon::parse($lastCompleted->mission_date);
 
             // Backfill the tracking column for future performance
             $user->update(['last_mission_completed_at' => $lastDate]);

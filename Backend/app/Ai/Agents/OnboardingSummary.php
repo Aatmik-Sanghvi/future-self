@@ -2,11 +2,12 @@
 
 namespace App\Ai\Agents;
 
+use App\Ai\Concerns\HasGeminiFailover;
+use App\Models\CommunicationTone;
 use App\Models\DesiredTraits;
 use App\Models\Fear;
 use App\Models\Goals;
 use App\Models\RoleModel;
-use App\Models\CommunicationTone;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Laravel\Ai\Contracts\Agent;
 use Laravel\Ai\Contracts\Conversational;
@@ -17,9 +18,9 @@ use Laravel\Ai\Messages\Message;
 use Laravel\Ai\Promptable;
 use Stringable;
 
-class OnboardingSummary implements Agent, Conversational, HasTools, HasStructuredOutput
+class OnboardingSummary implements Agent, Conversational, HasStructuredOutput, HasTools
 {
-    use Promptable;
+    use HasGeminiFailover, Promptable;
 
     /**
      * Get the instructions that the agent should follow.
@@ -30,8 +31,8 @@ class OnboardingSummary implements Agent, Conversational, HasTools, HasStructure
         $goalId = $goals?->id;
 
         $fears = $goalId ? Fear::where('goal_id', $goalId)->first() : null;
-        $desiredTraits = $goalId ? implode(", ", DesiredTraits::where('goal_id', $goalId)->pluck('trait')->toArray()) : '';
-        $roleModels = $goalId ? implode(", ", RoleModel::where('goal_id', $goalId)->pluck('names')->toArray()) : '';
+        $desiredTraits = $goalId ? implode(', ', DesiredTraits::where('goal_id', $goalId)->pluck('trait')->toArray()) : '';
+        $roleModels = $goalId ? implode(', ', RoleModel::where('goal_id', $goalId)->pluck('names')->toArray()) : '';
         $tone = $goalId ? CommunicationTone::where('goal_id', $goalId)->first() : null;
 
         return "You are an expert behavioral analyst.

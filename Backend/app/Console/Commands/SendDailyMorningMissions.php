@@ -3,10 +3,13 @@
 namespace App\Console\Commands;
 
 use App\Ai\Agents\DailyMissionAgent;
+use App\Ai\Services\GeminiRateLimiter;
 use App\Mail\DailyMissionMail;
 use App\Models\DailyMission;
 use App\Models\Mood;
 use App\Models\User;
+use Carbon\Carbon;
+use Carbon\CarbonInterface;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -55,9 +58,9 @@ class SendDailyMorningMissions extends Command
                             ->max('mission_date');
 
                     if ($lastCompleted) {
-                        $lastDate = $lastCompleted instanceof \Carbon\CarbonInterface
+                        $lastDate = $lastCompleted instanceof CarbonInterface
                             ? $lastCompleted
-                            : \Carbon\Carbon::parse($lastCompleted);
+                            : Carbon::parse($lastCompleted);
                         $inactiveDays = (int) $lastDate->diffInDays(today());
                     } else {
                         // Never completed — check account age
@@ -66,13 +69,14 @@ class SendDailyMorningMissions extends Command
 
                     if ($inactiveDays >= 3) {
                         $this->line("Skipping {$user->email} (inactive {$inactiveDays} days — receives motivational email instead)");
+
                         continue;
                     }
 
                     // 1. Get or generate today's mission
                     $mission = DailyMission::today()->where('user_id', $user->id)->first();
 
-                    if (!$mission) {
+                    if (! $mission) {
                         // Check if today's mood was already recorded
                         $todayMood = Mood::where('user_id', $user->id)
                             ->whereDate('created_at', today())
@@ -80,8 +84,27 @@ class SendDailyMorningMissions extends Command
                             ->first();
 
                         $agent = new DailyMissionAgent($user, $todayMood?->mood_type);
-                        $result = $agent->prompt('Generate today daily mission');
-                        $taskData = is_array($result) ? $result : json_decode((string) $result, true);
+
+                        // Enforce pacing to strictly stay under 15 RPM
+                        GeminiRateLimiter::ensurePacing(function ($seconds, $reason) {
+                            $this->line('  [Pacing] Waiting '.round($seconds, 1)."s to respect 15 RPM limit ({$reason})...");
+                        });
+
+                        try {
+                            $result = $agent->prompt('Generate today daily mission');
+                            $taskData = is_array($result) ? $result : json_decode((string) $result, true);
+                        } catch (\Throwable $aiException) {
+                            Log::warning("AI mission generation fallback triggered for user {$user->id}: ".$aiException->getMessage());
+                            $activeGoal = $user->goals()->where('status', 'active')->first();
+                            $taskData = [
+                                'title' => 'Momentum Step: 15-Minute Goal Focus',
+                                'description' => 'Spend 15 undistracted minutes reviewing your goal and taking one small step forward.',
+                                'future_self_note' => 'Consistency is built in small steps. Give this 15 minutes of your full presence today.',
+                                'category' => $activeGoal?->category ?? 'Growth',
+                                'estimated_minutes' => 15,
+                                'difficulty' => 'medium',
+                            ];
+                        }
 
                         $activeGoal = $user->goals()->where('status', 'active')->first();
 
@@ -118,6 +141,7 @@ class SendDailyMorningMissions extends Command
         });
 
         $this->info("Completed. Queued/Dispatched: {$sentCount}, Failed: {$failedCount}");
+
         return Command::SUCCESS;
     }
 }
