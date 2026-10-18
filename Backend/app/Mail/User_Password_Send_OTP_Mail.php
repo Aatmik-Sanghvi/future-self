@@ -11,7 +11,7 @@ use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Mail\Mailables\Headers;
 use Illuminate\Queue\SerializesModels;
 
-class User_Password_Send_OTP_Mail extends Mailable
+class User_Password_Send_OTP_Mail extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
 

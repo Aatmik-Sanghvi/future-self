@@ -444,8 +444,8 @@ if (! function_exists('register_user_email')) {
                 $emailSubject = "{$otp} — {$subjectTomail} (FutureSelf)";
             }
 
-            // Send OTP email
-            Mail::to($user->email)->send(new User_Password_Send_OTP_Mail($name, $otp, $emailSubject));
+            // Queue OTP email (non-blocking — processed by queue worker)
+            Mail::to($user->email)->queue(new User_Password_Send_OTP_Mail($name, $otp, $emailSubject));
 
             return true;
         }

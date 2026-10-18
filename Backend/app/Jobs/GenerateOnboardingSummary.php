@@ -17,14 +17,17 @@ class GenerateOnboardingSummary implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     /**
-     * The number of seconds the job can run before timing out.
+     * Allow unlimited release attempts so the queue rate limiter can
+     * keep releasing this job without it being marked as failed.
      */
-    public int $timeout = 120;
+    public int $tries = 0;
 
     /**
-     * The number of times the job may be attempted.
+     * The maximum number of unhandled exceptions to allow before failing.
+     * This ensures actual AI crashes still fail the job after 3 real errors,
+     * while rate-limiter releases (which don't throw exceptions) are unlimited.
      */
-    public int $tries = 5;
+    public int $maxExceptions = 3;
 
     /**
      * The number of seconds to wait before retrying the job.
@@ -53,7 +56,7 @@ class GenerateOnboardingSummary implements ShouldQueue
      */
     public function handle(): void
     {
-        Log::info("🚀 [GenerateOnboardingSummary] Starting job for User #{$this->userId} (Attempt {$this->attempts()}/{$this->tries})");
+        Log::info("🚀 [GenerateOnboardingSummary] Starting job for User #{$this->userId} (Attempt {$this->attempts()})");
 
         // Authenticate as the user so the agent can access their data
         auth()->loginUsingId($this->userId);
