@@ -34,6 +34,7 @@ class SendDailyMissionReminders extends Command
         $this->info("Checking pending mission reminders for time slot: {$currentTime}...");
 
         $query = User::query()
+            ->activePro()
             ->where('is_onboarded', true)
             ->where('mission_reminder_enabled', true);
 

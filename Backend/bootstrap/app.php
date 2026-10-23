@@ -20,6 +20,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'verified' => \App\Http\Middleware\EnsureEmailIsVerified::class,
             'admin' => \App\Http\Middleware\AdminMiddleware::class,
             'log.activity' => \App\Http\Middleware\LogUserActivity::class,
+            'is_pro' => \App\Http\Middleware\EnsureUserIsPro::class,
         ]);
 
         $middleware->redirectGuestsTo('/admin/login');

@@ -46,4 +46,11 @@ return [
         'client_secret' => env('GOOGLE_CLIENT_SECRET'),
         'redirect' => env('GOOGLE_REDIRECT_URI', env('APP_URL', 'http://localhost:8000').'/api/V1/auth/google/callback'),
     ],
+
+    'razorpay' => [
+        'key' => env('RAZORPAY_KEY'),
+        'secret' => env('RAZORPAY_SECRET'),
+        'webhook_secret' => env('RAZORPAY_WEBHOOK_SECRET'),
+        'plan_id' => env('RAZORPAY_PLAN_ID', 'plan_TqYQFxc6HVaDhq'),
+    ],
 ];

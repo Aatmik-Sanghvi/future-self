@@ -237,6 +237,24 @@ async function confirmDeleteAccount() {
 function goBack() {
   router.back()
 }
+
+const isCancelling = ref(false)
+
+async function handleCancelSubscription() {
+  const confirmed = window.confirm(
+    'Are you sure you want to cancel? Your access to Daily Missions and Goal Tracking will be restricted.'
+  )
+  if (!confirmed) return
+
+  isCancelling.value = true
+  try {
+    await auth.cancelSubscription()
+  } catch (err) {
+    // Handled in auth store toast
+  } finally {
+    isCancelling.value = false
+  }
+}
 </script>
 
 <template>
@@ -625,6 +643,70 @@ function goBack() {
           </div>
         </div>
 
+        <!-- ── SUBSCRIPTION & PRO PLAN SECTION ─ -->
+        <div class="profile-section">
+          <div class="profile-section-header">
+            <div class="profile-section-icon violet">💎</div>
+            <div>
+              <div class="profile-section-title">Subscription & Pro Features</div>
+              <div class="profile-section-desc">Manage your access to Daily Missions and Goal Tracking</div>
+            </div>
+          </div>
+
+          <div class="profile-sub-box">
+            <div class="profile-sub-info">
+              <div class="profile-sub-status-line">
+                <span class="profile-sub-status-title">Current Status:</span>
+                <span v-if="auth.isPro && auth.isTrial" class="sub-badge trial">⚡ 7-Day Free Trial (Active)</span>
+                <span v-else-if="auth.isPro" class="sub-badge active">✨ Pro Active</span>
+                <span v-else-if="auth.hasUsedTrial" class="sub-badge restricted">Free Plan (Trial Used / Restricted)</span>
+                <span v-else class="sub-badge free">Free Plan (7-Day Trial Available)</span>
+              </div>
+
+              <p class="profile-sub-text" v-if="auth.isPro && auth.isTrial">
+                You have full access to Daily Missions and Goal Tracking during your 7-day free trial.
+                <span v-if="auth.trialEndsAt" class="profile-sub-date">
+                  Ends {{ new Date(auth.trialEndsAt).toLocaleDateString() }}.
+                </span>
+              </p>
+              <p class="profile-sub-text" v-else-if="auth.isPro">
+                You have full access to Daily Missions and Goal Tracking.
+                <span v-if="auth.proExpiresAt" class="profile-sub-date">
+                  Expires/Renews {{ new Date(auth.proExpiresAt).toLocaleDateString() }}.
+                </span>
+              </p>
+              <p class="profile-sub-text" v-else-if="auth.hasUsedTrial">
+                Daily Missions and Goal Tracking are restricted. Your one-time 7-day trial has been used. Purchase the Pro plan to unlock these features.
+              </p>
+              <p class="profile-sub-text" v-else>
+                Daily Missions and Goal Tracking are restricted to Pro users. You can activate a 7-day free trial!
+              </p>
+            </div>
+
+            <div class="profile-sub-action">
+              <button
+                v-if="auth.isPro"
+                class="profile-btn profile-btn-cancel-plan"
+                :disabled="isCancelling"
+                @click="handleCancelSubscription"
+                id="btn-cancel-plan"
+              >
+                <span v-if="isCancelling" class="profile-btn-spinner"></span>
+                <span v-else>{{ auth.isTrial ? 'Cancel 7-Day Trial' : 'Cancel Subscription' }}</span>
+              </button>
+              <router-link
+                v-else
+                to="/#pricing"
+                class="profile-btn profile-btn-primary"
+                id="btn-go-pricing"
+                style="text-decoration: none;"
+              >
+                {{ !auth.hasUsedTrial ? 'Start 7-Day Free Trial' : 'Unlock Pro — ₹199/month' }}
+              </router-link>
+            </div>
+          </div>
+        </div>
+
         <!-- ── DANGER ZONE ───────────────────── -->
         <div class="profile-danger-section">
           <div class="profile-danger-header">
@@ -729,5 +811,101 @@ function goBack() {
 </template>
 
 <style scoped>
-/* All styles are in profile.css */
+/* Subscription card styles */
+.profile-sub-box {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 14px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.profile-sub-info {
+  flex: 1;
+  min-width: 260px;
+}
+
+.profile-sub-status-line {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.profile-sub-status-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.sub-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.sub-badge.trial {
+  background: rgba(168, 85, 247, 0.15);
+  border: 1px solid rgba(168, 85, 247, 0.4);
+  color: #c084fc;
+}
+
+.sub-badge.active {
+  background: rgba(34, 197, 94, 0.15);
+  border: 1px solid rgba(34, 197, 94, 0.4);
+  color: #4ade80;
+}
+
+.sub-badge.restricted {
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  color: #f87171;
+}
+
+.sub-badge.free {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.profile-sub-text {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.5);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.profile-sub-date {
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 500;
+}
+
+.profile-btn-cancel-plan {
+  background: transparent;
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  color: #f87171;
+  padding: 10px 18px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.profile-btn-cancel-plan:hover:not(:disabled) {
+  background: rgba(239, 68, 68, 0.12);
+  border-color: #ef4444;
+}
+
+.profile-btn-cancel-plan:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
 </style>

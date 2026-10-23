@@ -37,6 +37,7 @@ class SendMotivationalEmails extends Command
         $this->info('Starting motivational email dispatch for inactive users...');
 
         $query = User::query()
+            ->activePro()
             ->where('is_onboarded', true)
             ->where('mission_email_enabled', true);
 

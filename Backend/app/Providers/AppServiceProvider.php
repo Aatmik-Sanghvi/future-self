@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Ai\Events\AgentFailedOver;
+use App\Contracts\PaymentGatewayInterface;
+use App\Services\Payments\RazorpayGateway;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -19,7 +21,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+       $this->app->bind(
+            PaymentGatewayInterface::class,
+            RazorpayGateway::class
+        );
     }
 
     /**

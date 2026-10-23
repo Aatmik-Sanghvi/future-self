@@ -33,6 +33,12 @@ class User extends Authenticatable
         'profile_image',
         'is_onboarded',
         'is_admin',
+        'is_pro',
+        'pro_expires_at',
+        'subscription_status',
+        'trial_ends_at',
+        'has_used_trial',
+        'razorpay_subscription_id',
         'google2fa_secret',
         'google2fa_enabled',
         'two_factor_recovery_codes',
@@ -77,6 +83,10 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_pro' => 'boolean',
+            'pro_expires_at' => 'datetime',
+            'trial_ends_at' => 'datetime',
+            'has_used_trial' => 'boolean',
             'google2fa_enabled' => 'boolean',
             'two_factor_recovery_codes' => 'array',
             'last_login' => 'datetime',
@@ -90,7 +100,52 @@ class User extends Authenticatable
     }
 
     public function scopeDetails($query){
-        return $query->select('id', 'name', 'email', 'country_code', 'mobile', 'profile_image', 'is_onboarded', 'daily_streak', 'created_at');
+        return $query->select(
+            'id', 'name', 'email', 'country_code', 'mobile', 'profile_image',
+            'is_onboarded', 'daily_streak', 'is_pro', 'pro_expires_at',
+            'subscription_status', 'trial_ends_at', 'has_used_trial', 'created_at'
+        );
+    }
+
+    /**
+     * Scope a query to only include users with an active Pro subscription or 7-day trial.
+     */
+    public function scopeActivePro($query)
+    {
+        return $query->where('is_pro', true)
+            ->where(function ($q) {
+                $q->whereNull('subscription_status')
+                  ->orWhere('subscription_status', '!=', 'cancelled');
+            })
+            ->where(function ($q) {
+                $q->whereNull('pro_expires_at')
+                  ->orWhere('pro_expires_at', '>', now());
+            });
+    }
+
+    /**
+     * Check if the user currently has an active Pro subscription or 7-day free trial.
+     */
+    public function hasActivePro(): bool
+    {
+        if (! $this->is_pro) {
+            return false;
+        }
+
+        if ($this->subscription_status === 'cancelled') {
+            return false;
+        }
+
+        if ($this->pro_expires_at && $this->pro_expires_at->isPast()) {
+            return false;
+        }
+
+        return true;
+    }
+
+    public function payments()
+    {
+        return $this->hasMany(Payment::class);
     }
 
     public function setPasswordAttribute($password)
