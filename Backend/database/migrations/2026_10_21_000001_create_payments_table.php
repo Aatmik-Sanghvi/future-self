@@ -22,7 +22,6 @@ return new class extends Migration
             $table->string('status', 20)->default('created'); // created, paid, failed
             $table->string('plan', 50)->default('pro_monthly');
             $table->string('razorpay_subscription_id')->nullable()->after('razorpay_order_id')->index();
-            $table->string('razorpay_order_id')->nullable()->change();
             $table->timestamps();
         });
     }
