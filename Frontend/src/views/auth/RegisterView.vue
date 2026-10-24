@@ -54,6 +54,7 @@ const handleOutsideClick = (event) => {
 
 onMounted(() => {
   document.addEventListener('click', handleOutsideClick)
+  restorePendingSession()
 })
 
 onBeforeUnmount(() => {
@@ -205,8 +206,19 @@ const handleRegister = async () => {
       password: password.value,
     })
 
+    const cooldownUntil = Date.now() + 60 * 1000
+    savePendingSession({
+      email: email.value.trim(),
+      name: name.value,
+      mobile: mobileNumber.value,
+      country_code: countryCode.value,
+      selectedCountryIso2: selectedCountryIso2.value,
+      expiresAt: Date.now() + 5 * 60 * 1000,
+      cooldownUntil,
+    })
+
     auth.toastMessage(response?.message || 'OTP sent to your email.', 'success')
-    startCountdown()
+    startCountdown(60)
     currentStep.value = 'otp'
     await nextTick()
     focusOtpInput(0)
@@ -220,12 +232,91 @@ const handleRegister = async () => {
   }
 }
 
-// ── Step 2: OTP Verification ──
+// ── Step 2: OTP Verification & Session Persistence ──
+const REGISTER_OTP_STORAGE_KEY = 'fs_pending_register_otp'
+const hasPendingSession = ref(false)
 const otp = ref(['', '', '', ''])
 const otpInputs = ref([])
 const resendCooldown = ref(60)
 const showSpamNote = ref(true)
 let timerInterval = null
+
+const startCountdown = (initialSeconds = 60) => {
+  resendCooldown.value = initialSeconds
+  if (timerInterval) clearInterval(timerInterval)
+  if (initialSeconds <= 0) return
+
+  timerInterval = setInterval(() => {
+    if (resendCooldown.value > 0) {
+      resendCooldown.value--
+    } else {
+      clearInterval(timerInterval)
+    }
+  }, 1000)
+}
+
+const savePendingSession = (data) => {
+  try {
+    localStorage.setItem(REGISTER_OTP_STORAGE_KEY, JSON.stringify(data))
+    hasPendingSession.value = true
+  } catch (e) {
+    console.warn('Failed to save OTP session to localStorage', e)
+  }
+}
+
+const clearPendingSession = () => {
+  try {
+    localStorage.removeItem(REGISTER_OTP_STORAGE_KEY)
+    hasPendingSession.value = false
+  } catch (e) {
+    console.warn('Failed to clear OTP session from localStorage', e)
+  }
+}
+
+const restorePendingSession = () => {
+  try {
+    const raw = localStorage.getItem(REGISTER_OTP_STORAGE_KEY)
+    if (!raw) return false
+
+    const session = JSON.parse(raw)
+    if (!session || !session.email || !session.expiresAt) {
+      clearPendingSession()
+      return false
+    }
+
+    if (Date.now() > session.expiresAt) {
+      clearPendingSession()
+      return false
+    }
+
+    email.value = session.email
+    if (session.name) name.value = session.name
+    if (session.mobile) mobile.value = session.mobile
+    if (session.selectedCountryIso2) selectedCountryIso2.value = session.selectedCountryIso2
+
+    hasPendingSession.value = true
+    currentStep.value = 'otp'
+
+    const remainingCooldown = Math.max(0, Math.ceil(((session.cooldownUntil || 0) - Date.now()) / 1000))
+    startCountdown(remainingCooldown)
+
+    nextTick(() => {
+      focusOtpInput(0)
+    })
+    return true
+  } catch (e) {
+    console.warn('Failed to restore OTP session', e)
+    clearPendingSession()
+    return false
+  }
+}
+
+const resumePendingOtp = () => {
+  currentStep.value = 'otp'
+  nextTick(() => {
+    focusOtpInput(0)
+  })
+}
 
 const formattedTimer = computed(() => {
   const mins = Math.floor(resendCooldown.value / 60).toString().padStart(2, '0')
@@ -289,18 +380,6 @@ const focusOtpInput = (index) => {
   }
 }
 
-const startCountdown = () => {
-  resendCooldown.value = 60
-  clearInterval(timerInterval)
-  timerInterval = setInterval(() => {
-    if (resendCooldown.value > 0) {
-      resendCooldown.value--
-    } else {
-      clearInterval(timerInterval)
-    }
-  }, 1000)
-}
-
 const handleResendOtp = async () => {
   if (resendCooldown.value > 0) return
   isLoading.value = true
@@ -310,7 +389,17 @@ const handleResendOtp = async () => {
   try {
     await auth.registerResendOtp({ email: email.value })
     auth.toastMessage('A new OTP has been sent to your email.', 'success')
-    startCountdown()
+    const cooldownUntil = Date.now() + 60 * 1000
+    savePendingSession({
+      email: email.value.trim(),
+      name: name.value,
+      mobile: mobileNumber.value,
+      country_code: countryCode.value,
+      selectedCountryIso2: selectedCountryIso2.value,
+      expiresAt: Date.now() + 5 * 60 * 1000,
+      cooldownUntil,
+    })
+    startCountdown(60)
     focusOtpInput(0)
   } catch (err) {
     errorMessage.value = err?.response?.data?.message || 'Failed to resend OTP.'
@@ -331,9 +420,13 @@ const handleVerifyOtp = async () => {
       otp: otpString,
     })
 
+    clearPendingSession()
     auth.toastMessage(response?.message || 'Account created successfully!', 'success')
     await router.push({ name: auth.user?.is_onboarded ? 'Dashboard' : 'Onboarding' })
   } catch (err) {
+    if (err?.response?.status === 412 && err?.response?.data?.message?.toLowerCase().includes('expired')) {
+      clearPendingSession()
+    }
     errorMessage.value = err?.response?.data?.message || 'Invalid OTP. Please try again.'
     otp.value = ['', '', '', '']
     focusOtpInput(0)
@@ -347,6 +440,7 @@ const goBackToForm = () => {
   errorMessage.value = ''
   otp.value = ['', '', '', '']
   if (timerInterval) clearInterval(timerInterval)
+  clearPendingSession()
 }
 </script>
 
@@ -384,6 +478,16 @@ const goBackToForm = () => {
             <div class="auth-heading">
               <h1 class="auth-heading__title">Create your account</h1>
               <p class="auth-heading__subtitle">Meet the version of your future self, that will help you achieve your goals</p>
+            </div>
+
+            <!-- Resume pending OTP banner -->
+            <div v-if="hasPendingSession" class="otp-resume-banner">
+              <div class="otp-resume-banner__text">
+                Pending verification code for <strong>{{ maskedEmail }}</strong>
+              </div>
+              <button type="button" class="otp-resume-banner__btn" @click="resumePendingOtp">
+                Enter OTP →
+              </button>
             </div>
 
             <!-- Form -->
