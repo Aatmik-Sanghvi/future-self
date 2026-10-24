@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onUnmounted, nextTick } from 'vue'
+import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 
@@ -23,7 +23,14 @@ const handleSendEmail = async () => {
   try {
     await auth.forgotPassword({ email: email.value })
     auth.toastMessage('Password reset OTP sent to your email.', 'success')
-    startCountdown()
+    const cooldownUntil = Date.now() + 60 * 1000
+    savePendingSession({
+      step: 'otp',
+      email: email.value.trim(),
+      expiresAt: Date.now() + 5 * 60 * 1000,
+      cooldownUntil,
+    })
+    startCountdown(60)
     currentStep.value = 'otp'
     await nextTick()
     focusOtpInput(0)
@@ -34,13 +41,115 @@ const handleSendEmail = async () => {
   }
 }
 
-// Step 2: OTP
+// Step 2: OTP & Session Persistence
+const FORGOT_OTP_STORAGE_KEY = 'fs_pending_forgot_password'
+const hasPendingSession = ref(false)
 const otp = ref(['', '', '', ''])
 const otpInputs = ref([])
 const resendCooldown = ref(60)
 const showSpamNote = ref(true)
 let timerInterval = null
 const resetToken = ref('')
+
+const startCountdown = (initialSeconds = 60) => {
+  resendCooldown.value = initialSeconds
+  if (timerInterval) clearInterval(timerInterval)
+  if (initialSeconds <= 0) return
+
+  timerInterval = setInterval(() => {
+    if (resendCooldown.value > 0) {
+      resendCooldown.value--
+    } else {
+      clearInterval(timerInterval)
+    }
+  }, 1000)
+}
+
+const savePendingSession = (data) => {
+  try {
+    localStorage.setItem(FORGOT_OTP_STORAGE_KEY, JSON.stringify(data))
+    hasPendingSession.value = true
+  } catch (e) {
+    console.warn('Failed to save forgot password session', e)
+  }
+}
+
+const clearPendingSession = () => {
+  try {
+    localStorage.removeItem(FORGOT_OTP_STORAGE_KEY)
+    hasPendingSession.value = false
+  } catch (e) {
+    console.warn('Failed to clear forgot password session', e)
+  }
+}
+
+const restorePendingSession = () => {
+  try {
+    const raw = localStorage.getItem(FORGOT_OTP_STORAGE_KEY)
+    if (!raw) return false
+
+    const session = JSON.parse(raw)
+    if (!session || !session.email || !session.expiresAt) {
+      clearPendingSession()
+      return false
+    }
+
+    if (Date.now() > session.expiresAt) {
+      clearPendingSession()
+      return false
+    }
+
+    email.value = session.email
+    hasPendingSession.value = true
+
+    if (session.step === 'reset' && session.resetToken) {
+      resetToken.value = session.resetToken
+      currentStep.value = 'reset'
+      return true
+    }
+
+    if (session.step === 'otp') {
+      currentStep.value = 'otp'
+      const remainingCooldown = Math.max(0, Math.ceil(((session.cooldownUntil || 0) - Date.now()) / 1000))
+      startCountdown(remainingCooldown)
+      nextTick(() => {
+        focusOtpInput(0)
+      })
+      return true
+    }
+
+    return false
+  } catch (e) {
+    console.warn('Failed to restore forgot password session', e)
+    clearPendingSession()
+    return false
+  }
+}
+
+const resumePendingStep = () => {
+  try {
+    const raw = localStorage.getItem(FORGOT_OTP_STORAGE_KEY)
+    if (raw) {
+      const session = JSON.parse(raw)
+      if (session.step === 'reset' && session.resetToken) {
+        currentStep.value = 'reset'
+        return
+      }
+    }
+  } catch (_) {}
+  currentStep.value = 'otp'
+  nextTick(() => {
+    focusOtpInput(0)
+  })
+}
+
+const goBackToEmail = () => {
+  currentStep.value = 'email'
+  errorMessage.value = ''
+  otp.value = ['', '', '', '']
+  if (timerInterval) clearInterval(timerInterval)
+  clearPendingSession()
+}
 
 const formattedTimer = computed(() => {
   const mins = Math.floor(resendCooldown.value / 60).toString().padStart(2, '0')
@@ -113,18 +222,6 @@ const focusOtpInput = (index) => {
   }
 }
 
-const startCountdown = () => {
-  resendCooldown.value = 60
-  clearInterval(timerInterval)
-  timerInterval = setInterval(() => {
-    if (resendCooldown.value > 0) {
-      resendCooldown.value--
-    } else {
-      clearInterval(timerInterval)
-    }
-  }, 1000)
-}
-
 const handleResendOtp = async () => {
   if (resendCooldown.value > 0) return
   isLoading.value = true
@@ -134,7 +231,14 @@ const handleResendOtp = async () => {
   try {
     await auth.forgotPassword({ email: email.value })
     auth.toastMessage('A new OTP has been sent to your email.', 'success')
-    startCountdown()
+    const cooldownUntil = Date.now() + 60 * 1000
+    savePendingSession({
+      step: 'otp',
+      email: email.value.trim(),
+      expiresAt: Date.now() + 5 * 60 * 1000,
+      cooldownUntil,
+    })
+    startCountdown(60)
     focusOtpInput(0)
   } catch (err) {
     errorMessage.value = err?.response?.data?.message || 'Failed to resend OTP.'
@@ -157,6 +261,12 @@ const handleVerifyOtp = async () => {
     
     resetToken.value = response.data.reset_token
     auth.toastMessage('OTP verified successfully.', 'success')
+    savePendingSession({
+      step: 'reset',
+      email: email.value.trim(),
+      resetToken: resetToken.value,
+      expiresAt: Date.now() + 15 * 60 * 1000,
+    })
     currentStep.value = 'reset'
   } catch (err) {
     errorMessage.value = err?.response?.data?.message || 'Invalid OTP. Please try again.'
@@ -204,16 +314,20 @@ const handleResetPassword = async () => {
       reset_token: resetToken.value
     })
 
+    clearPendingSession()
     auth.toastMessage('Password reset successfully! Please sign in with your new password.', 'success')
     router.push({ name: 'Login' })
   } catch (err) {
     console.log(err);
-    
     errorMessage.value = err?.response?.data?.message || 'Failed to reset password.'
   } finally {
     isLoading.value = false
   }
 }
+
+onMounted(() => {
+  restorePendingSession()
+})
 
 // Cleanup
 onUnmounted(() => {
@@ -252,6 +366,16 @@ onUnmounted(() => {
               <p class="auth-heading__subtitle">
                 No worries — enter your email and we'll send you an OTP to reset it.
               </p>
+            </div>
+
+            <!-- Resume pending OTP banner -->
+            <div v-if="hasPendingSession" class="otp-resume-banner">
+              <div class="otp-resume-banner__text">
+                Pending verification for <strong>{{ maskedEmail }}</strong>
+              </div>
+              <button type="button" class="otp-resume-banner__btn" @click="resumePendingStep">
+                Continue →
+              </button>
             </div>
 
             <form @submit.prevent="handleSendEmail" id="forgot-password-form">
@@ -377,7 +501,7 @@ onUnmounted(() => {
             </form>
             
             <div class="auth-footer">
-              <a href="#" @click.prevent="currentStep = 'email'">Change email address</a>
+              <a href="#" @click.prevent="goBackToEmail">Change email address</a>
             </div>
           </div>
 
