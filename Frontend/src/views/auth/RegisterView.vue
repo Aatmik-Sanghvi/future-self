@@ -760,8 +760,8 @@ const goBackToForm = () => {
                 </div>
                 
                 <div class="otp-meta">
-                  <span class="otp-timer" :class="{'otp-timer--warning': resendCooldown <= 30}">
-                    {{ resendCooldown > 0 ? formattedTimer : 'Code expired' }}
+                  <span v-if="resendCooldown > 0" class="otp-timer" :class="{'otp-timer--warning': resendCooldown <= 30}">
+                    {{ formattedTimer }}
                   </span>
                   <button 
                     type="button" 
