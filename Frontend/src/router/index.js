@@ -9,7 +9,7 @@ const routes = [
     path: '/',
     name: 'Dashboard',
     component: () => import('@/views/DashboardView.vue'),
-    meta: { 
+    meta: {
       title: 'FutureSelf — Meet the Future Version of Yourself with AI',
       description: 'Connect with the person you want to become. Set goals, overcome fears, and chat with your future self using AI. Start your self-transformation today.',
       keywords: 'AI future self, chat with future self, goal setting AI, future self visualization, personal growth AI coach, future self letter',
@@ -32,14 +32,14 @@ const routes = [
       ogTitle: 'Sign In — FutureSelf',
       ogDescription: 'Log in to access your personal AI future self coach and goal milestones.',
       ogImage: DEFAULT_IMAGE,
-      guestOnly: true, 
+      guestOnly: true,
     }
   },
   {
     path: '/register',
     name: 'Register',
     component: () => import('@/views/auth/RegisterView.vue'),
-    meta: { 
+    meta: {
       title: 'Create Account — FutureSelf | Start Free',
       description: 'Create your free FutureSelf account today. Define your goals, map your fears, and start conversing with your future self powered by AI.',
       keywords: 'FutureSelf register, sign up future self, free AI self-improvement app',
@@ -54,7 +54,7 @@ const routes = [
     path: '/forgot-password',
     name: 'ForgotPassword',
     component: () => import('@/views/auth/ForgotPasswordView.vue'),
-    meta: { 
+    meta: {
       title: 'Forgot Password — FutureSelf',
       description: 'Reset your FutureSelf account password to regain access to your future self conversations.',
       canonical: `${BASE_URL}/forgot-password`,
@@ -67,7 +67,7 @@ const routes = [
     path: '/privacy-policy',
     name: 'PrivacyPolicy',
     component: () => import('@/views/PrivacyPolicyView.vue'),
-    meta: { 
+    meta: {
       title: 'Privacy Policy — FutureSelf',
       description: 'Read the FutureSelf Privacy Policy. We prioritize your data privacy, encryption, and goal security.',
       canonical: `${BASE_URL}/privacy-policy`,
@@ -80,7 +80,7 @@ const routes = [
     path: '/terms-of-service',
     name: 'TermsOfService',
     component: () => import('@/views/TermsOfServiceView.vue'),
-    meta: { 
+    meta: {
       title: 'Terms of Service — FutureSelf',
       description: 'Review the Terms of Service for using the FutureSelf AI platform and services.',
       canonical: `${BASE_URL}/terms-of-service`,
@@ -93,7 +93,7 @@ const routes = [
     path: '/auth/callback',
     name: 'SocialCallback',
     component: () => import('@/views/auth/SocialCallbackView.vue'),
-    meta: { 
+    meta: {
       title: 'Authenticating — FutureSelf',
       noIndex: true,
     }
@@ -101,7 +101,7 @@ const routes = [
   {
     path: '/logout',
     name: 'Logout',
-    meta: { 
+    meta: {
       title: 'Logout — FutureSelf',
       guestOnly: true,
       noIndex: true,
@@ -111,7 +111,7 @@ const routes = [
     path: '/onboarding',
     name: 'Onboarding',
     component: () => import('@/views/OnboardingView.vue'),
-    meta: { 
+    meta: {
       title: 'Setup Your Future Self — FutureSelf',
       description: 'Set up your future vision, goals, and personality traits.',
       requiresAuth: true,
@@ -137,6 +137,7 @@ const routes = [
       title: 'Daily Missions & Growth Log — FutureSelf',
       description: 'Daily action missions assigned by your future self.',
       requiresAuth: true,
+      requiresPro: true,
       noIndex: true,
     }
   },
@@ -148,6 +149,7 @@ const routes = [
       title: 'Goal Momentum & Tracking — FutureSelf',
       description: 'Track your goal momentum, action consistency, and weekly progress with your AI Future Self.',
       requiresAuth: true,
+      requiresPro: true,
       noIndex: true,
     }
   },
@@ -209,22 +211,31 @@ router.beforeEach(async (to) => {
   const auth = useAuthStore()
 
   // Restore the session after refresh
-  if(auth.token && !auth.user) {
+  if (auth.token && !auth.user) {
     await auth.checkAuth()
   }
 
   // protected pages - redirect to login if not authenticated
   if (to.meta.requiresAuth && !auth.isAuthenticated) {
-    return { 
+    return {
       name: 'Login',
       query: { redirect: to.fullPath }
     }
   }
 
+  // Pro-restricted pages - redirect to pricing if not active Pro
+  if (to.meta.requiresPro && !auth.isPro) {
+    auth.toastMessage('⚡ Daily Missions and Goal Tracking require an active Pro subscription or 7-day free trial.', 'info')
+    return {
+      name: 'Dashboard',
+      hash: '#pricing'
+    }
+  }
+
   // Guest pages - redirect authenticated users away from login/register
   if (to.meta.guestOnly && auth.isAuthenticated) {
-    return { 
-      name: auth.isOnboarded ? 'Dashboard' : 'Onboarding' 
+    return {
+      name: auth.isOnboarded ? 'Dashboard' : 'Onboarding'
     }
   }
 

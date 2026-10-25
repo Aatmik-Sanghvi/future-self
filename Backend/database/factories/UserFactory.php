@@ -43,4 +43,34 @@ class UserFactory extends Factory
             'email_verified_at' => null,
         ]);
     }
+
+    public function pro(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'is_pro' => true,
+            'subscription_status' => 'active',
+            'pro_expires_at' => now()->addMonth(),
+            'has_used_trial' => true,
+        ]);
+    }
+
+    public function trial(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'is_pro' => true,
+            'subscription_status' => 'trial',
+            'trial_ends_at' => now()->addDays(7),
+            'pro_expires_at' => now()->addDays(7),
+            'has_used_trial' => true,
+        ]);
+    }
+
+    public function cancelled(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'is_pro' => false,
+            'subscription_status' => 'cancelled',
+            'has_used_trial' => true,
+        ]);
+    }
 }

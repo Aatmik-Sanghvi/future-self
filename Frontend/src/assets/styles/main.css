@@ -665,9 +665,11 @@
   .pricing-header { text-align: center; margin-bottom: 56px; }
   .pricing-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
     align-items: stretch;
+    max-width: 720px;
+    margin: 0 auto;
   }
   .pricing-card {
     border-radius: 20px;

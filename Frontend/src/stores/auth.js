@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import AuthService from '@/services/authService'
+import paymentService from '@/services/paymentService'
 import { toast } from 'vue3-toastify'
 
 export const useAuthStore = defineStore('auth', () => {
@@ -17,15 +18,27 @@ export const useAuthStore = defineStore('auth', () => {
 
     const isOnboarded = computed(() => user.value?.is_onboarded)
 
-    const isDailyMoodCheckIn = computed(() => user.value?.is_daily_mood_check_in)    
+    const isDailyMoodCheckIn = computed(() => user.value?.is_daily_mood_check_in)
 
     const dailyStreak = computed(() => user.value?.daily_streak ?? 0)
+
+    const isPro = computed(() => !!user.value?.is_pro)
+
+    const proExpiresAt = computed(() => user.value?.pro_expires_at ?? null)
+
+    const subscriptionStatus = computed(() => user.value?.subscription_status || (user.value?.is_pro ? 'active' : 'free'))
+
+    const isTrial = computed(() => user.value?.subscription_status === 'trial')
+
+    const trialEndsAt = computed(() => user.value?.trial_ends_at ?? null)
+
+    const hasUsedTrial = computed(() => !!user.value?.has_used_trial)
 
     async function login(credentials) {
         loading.value = true
         error.value = null
 
-        try{
+        try {
             const response = await AuthService.login(credentials)
             console.log('Login response:', response.data);
             token.value = response.data.data.token
@@ -47,8 +60,8 @@ export const useAuthStore = defineStore('auth', () => {
         try {
             const response = await AuthService.registerSendOtp(userData)
             console.log('Register send OTP response:', response.data);
-            return response.data            
-        } catch(err) {
+            return response.data
+        } catch (err) {
             error.value = err.response?.data?.message ?? 'Something went wrong.'
             throw err
         } finally {
@@ -66,8 +79,8 @@ export const useAuthStore = defineStore('auth', () => {
             token.value = response.data.data.token
             localStorage.setItem('token', token.value)
             await fetchUser()
-            return response.data            
-        } catch(err) {
+            return response.data
+        } catch (err) {
             error.value = err.response?.data?.message ?? 'Something went wrong.'
             throw err
         } finally {
@@ -82,8 +95,8 @@ export const useAuthStore = defineStore('auth', () => {
         try {
             const response = await AuthService.registerResendOtp(data)
             console.log('Register resend OTP response:', response.data);
-            return response.data            
-        } catch(err) {
+            return response.data
+        } catch (err) {
             error.value = err.response?.data?.message ?? 'Something went wrong.'
             throw err
         } finally {
@@ -151,7 +164,7 @@ export const useAuthStore = defineStore('auth', () => {
     }
 
     async function checkAuth() {
-        if(!token.value) {
+        if (!token.value) {
             return false
         }
 
@@ -184,6 +197,40 @@ export const useAuthStore = defineStore('auth', () => {
         });
     }
 
+    async function startTrial() {
+        loading.value = true
+        error.value = null
+        try {
+            const response = await paymentService.startTrial()
+            user.value = response.data.data
+            toastMessage(response.data.message || '7-day trial activated!', 'success')
+            return response.data
+        } catch (err) {
+            const msg = err.response?.data?.message || 'Failed to activate trial.'
+            toastMessage(msg, 'error')
+            throw err
+        } finally {
+            loading.value = false
+        }
+    }
+
+    async function cancelSubscription() {
+        loading.value = true
+        error.value = null
+        try {
+            const response = await paymentService.cancelSubscription()
+            user.value = response.data.data
+            toastMessage(response.data.message || 'Subscription cancelled.', 'info')
+            return response.data
+        } catch (err) {
+            const msg = err.response?.data?.message || 'Failed to cancel subscription.'
+            toastMessage(msg, 'error')
+            throw err
+        } finally {
+            loading.value = false
+        }
+    }
+
     return {
         user,
         token,
@@ -193,6 +240,12 @@ export const useAuthStore = defineStore('auth', () => {
         isOnboarded,
         isDailyMoodCheckIn,
         dailyStreak,
+        isPro,
+        proExpiresAt,
+        subscriptionStatus,
+        isTrial,
+        trialEndsAt,
+        hasUsedTrial,
         login,
         registerSendOtp,
         registerVerifyOtp,
@@ -204,6 +257,8 @@ export const useAuthStore = defineStore('auth', () => {
         checkAuth,
         clearAuth,
         logout,
-        toastMessage
+        toastMessage,
+        startTrial,
+        cancelSubscription,
     }
 })

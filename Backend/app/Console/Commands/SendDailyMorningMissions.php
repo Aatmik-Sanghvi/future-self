@@ -38,6 +38,7 @@ class SendDailyMorningMissions extends Command
         $this->info('Starting 8:00 AM Daily Morning Mission email dispatch...');
 
         $query = User::query()
+            ->activePro()
             ->where('is_onboarded', true)
             ->where('mission_email_enabled', true);
 
