@@ -447,17 +447,15 @@ const goBackToForm = () => {
 <template>
   <div class="auth-page">
     <div class="auth-card">
-      <!-- Brand (inline layout) -->
+      <!-- Brand -->
       <div class="auth-brand">
-        <div class="auth-brand__icon">✦</div>
-        <div class="auth-brand__text">
-          <div class="auth-brand__name">
-            <router-link to="/">
-              Future Self
-            </router-link>
+        <router-link to="/" class="auth-brand__link">
+          <div class="auth-brand__icon">✨</div>
+          <div class="auth-brand__text">
+            <div class="auth-brand__name">Future Self</div>
+            <div class="auth-brand__tagline">Begin your transformation</div>
           </div>
-          <div class="auth-brand__tagline">Begin your transformation</div>
-        </div>
+        </router-link>
       </div>
 
       <!-- Error -->

@@ -2,6 +2,9 @@
 import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { useRouter, useRoute } from 'vue-router'
+import FeedbackModal from '@/components/FeedbackModal.vue'
+import ContactModal from '@/components/ContactModal.vue'
+import feedbackService from '@/services/feedbackService'
 
 const auth = useAuthStore()
 const router = useRouter()
@@ -9,6 +12,12 @@ const route = useRoute()
 const dropdownOpen = ref(false)
 const dropdownRef = ref(null)
 const menuOpen = ref(false)
+
+// Modals state
+const showFeedbackModal = ref(false)
+const showContactModal = ref(false)
+const existingFeedback = ref(null)
+const feedbackStatusLoaded = ref(false)
 
 const userInitials = computed(() => {
   if (!auth.user?.name) return '?'
@@ -42,6 +51,35 @@ function closeMobileMenu() {
 watch(menuOpen, (val) => {
   document.body.style.overflow = val ? 'hidden' : ''
 })
+
+async function openFeedbackModal() {
+  dropdownOpen.value = false
+  closeMobileMenu()
+  if (auth.isAuthenticated && !feedbackStatusLoaded.value) {
+    try {
+      const res = await feedbackService.getFeedbackStatus()
+      existingFeedback.value = res.data?.data?.feedback || null
+      feedbackStatusLoaded.value = true
+    } catch (e) {
+      console.error('Failed to load feedback status', e)
+    }
+  }
+  showFeedbackModal.value = true
+}
+
+function onFeedbackSubmitted(savedData) {
+  existingFeedback.value = savedData
+  showFeedbackModal.value = false
+  if (auth.toastMessage) {
+    auth.toastMessage('Feedback saved successfully. Thank you! ❤️', 'success')
+  }
+}
+
+function openContactModal() {
+  dropdownOpen.value = false
+  closeMobileMenu()
+  showContactModal.value = true
+}
 
 async function handleLogout() {
   dropdownOpen.value = false
@@ -82,6 +120,7 @@ onBeforeUnmount(() => {
         <a href="/#testimonials">Testimonials</a>
         <a href="/#pricing">Pricing</a>
         <a href="/#faq">FAQ</a>
+        <router-link to="/contact">Contact</router-link>
       </template>
       <div v-if="auth.isAuthenticated" class="nav-auth-links-group">
         <router-link to="/missions" class="nav-mission-btn" id="nav-missions-link">⚡ Missions</router-link>
@@ -171,6 +210,22 @@ onBeforeUnmount(() => {
 
             <div class="nav-dropdown-divider"></div>
 
+            <button class="nav-dropdown-item" @click="openFeedbackModal" id="dropdown-feedback">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+              </svg>
+              Share Feedback
+            </button>
+
+            <button class="nav-dropdown-item" @click="openContactModal" id="dropdown-contact">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>
+              </svg>
+              Contact & Queries
+            </button>
+
+            <div class="nav-dropdown-divider"></div>
+
             <button class="nav-dropdown-item nav-dropdown-item-danger" @click="handleLogout" id="dropdown-logout">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
@@ -217,6 +272,13 @@ onBeforeUnmount(() => {
         <router-link to="/edit-profile" class="nav-mobile-link" @click="closeMobileMenu">👤 Profile & Settings</router-link>
         <router-link to="/onboarding" class="nav-mobile-link" @click="closeMobileMenu">📋 Onboarding Steps</router-link>
         <div class="nav-mobile-divider"></div>
+        <button class="nav-mobile-link nav-mobile-btn-action" @click="openFeedbackModal" id="mobile-feedback">
+          💬 Share Feedback
+        </button>
+        <button class="nav-mobile-link nav-mobile-btn-action" @click="openContactModal" id="mobile-contact">
+          📩 Contact & Queries
+        </button>
+        <div class="nav-mobile-divider"></div>
         <a href="/#features" class="nav-mobile-link" @click="closeMobileMenu">Features</a>
         <a href="/#how" class="nav-mobile-link" @click="closeMobileMenu">How It Works</a>
         <a href="/#pricing" class="nav-mobile-link" @click="closeMobileMenu">Pricing</a>
@@ -232,6 +294,7 @@ onBeforeUnmount(() => {
         <a href="/#testimonials" class="nav-mobile-link" @click="closeMobileMenu">Testimonials</a>
         <a href="/#pricing" class="nav-mobile-link" @click="closeMobileMenu">Pricing</a>
         <a href="/#faq" class="nav-mobile-link" @click="closeMobileMenu">FAQ</a>
+        <router-link to="/contact" class="nav-mobile-link" @click="closeMobileMenu">📩 Contact Us</router-link>
         <div class="nav-mobile-divider"></div>
         <div class="nav-mobile-actions">
           <router-link to="/login" class="btn-mobile-login" @click="closeMobileMenu">Login</router-link>
@@ -239,6 +302,21 @@ onBeforeUnmount(() => {
         </div>
       </template>
     </div>
+
+    <!-- Feedback Modal -->
+    <FeedbackModal
+      :show="showFeedbackModal"
+      :initialData="existingFeedback"
+      @close="showFeedbackModal = false"
+      @submitted="onFeedbackSubmitted"
+      @skipped="showFeedbackModal = false"
+    />
+
+    <!-- Contact & Queries Modal -->
+    <ContactModal
+      :show="showContactModal"
+      @close="showContactModal = false"
+    />
   </nav>
 </template>
 
@@ -489,6 +567,28 @@ onBeforeUnmount(() => {
   .streak-unit {
     display: none !important;
   }
+}
+
+.nav-mobile-btn-action {
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: none;
+  font-family: inherit;
+  font-size: 15px;
+  cursor: pointer;
+  color: rgba(255, 255, 255, 0.85);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  transition: all 0.2s ease;
+}
+
+.nav-mobile-btn-action:hover {
+  background: rgba(139, 92, 246, 0.12);
+  color: #fff;
 }
 
 .nav-mobile-logout-btn {

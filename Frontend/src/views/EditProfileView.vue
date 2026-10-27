@@ -264,7 +264,7 @@ async function handleCancelSubscription() {
       <div class="profile-nav-left">
         <router-link to="/" class="profile-nav-logo">
           <div class="profile-nav-logo-icon">✨</div>
-          <span class="profile-nav-logo-name">FutureYou</span>
+          <span class="profile-nav-logo-name">Future Self</span>
         </router-link>
         <div class="profile-nav-divider"></div>
         <span class="profile-nav-title">Edit Profile</span>

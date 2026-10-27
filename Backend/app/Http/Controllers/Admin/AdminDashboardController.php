@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Mail\ContactQueryReplyMail;
+use App\Models\Contact;
 use App\Models\DailyActiveUser;
 use App\Models\Feedback;
 use App\Models\User;
@@ -10,6 +12,8 @@ use App\Models\UserActivityLog;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class AdminDashboardController extends Controller
 {
@@ -444,5 +448,161 @@ class AdminDashboardController extends Controller
             'ratingValues',
             'feedbacks'
         ));
+    }
+
+    /**
+     * Contact queries management with filtering and pagination.
+     */
+    public function contacts(Request $request)
+    {
+        $request->validate([
+            'search'    => 'nullable|string|max:100',
+            'category'  => 'nullable|string|max:50',
+            'status'    => 'nullable|string|in:pending,in_progress,resolved,spam',
+            'date_from' => 'nullable|date',
+            'date_to'   => 'nullable|date|after_or_equal:date_from',
+            'per_page'  => 'nullable|integer|min:10|max:100',
+        ]);
+
+        // Summary counts
+        $totalContacts   = Contact::count();
+        $pendingCount    = Contact::where('status', 'pending')->count();
+        $inProgressCount = Contact::where('status', 'in_progress')->count();
+        $resolvedCount   = Contact::where('status', 'resolved')->count();
+        $spamCount       = Contact::where('status', 'spam')->count();
+
+        // Query breakdown by category
+        $categoriesBreakdown = Contact::select('category', DB::raw('COUNT(*) as count'))
+            ->groupBy('category')
+            ->orderByDesc('count')
+            ->get();
+
+        // Filtered query
+        $query = Contact::with('user:id,name,email');
+
+        if ($search = $request->input('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%")
+                  ->orWhere('subject', 'like', "%{$search}%")
+                  ->orWhere('message', 'like', "%{$search}%");
+            });
+        }
+
+        if ($category = $request->input('category')) {
+            $query->where('category', $category);
+        }
+
+        if ($status = $request->input('status')) {
+            $query->where('status', $status);
+        }
+
+        if ($request->filled('date_from')) {
+            $query->whereDate('created_at', '>=', $request->input('date_from'));
+        }
+        if ($request->filled('date_to')) {
+            $query->whereDate('created_at', '<=', $request->input('date_to'));
+        }
+
+        $contacts = $query->latest()
+            ->paginate($request->input('per_page', 20))
+            ->withQueryString();
+
+        return view('admin.contacts', compact(
+            'totalContacts',
+            'pendingCount',
+            'inProgressCount',
+            'resolvedCount',
+            'spamCount',
+            'categoriesBreakdown',
+            'contacts'
+        ));
+    }
+
+    /**
+     * Update contact query status.
+     */
+    public function updateContactStatus(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'status' => 'required|string|in:pending,in_progress,resolved,spam',
+        ]);
+
+        $contact = Contact::findOrFail($id);
+        $contact->update(['status' => $validated['status']]);
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Status updated successfully.',
+                'status'  => $contact->status,
+            ]);
+        }
+
+        return redirect()->back()->with('success', 'Contact status updated successfully.');
+    }
+
+    /**
+     * Send email reply to contact query.
+     */
+    public function replyToContact(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'subject' => 'required|string|max:255',
+            'message' => 'required|string|min:3',
+            'status' => 'nullable|string|in:pending,in_progress,resolved,spam',
+        ]);
+
+        $contact = Contact::findOrFail($id);
+
+        $adminUser = auth()->user();
+        $adminName = $adminUser ? $adminUser->name : config('mail.from.name', 'FutureSelf Team');
+
+        try {
+            Mail::to($contact->email, $contact->name)
+                ->queue(new ContactQueryReplyMail(
+                    $contact,
+                    $validated['subject'],
+                    $validated['message'],
+                    $adminName
+                ));
+        } catch (\Throwable $e) {
+            Log::error('Failed to send contact reply email: ' . $e->getMessage(), [
+                'contact_id' => $contact->id,
+                'email' => $contact->email,
+            ]);
+
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to send reply email: ' . $e->getMessage(),
+                ], 500);
+            }
+
+            return redirect()->back()->with('error', 'Failed to send reply email: ' . $e->getMessage());
+        }
+
+        $newStatus = $validated['status'] ?? 'resolved';
+
+        $contact->update([
+            'admin_reply' => $validated['message'],
+            'replied_at' => now(),
+            'status' => $newStatus,
+        ]);
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => "Reply queued and sent successfully to {$contact->email}.",
+                'contact' => [
+                    'id' => $contact->id,
+                    'status' => $contact->status,
+                    'admin_reply' => $contact->admin_reply,
+                    'replied_at' => $contact->replied_at ? $contact->replied_at->format('M d, Y — h:i A') : null,
+                ],
+            ]);
+        }
+
+        return redirect()->back()->with('success', "Reply successfully sent to {$contact->email}.");
     }
 }

@@ -64,11 +64,13 @@ onMounted(async () => {
   <div class="auth-page">
     <div class="auth-card text-center flex-col items-center justify-center py-12">
       <div class="auth-brand mb-6">
-        <div class="auth-brand__icon">✦</div>
-        <div class="auth-brand__text">
-          <div class="auth-brand__name">Future Self</div>
-          <div class="auth-brand__tagline">Connecting your account...</div>
-        </div>
+        <router-link to="/" class="auth-brand__link">
+          <div class="auth-brand__icon">✨</div>
+          <div class="auth-brand__text">
+            <div class="auth-brand__name">Future Self</div>
+            <div class="auth-brand__tagline">Connecting your account...</div>
+          </div>
+        </router-link>
       </div>
 
       <div class="spinner-container my-6">

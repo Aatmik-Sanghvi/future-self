@@ -4,6 +4,7 @@ import { useAuthStore } from '@/stores/auth'
 import ChatService from '@/services/chatService'
 import feedbackService from '@/services/feedbackService'
 import FeedbackModal from '@/components/FeedbackModal.vue'
+import ContactModal from '@/components/ContactModal.vue'
 import { marked } from 'marked'
 import { useRouter } from 'vue-router'
 
@@ -38,9 +39,10 @@ const userDailyMessageCount = ref();
 const canMessage = ref();
 const dailyMessageLimit = ref();
 
-// Feedback state
+// Feedback & Support state
 const FEEDBACK_MODAL_THRESHOLD = 2
 const showFeedbackModal = ref(false)
+const showContactModal = ref(false)
 const hasFeedbackSubmitted = ref(false)
 const hasFeedbackSkipped = ref(false)
 const existingFeedback = ref(null)
@@ -425,6 +427,11 @@ onMounted(async () => {
       @submitted="onFeedbackSubmitted"
       @skipped="onFeedbackSkipped"
     />
+    <!-- Support & Queries Modal -->
+    <ContactModal
+      :show="showContactModal"
+      @close="showContactModal = false"
+    />
     <!-- Mobile sidebar overlay -->
     <div
       class="sidebar-overlay"
@@ -532,6 +539,12 @@ onMounted(async () => {
           </div>
         </div>
         <div class="profile-nav-actions" v-if="auth.isOnboarded">
+          <button class="profile-nav-btn" @click="showFeedbackModal = true" id="btn-chat-feedback" title="Give Feedback">
+            💬 Feedback
+          </button>
+          <button class="profile-nav-btn" @click="showContactModal = true" id="btn-chat-queries" title="Support & Queries">
+            📩 Queries
+          </button>
           <router-link to="/missions" class="profile-nav-btn" id="btn-missions-header" style="text-decoration: none;">
             🎯 Missions
           </router-link>

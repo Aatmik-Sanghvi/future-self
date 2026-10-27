@@ -91,8 +91,8 @@ const goBack = () => {
           </section>
 
           <section class="doc-section">
-            <h2>10. Beta Features</h2>
-            <p>Experimental or beta features are provided "as-is" for testing purposes and may be modified, suspended, or discontinued at any time without notice.</p>
+            <h2>10. Feature Availability & Updates</h2>
+            <p>Features and functionality may evolve, improve, or be modified or discontinued at any time to enhance platform performance and user experience.</p>
           </section>
 
           <section class="doc-section">

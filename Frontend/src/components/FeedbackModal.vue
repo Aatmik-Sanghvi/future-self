@@ -177,7 +177,7 @@ function resetForm() {
           <div v-else class="feedback-form-content">
             <!-- Header -->
             <div class="feedback-modal-header">
-              <div class="feedback-badge">Beta Feedback</div>
+              <div class="feedback-badge">Feedback</div>
               <h2 class="feedback-modal-title">Help Shape Future Self</h2>
               <p class="feedback-modal-subtitle">
                 {{ isLimitReached ? 'Daily limit reached — take a moment to share your experience (Optional)' : 'Take a moment to share your experience and help shape Future Self (Optional)' }}

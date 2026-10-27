@@ -13,7 +13,7 @@
             <a href="/#faq">FAQ</a>
             <router-link to="/privacy-policy">Privacy</router-link>
             <router-link to="/terms-of-service">Terms</router-link>
-            <a href="mailto:support@futureself.in">Contact</a>
+            <router-link to="/contact">Contact</router-link>
         </div>
         <div class="footer-copy">© 2026 FutureSelf. All rights reserved.</div>
     </footer>

@@ -950,6 +950,10 @@
                     <i data-lucide="message-square-heart"></i>
                     <span>Feedbacks</span>
                 </a>
+                <a href="{{ route('admin.contacts') }}" class="nav-link {{ request()->routeIs('admin.contacts*') ? 'active' : '' }}">
+                    <i data-lucide="mail"></i>
+                    <span>Contact Queries</span>
+                </a>
             </nav>
 
             <div class="sidebar-footer">

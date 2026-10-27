@@ -29,8 +29,8 @@ You retain ownership of your content while granting us permission to process it 
 ## 9. Subscriptions
 Premium features may require payment and renew automatically unless cancelled.
 
-## 10. Beta Features
-Beta features are provided as-is and may change or be discontinued.
+## 10. Feature Availability & Updates
+Features and functionality may evolve, improve, or be modified or discontinued at any time.
 
 ## 11. Availability
 We do not guarantee uninterrupted service.

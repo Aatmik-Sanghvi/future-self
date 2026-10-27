@@ -148,8 +148,8 @@ const closeModal = () => {
               </div>
 
               <div class="legal-section">
-                <h3>10. Beta Features</h3>
-                <p>Beta features are provided "as-is" and may change, evolve, or be discontinued at any time.</p>
+                <h3>10. Feature Availability & Updates</h3>
+                <p>Features and functionality may evolve, improve, or be modified or discontinued at any time to enhance platform performance and user experience.</p>
               </div>
 
               <div class="legal-section">

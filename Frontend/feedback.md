@@ -1,8 +1,8 @@
-# FutureYou Beta Feedback
+# Future Self Feedback
 
-Thank you for trying **FutureYou**! 🚀
+Thank you for using **Future Self**! 🚀
 
-Your feedback will directly shape the product before the public launch.
+Your feedback directly shapes the product and future improvements.
 
 ------------------------------------------------------------------------
 

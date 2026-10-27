@@ -23,7 +23,7 @@ defineProps({
 
     <div class="hero-badge">
       <span class="hero-badge-dot">●</span>
-      Now in Early Access — Join {{ users }}+ users
+      Join {{ users }}+ users shaping their future
     </div>
 
     <h1 class="hero-h1 grad-text">

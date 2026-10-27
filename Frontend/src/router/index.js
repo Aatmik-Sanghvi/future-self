@@ -90,6 +90,19 @@ const routes = [
     }
   },
   {
+    path: '/contact',
+    name: 'Contact',
+    component: () => import('@/views/ContactView.vue'),
+    meta: { 
+      title: 'Contact & Support — FutureSelf',
+      description: 'Have a query or feedback? Contact the FutureSelf team for support, feature inquiries, or assistance.',
+      canonical: `${BASE_URL}/contact`,
+      ogTitle: 'Contact & Support — FutureSelf',
+      ogDescription: 'Get in touch with the FutureSelf team for any queries or help.',
+      ogImage: DEFAULT_IMAGE,
+    }
+  },
+  {
     path: '/auth/callback',
     name: 'SocialCallback',
     component: () => import('@/views/auth/SocialCallbackView.vue'),

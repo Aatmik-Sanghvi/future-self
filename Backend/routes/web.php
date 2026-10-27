@@ -36,5 +36,8 @@ Route::prefix('admin')->group(function () {
         Route::get('activity-logs', [AdminDashboardController::class, 'activityLogs'])->name('admin.activity-logs');
         Route::get('daily-active-users', [AdminDashboardController::class, 'dailyActiveUsers'])->name('admin.daily-active-users');
         Route::get('feedbacks', [AdminDashboardController::class, 'feedbacks'])->name('admin.feedbacks');
+        Route::get('contacts', [AdminDashboardController::class, 'contacts'])->name('admin.contacts');
+        Route::patch('contacts/{id}/status', [AdminDashboardController::class, 'updateContactStatus'])->name('admin.contacts.status');
+        Route::post('contacts/{id}/reply', [AdminDashboardController::class, 'replyToContact'])->name('admin.contacts.reply');
     });
 });

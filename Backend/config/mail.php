@@ -132,4 +132,19 @@ return [
         'name' => env('MAIL_REPLY_TO_NAME', env('MAIL_FROM_NAME', env('APP_NAME', 'Laravel'))),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Support / Contact Reply Address
+    |--------------------------------------------------------------------------
+    |
+    | Dedicated email address and sender name for customer support and contact
+    | query replies sent from the admin panel.
+    |
+    */
+
+    'support' => [
+        'address' => env('SUPPORT_MAIL_FROM_ADDRESS', env('ADMIN_CONTACT_EMAIL', 'support@mail.futureself.in')),
+        'name' => env('SUPPORT_MAIL_FROM_NAME', 'FutureSelf Support'),
+    ],
+
 ];
