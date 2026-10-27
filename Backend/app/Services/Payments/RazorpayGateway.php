@@ -4,6 +4,7 @@ namespace App\Services\Payments;
 
 use App\Contracts\PaymentGatewayInterface;
 use Exception;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Razorpay\Api\Api;
@@ -130,6 +131,20 @@ class RazorpayGateway implements PaymentGatewayInterface
             Log::error('Razorpay cancel subscription error: ' . $e->getMessage());
             return false;
         }
+    }
+
+    /**
+     * Fetch plan details from Razorpay (cached for 24 hours).
+     *
+     * @param string $planId
+     * @return array
+     */
+    public function getPlan(string $planId): array
+    {
+        return Cache::remember("razorpay_plan_{$planId}", 86400, function () use ($planId) {
+            $plan = $this->api->plan->fetch($planId);
+            return $plan->toArray();
+        });
     }
 
     /**

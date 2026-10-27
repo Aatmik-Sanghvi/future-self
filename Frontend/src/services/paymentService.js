@@ -87,6 +87,13 @@ class PaymentService {
   getSubscriptionStatus() {
     return api.get('/payments/status')
   }
+
+  /**
+   * Fetch subscription plan details directly from Razorpay via backend.
+   */
+  getPlan() {
+    return api.get('/payments/plan')
+  }
 }
 
 export default new PaymentService()

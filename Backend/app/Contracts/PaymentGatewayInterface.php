@@ -14,5 +14,7 @@ interface PaymentGatewayInterface
 
     public function cancelSubscription(string $subscriptionId): bool;
 
+    public function getPlan(string $planId): array;
+
     public function verifyWebhookSignature(string $payload, string $signature): bool;
 }

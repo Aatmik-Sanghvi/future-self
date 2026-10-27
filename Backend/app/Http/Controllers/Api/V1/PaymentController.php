@@ -16,15 +16,52 @@ class PaymentController extends ResponseController
 {
     protected PaymentGatewayInterface $paymentGateway;
 
-    // Supported plans and prices in paise (1 INR = 100 paise)
+    // Supported plans duration
     protected const PLANS = [
         'pro_monthly' => [
             'name' => 'Pro Monthly',
-            'amount' => 19900, // ₹199.00
-            'currency' => 'INR',
             'duration_days' => 30,
         ],
     ];
+
+    /**
+     * Get active plan details dynamically from Razorpay (cached).
+     */
+    protected function getActivePlan(): array
+    {
+        $planId = config('services.razorpay.plan_id');
+
+        if (! $planId) {
+            return [
+                'plan_id' => null,
+                'amount' => 0,
+                'currency' => 'INR',
+                'name' => 'Pro Monthly',
+            ];
+        }
+
+        try {
+            $plan = $this->paymentGateway->getPlan($planId);
+            $item = $plan['item'] ?? [];
+
+            return [
+                'plan_id' => $planId,
+                'amount' => (int) ($item['amount'] ?? 0),
+                'currency' => $item['currency'] ?? 'INR',
+                'name' => $item['name'] ?? 'Pro Monthly',
+                'period' => $plan['period'] ?? 'monthly',
+                'interval' => $plan['interval'] ?? 1,
+            ];
+        } catch (Exception $e) {
+            Log::warning('Failed to fetch plan from Razorpay: ' . $e->getMessage());
+            return [
+                'plan_id' => $planId,
+                'amount' => 0,
+                'currency' => 'INR',
+                'name' => 'Pro Monthly',
+            ];
+        }
+    }
 
     public function __construct(
         ValidationService $validationService,
@@ -44,14 +81,14 @@ class PaymentController extends ResponseController
         ]);
 
         $planKey = $request->input('plan', 'pro_monthly');
-        $plan = self::PLANS[$planKey];
+        $planData = $this->getActivePlan();
 
         $user = auth()->user();
 
         try {
             $orderData = $this->paymentGateway->createOrder([
-                'amount' => $plan['amount'],
-                'currency' => $plan['currency'],
+                'amount' => $planData['amount'],
+                'currency' => $planData['currency'],
                 'receipt' => 'fs_rcpt_' . $user->id . '_' . time(),
                 'notes' => [
                     'user_id' => $user->id,
@@ -166,7 +203,13 @@ class PaymentController extends ResponseController
             return ResponseHelper::send(400, 'You already have an active Pro plan or trial.');
         }
 
-        $planId = config('services.razorpay.plan_id') ?? env('RAZORPAY_PLAN_ID', 'plan_TqYQFxc6HVaDhq');
+        $planData = $this->getActivePlan();
+        $planId = $planData['plan_id'] ?? config('services.razorpay.plan_id');
+
+        if (! $planId) {
+            return ResponseHelper::send(500, 'Subscription plan is not configured. Please contact support.');
+        }
+
         $isTrial = ! $user->has_used_trial;
 
         try {
@@ -194,8 +237,8 @@ class PaymentController extends ResponseController
                 'key' => $razorpayKey,
                 'is_trial' => $isTrial,
                 'trial_days' => $isTrial ? 7 : 0,
-                'amount' => 19900,
-                'currency' => 'INR',
+                'amount' => $planData['amount'],
+                'currency' => $planData['currency'],
                 'plan_id' => $planId,
             ]);
         } catch (Exception $e) {
@@ -257,14 +300,16 @@ class PaymentController extends ResponseController
             $message = '🎉 Welcome to FutureSelf Pro! Your subscription is now active.';
         }
 
+        $planData = $this->getActivePlan();
+
         // Save payment record
         Payment::create([
             'user_id' => $user->id,
             'razorpay_subscription_id' => $request->razorpay_subscription_id,
             'razorpay_payment_id' => $request->razorpay_payment_id,
             'razorpay_signature' => $request->razorpay_signature,
-            'amount' => 19900,
-            'currency' => 'INR',
+            'amount' => $planData['amount'],
+            'currency' => $planData['currency'],
             'status' => 'paid',
             'plan' => 'pro_monthly',
         ]);
@@ -362,12 +407,16 @@ class PaymentController extends ResponseController
                         'pro_expires_at' => now()->addDays(30),
                     ]);
 
+                    $planData = $this->getActivePlan();
+                    $amount = $subEntity['plan']['item']['amount'] ?? $planData['amount'];
+                    $currency = $subEntity['plan']['item']['currency'] ?? $planData['currency'];
+
                     Payment::create([
                         'user_id' => $user->id,
                         'razorpay_subscription_id' => $subEntity['id'],
                         'razorpay_payment_id' => $payload['payload']['payment']['entity']['id'] ?? null,
-                        'amount' => $subEntity['plan']['item']['amount'] ?? 19900,
-                        'currency' => $subEntity['plan']['item']['currency'] ?? 'INR',
+                        'amount' => $amount,
+                        'currency' => $currency,
                         'status' => 'paid',
                         'plan' => 'pro_monthly',
                     ]);
@@ -405,6 +454,23 @@ class PaymentController extends ResponseController
             'days_remaining' => $user->pro_expires_at && $user->pro_expires_at->isFuture()
                 ? now()->diffInDays($user->pro_expires_at, false)
                 : 0,
+        ]);
+    }
+
+    /**
+     * Get plan details fetched dynamically from Razorpay.
+     */
+    public function getPlanDetails(Request $request)
+    {
+        $planData = $this->getActivePlan();
+
+        return ResponseHelper::send(200, 'Plan details fetched successfully.', [
+            'plan_id' => $planData['plan_id'],
+            'name' => $planData['name'],
+            'amount' => $planData['amount'],
+            'currency' => $planData['currency'],
+            'amount_in_rupees' => $planData['amount'] > 0 ? ($planData['amount'] / 100) : 0,
+            'amount_formatted' => '₹' . number_format($planData['amount'] / 100, 0),
         ]);
     }
 }

@@ -5,12 +5,14 @@ import { useAuthStore } from '@/stores/auth'
 import CountryFlag from 'vue-country-flag-next'
 import countryTelephoneData from 'country-telephone-data'
 import authService from '@/services/authService'
+import paymentService from '@/services/paymentService'
 
 const router = useRouter()
 const auth = useAuthStore()
 const selectedCountryIso2 = ref('in')
 const countryMenuOpen = ref(false)
 const countryMenuRef = ref(null)
+const planPrice = ref('₹186')
 
 const handleOutsideClick = (event) => {
   if (countryMenuOpen.value && countryMenuRef.value && !countryMenuRef.value.contains(event.target)) {
@@ -20,6 +22,11 @@ const handleOutsideClick = (event) => {
 
 onMounted(async () => {
   document.addEventListener('click', handleOutsideClick)
+  paymentService.getPlan().then((res) => {
+    if (res.data?.data?.amount_formatted) {
+      planPrice.value = res.data.data.amount_formatted
+    }
+  }).catch(() => {})
   if (!auth.user) {
     await auth.fetchUser().catch(() => {})
   }
@@ -238,17 +245,22 @@ function goBack() {
   router.back()
 }
 
+const showCancelModal = ref(false)
 const isCancelling = ref(false)
 
-async function handleCancelSubscription() {
-  const confirmed = window.confirm(
-    'Are you sure you want to cancel? Your access to Daily Missions and Goal Tracking will be restricted.'
-  )
-  if (!confirmed) return
+function openCancelModal() {
+  showCancelModal.value = true
+}
 
+function closeCancelModal() {
+  showCancelModal.value = false
+}
+
+async function confirmCancelSubscription() {
   isCancelling.value = true
   try {
     await auth.cancelSubscription()
+    showCancelModal.value = false
   } catch (err) {
     // Handled in auth store toast
   } finally {
@@ -688,7 +700,7 @@ async function handleCancelSubscription() {
                 v-if="auth.isPro"
                 class="profile-btn profile-btn-cancel-plan"
                 :disabled="isCancelling"
-                @click="handleCancelSubscription"
+                @click="openCancelModal"
                 id="btn-cancel-plan"
               >
                 <span v-if="isCancelling" class="profile-btn-spinner"></span>
@@ -701,7 +713,7 @@ async function handleCancelSubscription() {
                 id="btn-go-pricing"
                 style="text-decoration: none;"
               >
-                {{ !auth.hasUsedTrial ? 'Start 7-Day Free Trial' : 'Unlock Pro — ₹199/month' }}
+                {{ !auth.hasUsedTrial ? 'Start 7-Day Free Trial' : `Unlock Pro — ${planPrice}/month` }}
               </router-link>
             </div>
           </div>
@@ -801,6 +813,69 @@ async function handleCancelSubscription() {
                   <path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2" />
                 </svg>
                 {{ isDeleting ? 'Deleting...' : 'Delete Forever' }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </Transition>
+    </Teleport>
+
+    <!-- ── CANCEL SUBSCRIPTION CONFIRMATION MODAL ── -->
+    <Teleport to="body">
+      <Transition name="modal">
+        <div v-if="showCancelModal" class="delete-modal-overlay" @click.self="closeCancelModal" id="cancel-modal-overlay">
+          <div class="cancel-modal">
+            <!-- Warning glow -->
+            <div class="cancel-modal-glow"></div>
+
+            <!-- Icon -->
+            <div class="cancel-modal-icon-wrapper">
+              <div class="cancel-modal-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+                  <line x1="12" y1="9" x2="12" y2="13" />
+                  <line x1="12" y1="17" x2="12.01" y2="17" />
+                </svg>
+              </div>
+              <div class="cancel-modal-icon-ring"></div>
+            </div>
+
+            <!-- Content -->
+            <h3 class="cancel-modal-title">
+              {{ auth.isTrial ? 'Cancel Free Trial?' : 'Cancel Subscription?' }}
+            </h3>
+            <p class="cancel-modal-desc">
+              Are you sure you want to cancel your {{ auth.isTrial ? '7-day trial' : 'Pro subscription' }}?
+            </p>
+
+            <div class="cancel-modal-consequences">
+              <div class="cancel-modal-consequence-item">
+                <span class="cancel-modal-consequence-icon">🔒</span>
+                <span>Access to <strong>Daily Missions</strong> will be locked</span>
+              </div>
+              <div class="cancel-modal-consequence-item">
+                <span class="cancel-modal-consequence-icon">🎯</span>
+                <span><strong>Goal Tracking</strong> progress will be restricted</span>
+              </div>
+              <div class="cancel-modal-consequence-item">
+                <span class="cancel-modal-consequence-icon">💳</span>
+                <span>No recurring charges will be made to your account</span>
+              </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="cancel-modal-actions">
+              <button class="profile-btn profile-btn-ghost" @click="closeCancelModal" id="btn-keep-sub">
+                Keep {{ auth.isTrial ? 'Trial' : 'Pro' }}
+              </button>
+              <button
+                class="profile-btn cancel-modal-btn-confirm"
+                :disabled="isCancelling"
+                @click="confirmCancelSubscription"
+                id="btn-confirm-cancel-sub"
+              >
+                <span v-if="isCancelling" class="profile-btn-spinner"></span>
+                <span v-else>Yes, Cancel Plan</span>
               </button>
             </div>
           </div>

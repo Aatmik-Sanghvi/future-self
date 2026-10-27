@@ -325,14 +325,6 @@ onBeforeUnmount(() => {
                 <span v-if="errors.message" class="field-error">{{ errors.message }}</span>
               </div>
 
-              <!-- Direct Email Note -->
-              <div class="contact-footer-note">
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>
-                </svg>
-                <span>Prefer email directly? Reach us at <a href="mailto:support@futureself.in">support@futureself.in</a></span>
-              </div>
-
               <!-- Actions -->
               <div class="contact-actions">
                 <button
@@ -612,32 +604,6 @@ onBeforeUnmount(() => {
   resize: vertical;
   min-height: 85px;
   line-height: 1.5;
-}
-
-/* ── Direct Email Note ────────────────────────────── */
-.contact-footer-note {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.8rem;
-  color: rgba(148, 163, 184, 0.8);
-  padding: 6px 0;
-}
-
-.contact-footer-note svg {
-  color: #a78bfa;
-  flex-shrink: 0;
-}
-
-.contact-footer-note a {
-  color: #c4b5fd;
-  text-decoration: underline;
-  text-underline-offset: 2px;
-  transition: color 0.15s ease;
-}
-
-.contact-footer-note a:hover {
-  color: #fff;
 }
 
 /* ── Actions ─────────────────────────────────────── */

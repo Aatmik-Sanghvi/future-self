@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('razorpay_order_id')->index();
             $table->string('razorpay_payment_id')->nullable()->index();
             $table->string('razorpay_signature')->nullable();
-            $table->unsignedInteger('amount'); // in paise (e.g. 19900 = ₹199)
+            $table->unsignedInteger('amount'); // in paise
             $table->string('currency', 10)->default('INR');
             $table->string('status', 20)->default('created'); // created, paid, failed
             $table->string('plan', 50)->default('pro_monthly');

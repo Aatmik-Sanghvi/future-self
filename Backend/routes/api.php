@@ -30,6 +30,8 @@ Route::prefix('V1')->group(function () {
     // Social Auth routes
     Route::get('auth/google/redirect', [SocialAuthController::class, 'redirectToGoogle']);
     Route::get('auth/google/callback', [SocialAuthController::class, 'handleGoogleCallback']);
+    // Public plan details from Razorpay
+    Route::get('payments/plan', [PaymentController::class, 'getPlanDetails']);
     
     Route::middleware(['auth:sanctum', 'log.activity'])->group(function () {
         Route::get('profile', [GeneralController::class, 'profile']);

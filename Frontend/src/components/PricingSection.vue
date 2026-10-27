@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
 import paymentService from '@/services/paymentService';
@@ -7,6 +7,18 @@ import paymentService from '@/services/paymentService';
 const router = useRouter();
 const auth = useAuthStore();
 const isProcessing = ref(false);
+const planPrice = ref('₹186');
+
+onMounted(async () => {
+  try {
+    const res = await paymentService.getPlan();
+    if (res.data?.data?.amount_formatted) {
+      planPrice.value = res.data.data.amount_formatted;
+    }
+  } catch (e) {
+    // Graceful fallback to default
+  }
+});
 
 const startMyJourney = () => {
   router.push({ name: 'Login', query: { redirect: '/#pricing' } });
@@ -42,6 +54,7 @@ const handleProAction = async () => {
     }
 
     const isTrial = subData.is_trial;
+    const formattedPrice = subData.amount ? `₹${Math.round(subData.amount / 100)}` : planPrice.value;
 
     // 3. Configure Razorpay checkout modal with subscription_id
     const options = {
@@ -49,8 +62,8 @@ const handleProAction = async () => {
       subscription_id: subData.subscription_id,
       name: 'FutureSelf',
       description: isTrial
-        ? 'Pro Monthly — 7-Day Free Trial (₹199/month after trial)'
-        : 'Pro Monthly Subscription (₹199/month)',
+        ? `Pro Monthly — 7-Day Free Trial (${formattedPrice}/month after trial)`
+        : `Pro Monthly Subscription (${formattedPrice}/month)`,
       image: '/favicon.ico',
       prefill: {
         name: auth.user?.name || '',
@@ -153,7 +166,7 @@ const handleProAction = async () => {
                         <div class="pricing-name">Pro</div>
                     </div>
                     <div class="pricing-price">
-                        <span class="pricing-amount">₹199</span>
+                        <span class="pricing-amount">{{ planPrice }}</span>
                         <span class="pricing-period">/month</span>
                     </div>
                     <p class="pricing-tagline">
@@ -195,7 +208,7 @@ const handleProAction = async () => {
                         <span v-else-if="!auth.isAuthenticated">Start 7-Day Free Trial</span>
                         <span v-else-if="auth.isPro">✨ You're on Pro — Go to Missions</span>
                         <span v-else-if="!auth.hasUsedTrial">Try Pro Free for 7 Days</span>
-                        <span v-else>Subscribe to Pro — ₹199/month</span>
+                        <span v-else>Subscribe to Pro — {{ planPrice }}/month</span>
                     </button>
                     <p class="pricing-note">
                         <template v-if="auth.isAuthenticated && auth.hasUsedTrial && !auth.isPro">
@@ -205,7 +218,7 @@ const handleProAction = async () => {
                             Active 7-day free trial. Cancel anytime in your profile settings.
                         </template>
                         <template v-else>
-                            Free for 7 days, then ₹199/month. Cancel anytime.
+                            Free for 7 days, then {{ planPrice }}/month. Cancel anytime.
                         </template>
                     </p>
                 </div>
