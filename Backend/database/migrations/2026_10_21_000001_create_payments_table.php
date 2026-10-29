@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('payments', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->string('razorpay_order_id')->index();
+            $table->string('razorpay_order_id')->nullable()->index();
             $table->string('razorpay_payment_id')->nullable()->index();
             $table->string('razorpay_signature')->nullable();
             $table->unsignedInteger('amount'); // in paise

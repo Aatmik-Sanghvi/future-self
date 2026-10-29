@@ -305,6 +305,7 @@ class PaymentController extends ResponseController
         // Save payment record
         Payment::create([
             'user_id' => $user->id,
+            'razorpay_order_id' => $request->razorpay_order_id ?? null,
             'razorpay_subscription_id' => $request->razorpay_subscription_id,
             'razorpay_payment_id' => $request->razorpay_payment_id,
             'razorpay_signature' => $request->razorpay_signature,
@@ -413,6 +414,7 @@ class PaymentController extends ResponseController
 
                     Payment::create([
                         'user_id' => $user->id,
+                        'razorpay_order_id' => $payload['payload']['payment']['entity']['order_id'] ?? null,
                         'razorpay_subscription_id' => $subEntity['id'],
                         'razorpay_payment_id' => $payload['payload']['payment']['entity']['id'] ?? null,
                         'amount' => $amount,
