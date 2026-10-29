@@ -36,10 +36,10 @@
       <div class="stat-val">{{ messages }}+</div>
       <div class="stat-label">Messages Sent</div>
     </div>
-    <div class="stat-item">
+    <!-- <div class="stat-item">
       <div class="stat-val">{{ recommend }}%</div>
       <div class="stat-label">Will recommend to other</div>
-    </div>
+    </div> -->
   </div>
 </template>
 
