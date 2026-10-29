@@ -43,7 +43,7 @@
     />
     <Navbar />
     <HeroSection :register="register" :users="users"/>
-    <StatsBar v-model="users"/>
+    <!-- <StatsBar v-model="users"/> -->
     <FeaturesSection />
     <HowItWorks />
     <Testimonials />
