@@ -10,9 +10,10 @@
   import FeaturesSection from '@/components/FeaturesSection.vue';
   import FooterSection from '@/components/FooterSection.vue';
   import MoodPopup from '@/components/MoodPopup.vue';
+  import GeneralService from '@/services/GeneralService';
   import { useAuthStore } from '@/stores/auth';
 
-  import { ref, computed } from 'vue'
+  import { ref, computed, onMounted } from 'vue'
   import { useRouter } from 'vue-router';
 
   const router = useRouter();
@@ -22,6 +23,17 @@
   }
 
   const users = ref(0)
+
+  onMounted(async () => {
+    try {
+      const res = await GeneralService.getStats()
+      if (res?.data?.data?.users_count) {
+        users.value = res.data.data.users_count
+      }
+    } catch {
+      // Gracefully silent; fallback count in HeroSection applies
+    }
+  })
 
   const auth = useAuthStore()
   // Mood popup state
