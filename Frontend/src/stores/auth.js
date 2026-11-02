@@ -40,7 +40,7 @@ export const useAuthStore = defineStore('auth', () => {
 
         try {
             const response = await AuthService.login(credentials)
-            console.log('Login response:', response.data);
+
             token.value = response.data.data.token
             localStorage.setItem('token', token.value)
             await fetchUser()
@@ -59,7 +59,7 @@ export const useAuthStore = defineStore('auth', () => {
 
         try {
             const response = await AuthService.registerSendOtp(userData)
-            console.log('Register send OTP response:', response.data);
+
             return response.data
         } catch (err) {
             error.value = err.response?.data?.message ?? 'Something went wrong.'
@@ -75,7 +75,7 @@ export const useAuthStore = defineStore('auth', () => {
 
         try {
             const response = await AuthService.registerVerifyOtp(data)
-            console.log('Register verify OTP response:', response.data);
+
             token.value = response.data.data.token
             localStorage.setItem('token', token.value)
             await fetchUser()
@@ -94,7 +94,7 @@ export const useAuthStore = defineStore('auth', () => {
 
         try {
             const response = await AuthService.registerResendOtp(data)
-            console.log('Register resend OTP response:', response.data);
+
             return response.data
         } catch (err) {
             error.value = err.response?.data?.message ?? 'Something went wrong.'
@@ -110,7 +110,7 @@ export const useAuthStore = defineStore('auth', () => {
 
         try {
             const response = await AuthService.forgotPassword(email)
-            console.log('Forgot password response:', response.data);
+
             return response.data
         } catch (err) {
             error.value = err.response?.data?.message ?? 'Something went wrong.'
@@ -126,7 +126,7 @@ export const useAuthStore = defineStore('auth', () => {
 
         try {
             const response = await AuthService.verifyOtp(data)
-            console.log('Verify OTP response:', response.data);
+
             return response.data
         } catch (err) {
             error.value = err.response?.data?.message ?? 'Something went wrong.'
@@ -142,7 +142,7 @@ export const useAuthStore = defineStore('auth', () => {
 
         try {
             const response = await AuthService.resetPassword(data)
-            console.log('Reset password response:', response.data);
+
             return response.data
         } catch (err) {
             error.value = err.response?.data?.message ?? 'Something went wrong.'

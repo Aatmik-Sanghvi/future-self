@@ -6,6 +6,7 @@ import feedbackService from '@/services/feedbackService'
 import FeedbackModal from '@/components/FeedbackModal.vue'
 import ContactModal from '@/components/ContactModal.vue'
 import { marked } from 'marked'
+import { sanitizeHtml } from '@/utils/sanitize'
 import { useRouter } from 'vue-router'
 
 // Configure marked for clean rendering
@@ -16,7 +17,8 @@ marked.setOptions({
 
 function renderMarkdown(content) {
   if (!content) return ''
-  return marked(content.trim())
+  const rawHtml = marked(content.trim())
+  return sanitizeHtml(rawHtml)
 }
 
 const auth = useAuthStore()

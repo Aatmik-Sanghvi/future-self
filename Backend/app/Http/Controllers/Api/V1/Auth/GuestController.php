@@ -55,6 +55,17 @@ class GuestController extends ResponseController
             'otp'   => ['required', 'digits:4'],
         ]);
 
+        $attemptsKey = 'otp_reg_attempts_' . md5($request->email);
+        $attempts = (int) Cache::get($attemptsKey, 0);
+
+        if ($attempts >= 5) {
+            $emailLog = UserEmailLog::where('email', $request->email)->first();
+            if ($emailLog) {
+                $emailLog->update(['otp' => null, 'otp_expires_at' => null]);
+            }
+            return ResponseHelper::send(429, 'Too many failed verification attempts. Please request a new OTP.');
+        }
+
         $emailLog = UserEmailLog::where('email', $request->email)->first();
 
         if (!$emailLog) {
@@ -68,8 +79,15 @@ class GuestController extends ResponseController
 
         // Check if OTP matches
         if ((string) $emailLog->otp !== (string) $request->otp) {
-            return ResponseHelper::send(412, 'Invalid OTP. Please try again.');
+            Cache::put($attemptsKey, $attempts + 1, now()->addMinutes(10));
+            $remaining = 4 - $attempts;
+            $msg = $remaining > 0
+                ? "Invalid OTP. You have {$remaining} attempt(s) remaining."
+                : "Invalid OTP. Maximum attempts reached. Please request a new OTP.";
+            return ResponseHelper::send(412, $msg);
         }
+
+        Cache::forget($attemptsKey);
 
         // Retrieve cached registration data
         $registerData = Cache::get('register_data_' . $request->email);
@@ -157,6 +175,17 @@ class GuestController extends ResponseController
             'otp'   => ['required', 'digits:4'],
         ]);
 
+        $attemptsKey = 'otp_reset_attempts_' . md5($request->email);
+        $attempts = (int) Cache::get($attemptsKey, 0);
+
+        if ($attempts >= 5) {
+            $emailLog = UserEmailLog::where('email', $request->email)->first();
+            if ($emailLog) {
+                $emailLog->update(['otp' => null, 'otp_expires_at' => null]);
+            }
+            return ResponseHelper::send(429, 'Too many failed verification attempts. Please request a new OTP.');
+        }
+
         $emailLog = UserEmailLog::where('email', $request->email)->first();
 
         if (!$emailLog) {
@@ -170,8 +199,15 @@ class GuestController extends ResponseController
 
         // Check if OTP matches
         if ((string) $emailLog->otp !== (string) $request->otp) {
-            return ResponseHelper::send(412, 'Invalid OTP. Please try again.');
+            Cache::put($attemptsKey, $attempts + 1, now()->addMinutes(10));
+            $remaining = 4 - $attempts;
+            $msg = $remaining > 0
+                ? "Invalid OTP. You have {$remaining} attempt(s) remaining."
+                : "Invalid OTP. Maximum attempts reached. Please request a new OTP.";
+            return ResponseHelper::send(412, $msg);
         }
+
+        Cache::forget($attemptsKey);
 
         // OTP is valid — generate a temporary reset token
         $resetToken = Str::random(64);

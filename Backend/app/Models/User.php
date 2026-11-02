@@ -2,25 +2,34 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
-
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Database\Factories\UserFactory;
-use Illuminate\Database\Eloquent\Attributes\Fillable;
-use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\HasApiTokens;
 
-#[Fillable(['name', 'email', 'password'])]
-#[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
     use HasApiTokens, HasFactory, Notifiable, SoftDeletes;
+
+    /**
+     * Guarded attributes that can never be mass assigned.
+     * Prevents privilege escalation and tampering with sensitive security flags.
+     */
+    protected $guarded = [
+        'id',
+        'is_admin',
+        'is_pro',
+        'google2fa_secret',
+        'google2fa_enabled',
+        'two_factor_recovery_codes',
+        'created_at',
+        'updated_at',
+        'deleted_at',
+    ];
 
     protected $fillable = [
         'name',
@@ -32,16 +41,11 @@ class User extends Authenticatable
         'mobile',
         'profile_image',
         'is_onboarded',
-        'is_admin',
-        'is_pro',
         'pro_expires_at',
         'subscription_status',
         'trial_ends_at',
         'has_used_trial',
         'razorpay_subscription_id',
-        'google2fa_secret',
-        'google2fa_enabled',
-        'two_factor_recovery_codes',
         'current_state_summary',
         'future_self_summary',
         'daily_limit',
@@ -83,6 +87,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_admin' => 'boolean',
             'is_pro' => 'boolean',
             'pro_expires_at' => 'datetime',
             'trial_ends_at' => 'datetime',
@@ -146,13 +151,6 @@ class User extends Authenticatable
     public function payments()
     {
         return $this->hasMany(Payment::class);
-    }
-
-    public function setPasswordAttribute($password)
-    {
-        if (!empty($password)) {
-            $this->attributes['password'] = Hash::make($password);
-        }
     }
 
     public function getProfileImageAttribute($value){

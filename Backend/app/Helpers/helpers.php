@@ -416,8 +416,8 @@ if (! function_exists('register_user_email')) {
             // Static OTP for local environment (development)
             $otp = 1234;
         } else {
-            // Random OTP for production/live environment
-            $otp = rand(1111, 9999);
+            // Cryptographically secure random OTP for live environment
+            $otp = random_int(1000, 9999);
         }
 
         // Update or create user email log entry

@@ -15,18 +15,19 @@ use App\Http\Controllers\Api\V1\PaymentController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-Route::prefix('V1')->group(function () {
-    Route::post('register/send-otp', [GuestController::class, 'registerSendOtp']);
-    Route::post('register/verify-otp', [GuestController::class, 'registerVerifyOtp']);
-    Route::post('register/resend-otp', [GuestController::class, 'registerResendOtp']);
-    Route::post('login',[GuestController::class, 'login']);
-    Route::post('forgot-password', [GuestController::class, 'forgotPassword']);
-    Route::post('verify-otp', [GuestController::class, 'verifyOtp']);
-    Route::post('reset-password', [GuestController::class, 'resetPassword']);
+Route::prefix('V1')->middleware(['throttle:120,1'])->group(function () {
+    // Guest authentication routes (hardened with dedicated throttle limits)
+    Route::post('register/send-otp', [GuestController::class, 'registerSendOtp'])->middleware('throttle:5,1');
+    Route::post('register/verify-otp', [GuestController::class, 'registerVerifyOtp'])->middleware('throttle:5,1');
+    Route::post('register/resend-otp', [GuestController::class, 'registerResendOtp'])->middleware('throttle:3,1');
+    Route::post('login',[GuestController::class, 'login'])->middleware('throttle:6,1');
+    Route::post('forgot-password', [GuestController::class, 'forgotPassword'])->middleware('throttle:3,1');
+    Route::post('verify-otp', [GuestController::class, 'verifyOtp'])->middleware('throttle:5,1');
+    Route::post('reset-password', [GuestController::class, 'resetPassword'])->middleware('throttle:5,1');
     
     Route::get('stats', [GeneralController::class, 'stats']);
-    // Contact & Queries route
-    Route::post('contact', [ContactController::class, 'store']);
+    // Contact & Queries route (rate-limited against spam)
+    Route::post('contact', [ContactController::class, 'store'])->middleware('throttle:5,1');
     // Social Auth routes
     Route::get('auth/google/redirect', [SocialAuthController::class, 'redirectToGoogle']);
     Route::get('auth/google/callback', [SocialAuthController::class, 'handleGoogleCallback']);
@@ -36,7 +37,7 @@ Route::prefix('V1')->group(function () {
     Route::middleware(['auth:sanctum', 'log.activity'])->group(function () {
         Route::get('profile', [GeneralController::class, 'profile']);
         Route::post('update-profile',[GeneralController::class, 'updateProfile']);
-        Route::post('update-password',[GeneralController::class, 'updatePassword']);
+        Route::post('update-password',[GeneralController::class, 'updatePassword'])->middleware('throttle:5,1');
         Route::post('logout',[GeneralController::class, 'logout']);
 
         Route::post('delete-account', [GeneralController::class, 'deleteAccount']);
@@ -48,7 +49,6 @@ Route::prefix('V1')->group(function () {
         // Onboarding
         Route::prefix('onboarding')->group(function () {
             Route::post('goals', [OnboardingController::class, 'goals']);
-            
             Route::post('fears', [OnboardingController::class, 'fears']);
             Route::post('struggle', [OnboardingController::class, 'struggles']);
             Route::post('desired-traits', [OnboardingController::class, 'desiredTraits']);
@@ -60,8 +60,8 @@ Route::prefix('V1')->group(function () {
             Route::post('remove-detail', [OnboardingController::class, 'removeDetail']);
         });
 
-        // Chat with FutureSelf agent
-        Route::post('chat', [AIController::class, 'chat']);
+        // Chat with FutureSelf agent (throttled to prevent concurrent message flooding)
+        Route::post('chat', [AIController::class, 'chat'])->middleware('throttle:30,1');
         Route::get('conversations', [AIController::class, 'conversations']);
         Route::post('messages', [AIController::class, 'messages']);
         Route::post('delete-conversation', [AIController::class, 'deleteConversation']);
@@ -108,4 +108,3 @@ Route::prefix('V1')->group(function () {
     // Public Razorpay webhook for recurring subscription events
     Route::post('payments/webhook', [PaymentController::class, 'handleWebhook']);
 });
-

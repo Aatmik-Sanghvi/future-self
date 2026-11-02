@@ -8,6 +8,7 @@ import './assets/styles/main.css'
 import './assets/styles/chat.css'
 import './assets/styles/profile.css'
 import 'vue3-toastify/dist/index.css'
+import { initSecurityShield } from './utils/securityShield'
 
 const app = createApp(App)
 app.use(createPinia())
@@ -21,3 +22,6 @@ app.use(Vue3Toastify, {
   draggable: true,
 })
 app.mount('#app')
+
+// Initialize anti-inspect protection & humorous Easter Egg
+initSecurityShield()

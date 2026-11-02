@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { isDevToolsActive } from '@/utils/securityShield'
 
 const api = axios.create({
     baseURL: import.meta.env.VITE_API_URL,
@@ -9,6 +10,12 @@ const api = axios.create({
 })
 
 api.interceptors.request.use((config) => {
+    // If DevTools is active, kill all outgoing network traffic immediately
+    if (isDevToolsActive()) {
+        const error = new Error('Network request blocked: Developer tools are restricted.')
+        error.isDevToolsBlocked = true
+        return Promise.reject(error)
+    }
 
     const token = localStorage.getItem('token')
 

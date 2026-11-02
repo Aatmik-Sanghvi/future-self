@@ -19,7 +19,7 @@ class Fear extends Model
 
     public function goal()
     {
-        return $this->belongsTo(Goal::class);
+        return $this->belongsTo(Goals::class, 'goal_id');
     }
 
     public function store($data){
@@ -32,6 +32,6 @@ class Fear extends Model
     }
 
     public function removeDetail($id){
-        return $this->find($id)->delete();
+        return $this->find($id)?->delete();
     }
 }

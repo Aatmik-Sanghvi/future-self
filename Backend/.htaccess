@@ -1,0 +1,21 @@
+# Block direct access to any hidden files, .env, git, composer, etc.
+<FilesMatch "(^\.|\.env|\.json|\.lock|\.xml|\.md)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Prevent directory browsing
+Options -Indexes
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Block access to .env directly with 403 Forbidden
+    RewriteRule ^\.env - [F,L,NC]
+    RewriteRule ^\.git - [F,L,NC]
+
+    # If document root was pointed to project root instead of /public, redirect to public
+    RewriteCond %{REQUEST_URI} !^/public/
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>
+

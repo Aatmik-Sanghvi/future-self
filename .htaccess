@@ -1,0 +1,8 @@
+# Global block for sensitive files
+<FilesMatch "(^\.|\.env|\.git)">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+Options -Indexes
+

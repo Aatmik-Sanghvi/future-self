@@ -26,6 +26,16 @@ class AIController extends Controller
 
         // Continue existing conversation or start a new one
         if ($request->conversation_id) {
+            $convTable = config('ai.conversations.tables.conversations', 'agent_conversations');
+            $conversationExists = DB::table($convTable)
+                ->where('id', $request->conversation_id)
+                ->where('user_id', $user->id)
+                ->exists();
+
+            if (!$conversationExists) {
+                return ResponseHelper::send(404, 'Conversation not found.');
+            }
+
             $agent->continue($request->conversation_id, $user);
         } else {
             $agent->forUser($user);
