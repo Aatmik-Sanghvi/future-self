@@ -1,17 +1,27 @@
 <script setup>
+import { computed } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 
 const auth = useAuthStore()
 
-defineProps({
+const props = defineProps({
   register: {
     type: Function,
     required: true,
   },
   users: {
-    type: Number,
+    type: [Number, String],
     default: 0,
   },
+})
+
+// Format user count with comma separators, or fallback to 12,000 if not yet loaded or 0
+const displayUsers = computed(() => {
+  const count = Number(props.users)
+  if (count && count > 0) {
+    return count.toLocaleString()
+  }
+  return '0'
 })
 </script>
 
@@ -23,7 +33,7 @@ defineProps({
 
     <div class="hero-badge">
       <span class="hero-badge-dot">●</span>
-      Join {{ users }}+ users shaping their future
+      Join {{ displayUsers }}+ users shaping their future
     </div>
 
     <h1 class="hero-h1 grad-text">
