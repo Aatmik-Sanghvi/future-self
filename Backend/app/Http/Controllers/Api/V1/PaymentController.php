@@ -230,6 +230,11 @@ class PaymentController extends ResponseController
 
             $subscription = $this->paymentGateway->createSubscription($subPayload);
 
+            // Link subscription_id to user immediately so webhooks can match it even before verification
+            $user->update([
+                'razorpay_subscription_id' => $subscription['id'],
+            ]);
+
             $razorpayKey = config('services.razorpay.key') ?? env('RAZORPAY_KEY');
 
             return ResponseHelper::send(200, 'Subscription created successfully.', [
@@ -400,12 +405,23 @@ class PaymentController extends ResponseController
         if ($event === 'subscription.charged') {
             $subEntity = $payload['payload']['subscription']['entity'] ?? null;
             if ($subEntity && ! empty($subEntity['id'])) {
+                // Find user by razorpay_subscription_id or fallback to notes (user_id / user_email)
                 $user = User::where('razorpay_subscription_id', $subEntity['id'])->first();
+
+                if (! $user && ! empty($subEntity['notes']['user_id'])) {
+                    $user = User::find($subEntity['notes']['user_id']);
+                }
+
+                if (! $user && ! empty($subEntity['notes']['user_email'])) {
+                    $user = User::where('email', $subEntity['notes']['user_email'])->first();
+                }
+
                 if ($user) {
                     $user->update([
                         'is_pro' => true,
                         'subscription_status' => 'active',
                         'pro_expires_at' => now()->addDays(30),
+                        'razorpay_subscription_id' => $subEntity['id'],
                     ]);
 
                     $planData = $this->getActivePlan();
@@ -422,17 +438,55 @@ class PaymentController extends ResponseController
                         'status' => 'paid',
                         'plan' => 'pro_monthly',
                     ]);
+
+                    Log::info("Razorpay webhook: User #{$user->id} upgraded to Pro active via subscription.charged.");
+                } else {
+                    Log::warning('Razorpay webhook subscription.charged: User not found for subscription: ' . $subEntity['id']);
+                }
+            }
+        } elseif ($event === 'subscription.authenticated' || $event === 'subscription.activated') {
+            $subEntity = $payload['payload']['subscription']['entity'] ?? null;
+            if ($subEntity && ! empty($subEntity['id'])) {
+                $user = User::where('razorpay_subscription_id', $subEntity['id'])->first();
+
+                if (! $user && ! empty($subEntity['notes']['user_id'])) {
+                    $user = User::find($subEntity['notes']['user_id']);
+                }
+
+                if (! $user && ! empty($subEntity['notes']['user_email'])) {
+                    $user = User::where('email', $subEntity['notes']['user_email'])->first();
+                }
+
+                if ($user) {
+                    $trialEndsAt = now()->addDays(7);
+                    $user->update([
+                        'is_pro' => true,
+                        'subscription_status' => 'trial',
+                        'trial_ends_at' => $trialEndsAt,
+                        'pro_expires_at' => $trialEndsAt,
+                        'has_used_trial' => true,
+                        'razorpay_subscription_id' => $subEntity['id'],
+                    ]);
+
+                    Log::info("Razorpay webhook: User #{$user->id} activated trial via {$event}.");
                 }
             }
         } elseif ($event === 'subscription.cancelled' || $event === 'subscription.halted') {
             $subEntity = $payload['payload']['subscription']['entity'] ?? null;
             if ($subEntity && ! empty($subEntity['id'])) {
                 $user = User::where('razorpay_subscription_id', $subEntity['id'])->first();
+
+                if (! $user && ! empty($subEntity['notes']['user_id'])) {
+                    $user = User::find($subEntity['notes']['user_id']);
+                }
+
                 if ($user) {
                     $user->update([
                         'is_pro' => false,
                         'subscription_status' => 'cancelled',
                     ]);
+
+                    Log::info("Razorpay webhook: User #{$user->id} subscription cancelled via {$event}.");
                 }
             }
         }
