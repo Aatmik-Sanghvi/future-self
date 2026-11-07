@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Laravel\Ai\Models\Conversation;
 
 class AIController extends Controller
 {
@@ -42,9 +43,12 @@ class AIController extends Controller
         }
 
         $messagesTable = config('ai.conversations.tables.messages', 'agent_conversation_messages');
+        $participantType = Conversation::participantType($user);
+        $participantId = Conversation::participantKey($user);
 
         $userDailyMessageCount = DB::table($messagesTable)
-            ->where('user_id', $user->id)
+            ->where('participant_type', $participantType)
+            ->where('participant_id', $participantId)
             ->where('role', 'user')
             ->whereDate('created_at', today())
             ->count();
@@ -59,7 +63,8 @@ class AIController extends Controller
         Log::info($response);
 
         $userDailyMessageCountAfter = DB::table($messagesTable)
-            ->where('user_id', $user->id)
+            ->where('participant_type', $participantType)
+            ->where('participant_id', $participantId)
             ->where('role', 'user')
             ->whereDate('created_at', today())
             ->count();
@@ -78,22 +83,27 @@ class AIController extends Controller
      */
     public function conversations(Request $request)
     {
+        $user = auth()->user();
         $table = config('ai.conversations.tables.conversations', 'agent_conversations');
+        $participantType = Conversation::participantType($user);
+        $participantId = Conversation::participantKey($user);
 
         $conversations = DB::table($table)
-            ->where('user_id', auth()->id())
+            ->where('participant_type', $participantType)
+            ->where('participant_id', $participantId)
             ->orderByDesc('updated_at')
             ->get(['id', 'title', 'created_at', 'updated_at']);
 
         $messagesTable = config('ai.conversations.tables.messages', 'agent_conversation_messages');
 
         $userDailyMessageCount = DB::table($messagesTable)
-            ->where('user_id', auth()->id())
+            ->where('participant_type', $participantType)
+            ->where('participant_id', $participantId)
             ->where('role', 'user')
             ->whereDate('created_at', today())
             ->count();
 
-        $dailyMessageLimit = config('constants.message_limit') + (auth()->user()->bonus_chats ?? 0);
+        $dailyMessageLimit = config('constants.message_limit') + ($user->bonus_chats ?? 0);
 
         return ResponseHelper::send(200, 'Conversations fetched successfully.', [
             'conversations' => $conversations,
@@ -112,21 +122,26 @@ class AIController extends Controller
             'conversation_id' => 'required|string',
         ]);
 
+        $user = auth()->user();
         $table = config('ai.conversations.tables.messages', 'agent_conversation_messages');
+        $participantType = Conversation::participantType($user);
+        $participantId = Conversation::participantKey($user);
 
         $messages = DB::table($table)
             ->where('conversation_id', $request->conversation_id)
-            ->where('user_id', auth()->id())
+            ->where('participant_type', $participantType)
+            ->where('participant_id', $participantId)
             ->orderBy('created_at')
             ->get(['id', 'role', 'content', 'created_at']);
 
         $userDailyMessageCount = DB::table($table)
-            ->where('user_id', auth()->id())
+            ->where('participant_type', $participantType)
+            ->where('participant_id', $participantId)
             ->where('role', 'user')
             ->whereDate('created_at', today())
             ->count();
 
-        $dailyMessageLimit = config('constants.message_limit') + (auth()->user()->bonus_chats ?? 0);
+        $dailyMessageLimit = config('constants.message_limit') + ($user->bonus_chats ?? 0);
         $canMessage = $userDailyMessageCount < $dailyMessageLimit;
 
         return ResponseHelper::send(200, 'Messages fetched successfully.', [
@@ -146,11 +161,15 @@ class AIController extends Controller
             'conversation_id' => 'required|string',
         ]);
 
+        $user = auth()->user();
         $table = config('ai.conversations.tables.conversations', 'agent_conversations');
+        $participantType = Conversation::participantType($user);
+        $participantId = Conversation::participantKey($user);
 
         $deleted = DB::table($table)
             ->where('id', $request->conversation_id)
-            ->where('user_id', auth()->id())
+            ->where('participant_type', $participantType)
+            ->where('participant_id', $participantId)
             ->delete();
 
         if ($deleted) {
